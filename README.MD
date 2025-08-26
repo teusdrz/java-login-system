@@ -20,24 +20,23 @@ The project is organized using the standard Java project directory structure, wh
 │                   │   └── ConsoleView.java
 │                   └── Main.java       # Application entry point
 └── README.md
+
 How to Compile and Run
 This project does not use a build automation tool like Maven or Gradle. Compilation and execution are handled directly via the command line.
 
 1. Compilation
 Navigate to the project's root directory (java-login-system) and use the javac compiler to compile all source files.
 
-Bash
-
 javac -d out -sourcepath src src/main/java/com/loginapp/*.java src/main/java/com/loginapp/controller/*.java src/main/java/com/loginapp/model/*.java src/main/java/com/loginapp/view/*.java
+
 This command compiles all .java files in the loginapp, controller, model, and view packages and places the compiled bytecode (.class) in the out directory.
 
 2. Execution
 After compilation, run the application using the java command and specifying the classpath to your out directory.
 
-Bash
-
 java -cp out com.loginapp.Main
-3. Features
+
+Features
 The application provides the following functionalities through its main menu:
 
 Login: Authenticates an existing user.
@@ -52,4 +51,3 @@ The system also includes a user dashboard with options to view profile, change p
 
 Author
 Matheus Vinicius
-
