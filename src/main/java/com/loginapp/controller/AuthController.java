@@ -1,16 +1,21 @@
 package com.loginapp.controller;
 
+import com.loginapp.model.Role;
 import com.loginapp.model.User;
 import com.loginapp.model.UserDatabase;
+import com.loginapp.service.PermissionService;
 import com.loginapp.view.ConsoleView;
 
+import java.util.List;
+
 /**
- * AuthController class - Controls authentication flow
- * Part of Controller layer in MVC pattern
+ * AuthController class - Enhanced with role-based access control
+ * Manages authentication flow and user operations with permission checking
  */
 public class AuthController {
     private UserDatabase userDatabase;
     private ConsoleView consoleView;
+    private PermissionService permissionService;
     private User currentUser;
     private boolean applicationRunning;
     
@@ -18,6 +23,7 @@ public class AuthController {
     public AuthController(UserDatabase userDatabase, ConsoleView consoleView) {
         this.userDatabase = userDatabase;
         this.consoleView = consoleView;
+        this.permissionService = PermissionService.getInstance();
         this.currentUser = null;
         this.applicationRunning = true;
     }
@@ -54,7 +60,7 @@ public class AuthController {
                 handleRegistration();
                 break;
             case 3:
-                handleStatistics();
+                handlePublicStatistics();
                 break;
             case 4:
                 exitApplication();
@@ -77,19 +83,122 @@ public class AuthController {
                 handleViewProfile();
                 break;
             case 2:
-                handleChangePassword();
+                handleEditProfile();
                 break;
             case 3:
+                handleChangePassword();
+                break;
+            case 4:
+                if (permissionService.hasPermission(currentUser, PermissionService.SYSTEM_STATS)) {
+                    handleSystemStatistics();
+                } else {
+                    consoleView.displayErrorMessage("Access denied. Insufficient permissions.");
+                }
+                break;
+            case 5:
+                if (permissionService.hasPermission(currentUser, PermissionService.LOGIN_HISTORY)) {
+                    handleLoginHistory();
+                } else {
+                    consoleView.displayErrorMessage("Access denied. Insufficient permissions.");
+                }
+                break;
+            case 6:
+                if (permissionService.hasPermission(currentUser, PermissionService.USER_MANAGEMENT)) {
+                    handleUserManagement();
+                } else {
+                    consoleView.displayErrorMessage("Access denied. Insufficient permissions.");
+                }
+                break;
+            case 7:
+                if (permissionService.hasPermission(currentUser, PermissionService.SYSTEM_SETTINGS)) {
+                    handleSystemAdministration();
+                } else {
+                    consoleView.displayErrorMessage("Access denied. Insufficient permissions.");
+                }
+                break;
+            case 0:
                 handleLogout();
                 break;
             default:
-                consoleView.displayErrorMessage("Invalid option. Please choose 1-3.");
+                consoleView.displayErrorMessage("Invalid option. Please try again.");
                 break;
         }
     }
     
     /**
-     * Handle user login process
+     * Handle user management menu
+     */
+    private void handleUserManagement() {
+        boolean inUserManagement = true;
+        
+        while (inUserManagement) {
+            consoleView.displayUserManagementMenu();
+            int choice = consoleView.getMenuChoice();
+            
+            switch (choice) {
+                case 1:
+                    handleListAllUsers();
+                    break;
+                case 2:
+                    handleSearchUsers();
+                    break;
+                case 3:
+                    handleCreateUser();
+                    break;
+                case 4:
+                    handleModifyUserRole();
+                    break;
+                case 5:
+                    handleLockUnlockUser();
+                    break;
+                case 6:
+                    handleDeleteUser();
+                    break;
+                case 0:
+                    inUserManagement = false;
+                    break;
+                default:
+                    consoleView.displayErrorMessage("Invalid option. Please try again.");
+                    break;
+            }
+        }
+    }
+    
+    /**
+     * Handle system administration menu
+     */
+    private void handleSystemAdministration() {
+        boolean inSystemAdmin = true;
+        
+        while (inSystemAdmin) {
+            consoleView.displaySystemAdminMenu();
+            int choice = consoleView.getMenuChoice();
+            
+            switch (choice) {
+                case 1:
+                    handleViewAuditLog();
+                    break;
+                case 2:
+                    handleSystemHealthCheck();
+                    break;
+                case 3:
+                    handleUserStatisticsReport();
+                    break;
+                case 4:
+                    handleSecurityReport();
+                    break;
+                case 0:
+                    inSystemAdmin = false;
+                    break;
+                default:
+                    consoleView.displayErrorMessage("Invalid option. Please try again.");
+                    break;
+            }
+        }
+    }
+    
+    /**
+     * Handle user login process with enhanced security
      */
     private void handleLogin() {
         System.out.println("\n=== LOGIN ===");
@@ -108,14 +217,23 @@ public class AuthController {
         
         if (authenticatedUser != null) {
             currentUser = authenticatedUser;
-            consoleView.displaySuccessMessage("Login successful! Welcome, " + username + "!");
+            consoleView.displaySuccessMessage("Login successful! Welcome, " + 
+                                            authenticatedUser.getFullName() + " (" + 
+                                            authenticatedUser.getRole().getDisplayName() + ")!");
         } else {
-            consoleView.displayErrorMessage("Invalid username or password. Please try again.");
+            User user = userDatabase.getUserByUsername(username);
+            if (user != null && user.isLocked()) {
+                consoleView.displayErrorMessage("Account is locked due to multiple failed login attempts. Contact administrator.");
+            } else if (user != null && !user.isActive()) {
+                consoleView.displayErrorMessage("Account is inactive. Contact administrator.");
+            } else {
+                consoleView.displayErrorMessage("Invalid username or password.");
+            }
         }
     }
     
     /**
-     * Handle user registration process
+     * Handle user registration process with role assignment
      */
     private void handleRegistration() {
         System.out.println("\n=== REGISTRATION ===");
@@ -123,9 +241,11 @@ public class AuthController {
         String username = consoleView.getUsername();
         String password = consoleView.getPassword();
         String email = consoleView.getEmail();
+        String firstName = consoleView.getFirstName();
+        String lastName = consoleView.getLastName();
         
-        // Create new user object
-        User newUser = new User(username, password, email);
+        // Create new user object (default role is USER)
+        User newUser = new User(username, password, email, firstName, lastName, Role.USER);
         
         // Validate user data
         if (!newUser.isValidUsername()) {
@@ -143,11 +263,23 @@ public class AuthController {
             return;
         }
         
+        if (firstName != null && !firstName.isEmpty() && !newUser.isValidName(firstName)) {
+            consoleView.displayErrorMessage("Invalid first name. Must be 2-30 characters, letters and spaces only.");
+            return;
+        }
+        
+        if (lastName != null && !lastName.isEmpty() && !newUser.isValidName(lastName)) {
+            consoleView.displayErrorMessage("Invalid last name. Must be 2-30 characters, letters and spaces only.");
+            return;
+        }
+        
         // Attempt registration
-        if (userDatabase.registerUser(newUser)) {
+        UserDatabase.RegistrationResult result = userDatabase.registerUser(newUser);
+        
+        if (result.isSuccess()) {
             consoleView.displaySuccessMessage("Registration successful! You can now login with your credentials.");
         } else {
-            consoleView.displayErrorMessage("Registration failed. Username might already exist.");
+            consoleView.displayErrorMessage("Registration failed: " + result.getMessage());
         }
     }
     
@@ -155,8 +287,69 @@ public class AuthController {
      * Handle view profile functionality
      */
     private void handleViewProfile() {
-        consoleView.displayUserProfile(currentUser);
+        consoleView.displayDetailedUserProfile(currentUser);
         consoleView.waitForEnter();
+    }
+    
+    /**
+     * Handle edit profile functionality
+     */
+    private void handleEditProfile() {
+        System.out.println("\n=== EDIT PROFILE ===");
+        consoleView.displayInfoMessage("Leave blank to keep current value");
+        
+        String newFirstName = consoleView.getFirstName();
+        String newLastName = consoleView.getLastName();
+        String newEmail = consoleView.getEmail();
+        
+        boolean updated = false;
+        
+        // Update first name if provided
+        if (!newFirstName.isEmpty()) {
+            if (currentUser.isValidName(newFirstName)) {
+                currentUser.setFirstName(newFirstName);
+                updated = true;
+            } else {
+                consoleView.displayErrorMessage("Invalid first name format.");
+                return;
+            }
+        }
+        
+        // Update last name if provided
+        if (!newLastName.isEmpty()) {
+            if (currentUser.isValidName(newLastName)) {
+                currentUser.setLastName(newLastName);
+                updated = true;
+            } else {
+                consoleView.displayErrorMessage("Invalid last name format.");
+                return;
+            }
+        }
+        
+        // Update email if provided
+        if (!newEmail.isEmpty()) {
+            if (!userDatabase.emailExists(newEmail) || newEmail.equals(currentUser.getEmail())) {
+                User tempUser = new User();
+                tempUser.setEmail(newEmail);
+                if (tempUser.isValidEmail()) {
+                    currentUser.setEmail(newEmail);
+                    updated = true;
+                } else {
+                    consoleView.displayErrorMessage("Invalid email format.");
+                    return;
+                }
+            } else {
+                consoleView.displayErrorMessage("Email already exists.");
+                return;
+            }
+        }
+        
+        if (updated) {
+            userDatabase.updateUser(currentUser.getUsername(), currentUser, currentUser.getUsername());
+            consoleView.displaySuccessMessage("Profile updated successfully!");
+        } else {
+            consoleView.displayInfoMessage("No changes made to profile.");
+        }
     }
     
     /**
@@ -165,6 +358,7 @@ public class AuthController {
     private void handleChangePassword() {
         System.out.println("\n=== CHANGE PASSWORD ===");
         
+        System.out.print("Enter current password: ");
         String currentPassword = consoleView.getPassword();
         
         if (!currentUser.getPassword().equals(currentPassword)) {
@@ -175,12 +369,21 @@ public class AuthController {
         System.out.print("Enter new password: ");
         String newPassword = consoleView.getPassword();
         
+        System.out.print("Confirm new password: ");
+        String confirmPassword = consoleView.getPassword();
+        
+        if (!newPassword.equals(confirmPassword)) {
+            consoleView.displayErrorMessage("Passwords do not match.");
+            return;
+        }
+        
         if (newPassword.length() < 6 || newPassword.length() > 50) {
             consoleView.displayErrorMessage("New password must be 6-50 characters long.");
             return;
         }
         
         currentUser.setPassword(newPassword);
+        userDatabase.updateUser(currentUser.getUsername(), currentUser, currentUser.getUsername());
         consoleView.displaySuccessMessage("Password changed successfully!");
     }
     
@@ -194,13 +397,342 @@ public class AuthController {
     }
     
     /**
-     * Handle statistics display
+     * Handle public statistics display
      */
-    private void handleStatistics() {
-        int totalUsers = userDatabase.getTotalUsers();
-        var loginHistory = userDatabase.getLoginHistory();
+    private void handlePublicStatistics() {
+        UserDatabase.SystemStats stats = userDatabase.getSystemStats();
+        consoleView.displayEnhancedStatistics(stats, userDatabase.getRecentLoginHistory(5));
+        consoleView.waitForEnter();
+    }
+    
+    /**
+     * Handle system statistics (admin only)
+     */
+    private void handleSystemStatistics() {
+        UserDatabase.SystemStats stats = userDatabase.getSystemStats();
+        consoleView.displayEnhancedStatistics(stats, userDatabase.getLoginHistory());
+        consoleView.waitForEnter();
+    }
+    
+    /**
+     * Handle login history display
+     */
+    private void handleLoginHistory() {
+        List<String> history = userDatabase.getLoginHistory();
+        System.out.println("\n=== LOGIN HISTORY ===");
         
-        consoleView.displayStatistics(totalUsers, loginHistory);
+        if (history.isEmpty()) {
+            consoleView.displayInfoMessage("No login history available.");
+        } else {
+            int limit = Math.min(20, history.size());
+            int startIndex = history.size() - limit;
+            
+            for (int i = startIndex; i < history.size(); i++) {
+                System.out.println((i - startIndex + 1) + ". " + history.get(i));
+            }
+        }
+        
+        consoleView.waitForEnter();
+    }
+    
+    /**
+     * Handle list all users
+     */
+    private void handleListAllUsers() {
+        List<User> users = userDatabase.getAllUsers();
+        consoleView.displayUsersList(users);
+        consoleView.waitForEnter();
+    }
+    
+    /**
+     * Handle search users functionality
+     */
+    private void handleSearchUsers() {
+        String searchTerm = consoleView.getSearchTerm();
+        
+        if (searchTerm.isEmpty()) {
+            consoleView.displayInfoMessage("Search cancelled.");
+            return;
+        }
+        
+        List<User> results = userDatabase.searchUsers(searchTerm);
+        
+        if (results.isEmpty()) {
+            consoleView.displayInfoMessage("No users found matching: " + searchTerm);
+        } else {
+            System.out.println("\nSearch results for: " + searchTerm);
+            consoleView.displayUsersList(results);
+        }
+        
+        consoleView.waitForEnter();
+    }
+    
+    /**
+     * Handle create user functionality (admin)
+     */
+    private void handleCreateUser() {
+        System.out.println("\n=== CREATE NEW USER ===");
+        
+        String username = consoleView.getUsername();
+        String password = consoleView.getPassword();
+        String email = consoleView.getEmail();
+        String firstName = consoleView.getFirstName();
+        String lastName = consoleView.getLastName();
+        
+        System.out.println("\nSelect role for new user:");
+        Role selectedRole = consoleView.selectRole();
+        
+        if (selectedRole == null) {
+            consoleView.displayErrorMessage("Invalid role selection.");
+            return;
+        }
+        
+        // Check if current user can assign this role
+        if (!permissionService.canChangeUserRole(currentUser, new User(), selectedRole)) {
+            consoleView.displayErrorMessage("You cannot assign the role: " + selectedRole.getDisplayName());
+            return;
+        }
+        
+        // Create new user
+        User newUser = new User(username, password, email, firstName, lastName, selectedRole);
+        
+        // Validate user data
+        if (!newUser.isValid()) {
+            consoleView.displayErrorMessage("Invalid user data. Please check all fields.");
+            return;
+        }
+        
+        // Register user
+        UserDatabase.RegistrationResult result = userDatabase.registerUser(newUser, currentUser.getUsername());
+        
+        if (result.isSuccess()) {
+            consoleView.displaySuccessMessage("User created successfully: " + username + 
+                                            " (" + selectedRole.getDisplayName() + ")");
+        } else {
+            consoleView.displayErrorMessage("User creation failed: " + result.getMessage());
+        }
+    }
+    
+    /**
+     * Handle modify user role functionality
+     */
+    private void handleModifyUserRole() {
+        System.out.println("\n=== MODIFY USER ROLE ===");
+        
+        String username = consoleView.getUsername();
+        User targetUser = userDatabase.getUserByUsername(username);
+        
+        if (targetUser == null) {
+            consoleView.displayErrorMessage("User not found: " + username);
+            return;
+        }
+        
+        System.out.println("Current role: " + targetUser.getRole().getDisplayName());
+        System.out.println("\nSelect new role:");
+        Role newRole = consoleView.selectRole();
+        
+        if (newRole == null) {
+            consoleView.displayErrorMessage("Invalid role selection.");
+            return;
+        }
+        
+        if (targetUser.getRole() == newRole) {
+            consoleView.displayInfoMessage("User already has this role.");
+            return;
+        }
+        
+        // Check permissions
+        PermissionService.ValidationResult validation = 
+            permissionService.validateRoleOperation(currentUser, targetUser, PermissionService.MODIFY_ROLES);
+        
+        if (!validation.isValid()) {
+            consoleView.displayErrorMessage(validation.getMessage());
+            return;
+        }
+        
+        if (!permissionService.canChangeUserRole(currentUser, targetUser, newRole)) {
+            consoleView.displayErrorMessage("You cannot change this user's role to: " + newRole.getDisplayName());
+            return;
+        }
+        
+        // Confirm action
+        if (!consoleView.getConfirmation("Change " + username + "'s role from " + 
+                                       targetUser.getRole().getDisplayName() + " to " + 
+                                       newRole.getDisplayName() + "?")) {
+            consoleView.displayInfoMessage("Operation cancelled.");
+            return;
+        }
+        
+        // Perform role change
+        if (userDatabase.changeUserRole(username, newRole, currentUser.getUsername())) {
+            consoleView.displaySuccessMessage("Role changed successfully for user: " + username);
+        } else {
+            consoleView.displayErrorMessage("Failed to change user role.");
+        }
+    }
+    
+    /**
+     * Handle lock/unlock user functionality
+     */
+    private void handleLockUnlockUser() {
+        System.out.println("\n=== LOCK/UNLOCK USER ===");
+        
+        String username = consoleView.getUsername();
+        User targetUser = userDatabase.getUserByUsername(username);
+        
+        if (targetUser == null) {
+            consoleView.displayErrorMessage("User not found: " + username);
+            return;
+        }
+        
+        // Check permissions
+        if (!permissionService.canManageUser(currentUser, targetUser)) {
+            consoleView.displayErrorMessage("You cannot manage this user.");
+            return;
+        }
+        
+        boolean currentLockStatus = targetUser.isLocked();
+        String action = currentLockStatus ? "unlock" : "lock";
+        
+        System.out.println("User: " + username);
+        System.out.println("Current status: " + (currentLockStatus ? "LOCKED" : "UNLOCKED"));
+        
+        if (!consoleView.getConfirmation("Do you want to " + action + " this user?")) {
+            consoleView.displayInfoMessage("Operation cancelled.");
+            return;
+        }
+        
+        if (userDatabase.setUserLocked(username, !currentLockStatus, currentUser.getUsername())) {
+            consoleView.displaySuccessMessage("User " + username + " has been " + action + "ed successfully.");
+        } else {
+            consoleView.displayErrorMessage("Failed to " + action + " user.");
+        }
+    }
+    
+    /**
+     * Handle delete user functionality
+     */
+    private void handleDeleteUser() {
+        System.out.println("\n=== DELETE USER ===");
+        
+        String username = consoleView.getUsername();
+        User targetUser = userDatabase.getUserByUsername(username);
+        
+        if (targetUser == null) {
+            consoleView.displayErrorMessage("User not found: " + username);
+            return;
+        }
+        
+        // Check permissions
+        if (!permissionService.canDeleteUser(currentUser, targetUser)) {
+            consoleView.displayErrorMessage("You cannot delete this user.");
+            return;
+        }
+        
+        System.out.println("User to delete: " + username + " (" + targetUser.getRole().getDisplayName() + ")");
+        consoleView.displayWarningMessage("This action cannot be undone!");
+        
+        if (!consoleView.getConfirmation("Are you sure you want to delete this user?")) {
+            consoleView.displayInfoMessage("Operation cancelled.");
+            return;
+        }
+        
+        // Double confirmation for admin users
+        if (targetUser.getRole() == Role.ADMIN) {
+            consoleView.displayWarningMessage("You are about to delete an ADMIN user!");
+            if (!consoleView.getConfirmation("Type 'DELETE' to confirm")) {
+                System.out.print("Confirmation: ");
+                String confirmation = consoleView.scanner.nextLine().trim();
+                if (!"DELETE".equals(confirmation)) {
+                    consoleView.displayInfoMessage("Operation cancelled - confirmation failed.");
+                    return;
+                }
+            }
+        }
+        
+        if (userDatabase.deleteUser(username, currentUser.getUsername())) {
+            consoleView.displaySuccessMessage("User " + username + " has been deleted successfully.");
+        } else {
+            consoleView.displayErrorMessage("Failed to delete user.");
+        }
+    }
+    
+    /**
+     * Handle view audit log functionality
+     */
+    private void handleViewAuditLog() {
+        List<String> auditLog = userDatabase.getAuditLog();
+        consoleView.displayAuditLog(auditLog);
+        consoleView.waitForEnter();
+    }
+    
+    /**
+     * Handle system health check
+     */
+    private void handleSystemHealthCheck() {
+        System.out.println("\n=== SYSTEM HEALTH CHECK ===");
+        
+        UserDatabase.SystemStats stats = userDatabase.getSystemStats();
+        
+        System.out.println("System Status: OPERATIONAL");
+        System.out.println("Total Users: " + stats.getTotalUsers());
+        System.out.println("Active Users: " + stats.getActiveUsers());
+        System.out.println("Locked Accounts: " + stats.getLockedUsers());
+        
+        // Check for potential issues
+        if (stats.getLockedUsers() > 0) {
+            consoleView.displayWarningMessage("There are " + stats.getLockedUsers() + " locked accounts.");
+        }
+        
+        double lockPercentage = (double) stats.getLockedUsers() / stats.getTotalUsers() * 100;
+        if (lockPercentage > 20) {
+            consoleView.displayWarningMessage("High percentage of locked accounts: " + 
+                                            String.format("%.1f%%", lockPercentage));
+        }
+        
+        consoleView.displaySuccessMessage("System health check completed.");
+        consoleView.waitForEnter();
+    }
+    
+    /**
+     * Handle user statistics report
+     */
+    private void handleUserStatisticsReport() {
+        UserDatabase.SystemStats stats = userDatabase.getSystemStats();
+        consoleView.displayEnhancedStatistics(stats, userDatabase.getRecentLoginHistory(10));
+        consoleView.waitForEnter();
+    }
+    
+    /**
+     * Handle security report
+     */
+    private void handleSecurityReport() {
+        System.out.println("\n=== SECURITY REPORT ===");
+        
+        List<User> lockedUsers = userDatabase.getLockedUsers();
+        System.out.println("Locked Accounts: " + lockedUsers.size());
+        
+        if (!lockedUsers.isEmpty()) {
+            System.out.println("\nLocked Users:");
+            for (User user : lockedUsers) {
+                System.out.println("  - " + user.getUsername() + " (" + 
+                                 user.getFailedLoginAttempts() + " failed attempts)");
+            }
+        }
+        
+        // Recent login failures
+        List<String> recentHistory = userDatabase.getRecentLoginHistory(20);
+        long failureCount = recentHistory.stream()
+            .filter(entry -> entry.contains("LOGIN FAILED"))
+            .count();
+        
+        System.out.println("\nRecent Login Failures: " + failureCount + " out of last " + 
+                          Math.min(20, recentHistory.size()) + " attempts");
+        
+        if (failureCount > 10) {
+            consoleView.displayWarningMessage("High number of recent login failures detected!");
+        }
+        
         consoleView.waitForEnter();
     }
     
