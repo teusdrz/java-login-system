@@ -207,7 +207,7 @@ const getActivityIcon = (type: ActivityLog['type']): React.ReactElement => {
     }
 };
 
-const Dashboard: React.FC = () => {
+const DashboardComplete: React.FC = () => {
     const { state } = useAuth();
     const { user } = state;
     
@@ -2028,4 +2028,4 @@ const NumberSetting: React.FC<NumberSettingProps> = ({ label, description, value
     );
 };
 
-export default Dashboard;
+export default DashboardComplete;
