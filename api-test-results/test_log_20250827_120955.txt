@@ -1,0 +1,81 @@
+[0;36m[12:09:55][0m Starting comprehensive API testing at Qua 27 Ago 2025 12:09:55 -03
+[0;36m[12:09:55][0m Base URL: http://localhost:8080/api/v1
+[0;36m[12:09:55][0m Results will be saved to: api-test-results/
+[0;36m[12:09:55][0m Testing admin login...
+[0;31m❌ Admin login failed[0m
+[1;33m⚠️ Continuing with mock token for demonstration[0m
+[0;36m[12:09:55][0m Running: Admin Login - Valid Credentials
+[0;31m❌ Admin Login - Valid Credentials - Expected: 200, Got: 0.000242 (0.000242s)[0m
+[0;36m[12:09:55][0m Running: Invalid Login - Wrong Password
+[0;31m❌ Invalid Login - Wrong Password - Expected: 401, Got: 0.000250 (0.000250s)[0m
+[0;36m[12:09:55][0m Running: Invalid Login - Non-existent User
+[0;31m❌ Invalid Login - Non-existent User - Expected: 401, Got: 0.000204 (0.000204s)[0m
+[0;36m[12:09:55][0m Running: Invalid Login - Empty Credentials
+[0;31m❌ Invalid Login - Empty Credentials - Expected: 400, Got: 0.000206 (0.000206s)[0m
+[0;36m[12:09:55][0m Running: User Registration - Valid Data
+[0;31m❌ User Registration - Valid Data - Expected: 201, Got: 0.000206 (0.000206s)[0m
+[0;36m[12:09:55][0m Running: User Registration - Duplicate Username
+[0;31m❌ User Registration - Duplicate Username - Expected: 409, Got: 0.000210 (0.000210s)[0m
+[1;33m⚠️ Note: These tests simulate expected behavior as REST endpoints are not fully implemented[0m
+[0;36m[12:09:55][0m Running: Get All Users - Admin Access
+[0;31m❌ Get All Users - Admin Access - Expected: 200, Got: 0.000205 (0.000205s)[0m
+[0;36m[12:09:55][0m Running: Get All Users - Non-Admin Access
+[0;31m❌ Get All Users - Non-Admin Access - Expected: 403, Got: 0.000224 (0.000224s)[0m
+[0;36m[12:09:55][0m Running: Get All Users - No Authorization
+[0;31m❌ Get All Users - No Authorization - Expected: 401, Got: 0.000194 (0.000194s)[0m
+[0;36m[12:09:55][0m Running: Search Users by Role
+[0;31m❌ Search Users by Role - Expected: 200, Got: 0.000200 (0.000200s)[0m
+[0;36m[12:09:55][0m Running: Get User by ID - Valid
+[0;31m❌ Get User by ID - Valid - Expected: 200, Got: 0.000163 (0.000163s)[0m
+[0;36m[12:09:55][0m Running: Get User by ID - Non-existent
+[0;31m❌ Get User by ID - Non-existent - Expected: 404, Got: 0.000168 (0.000168s)[0m
+[0;36m[12:09:55][0m Running: Create New User - Valid Data
+[0;31m❌ Create New User - Valid Data - Expected: 201, Got: 0.000158 (0.000158s)[0m
+[0;36m[12:09:55][0m Running: Create User - Duplicate Username
+[0;31m❌ Create User - Duplicate Username - Expected: 409, Got: 0.000188 (0.000188s)[0m
+[0;36m[12:09:55][0m Running: Update User Profile
+[0;31m❌ Update User Profile - Expected: 200, Got: 0.000168 (0.000168s)[0m
+[0;36m[12:09:55][0m Running: Delete User - Valid Request
+[0;31m❌ Delete User - Valid Request - Expected: 204, Got: 0.000186 (0.000186s)[0m
+[0;36m[12:09:55][0m Running: Delete Non-existent User
+[0;31m❌ Delete Non-existent User - Expected: 404, Got: 0.000131 (0.000131s)[0m
+[0;36m[12:09:55][0m Running: Get System Statistics
+[0;31m❌ Get System Statistics - Expected: 200, Got: 0.000164 (0.000164s)[0m
+[0;36m[12:09:55][0m Running: System Health Check
+[0;31m❌ System Health Check - Expected: 200, Got: 0.000179 (0.000179s)[0m
+[0;36m[12:09:55][0m Running: Get Audit Logs
+[0;31m❌ Get Audit Logs - Expected: 200, Got: 0.000182 (0.000182s)[0m
+[0;36m[12:09:55][0m Running: Filter Audit Logs by User
+[0;31m❌ Filter Audit Logs by User - Expected: 200, Got: 0.000156 (0.000156s)[0m
+[0;36m[12:09:55][0m Running: Get Audit Statistics
+[0;31m❌ Get Audit Statistics - Expected: 200, Got: 0.000218 (0.000218s)[0m
+[0;36m[12:09:55][0m Running: Create System Backup
+[0;31m❌ Create System Backup - Expected: 201, Got: 0.000180 (0.000180s)[0m
+[0;36m[12:09:55][0m Running: List Backups
+[0;31m❌ List Backups - Expected: 200, Got: 0.000210 (0.000210s)[0m
+[0;36m[12:09:55][0m Running: Send Notification
+[0;31m❌ Send Notification - Expected: 201, Got: 0.000172 (0.000172s)[0m
+[0;36m[12:09:55][0m Running: Get User Notifications
+[0;31m❌ Get User Notifications - Expected: 200, Got: 0.000204 (0.000204s)[0m
+[0;36m[12:09:55][0m Running: Get Unread Notifications
+[0;31m❌ Get Unread Notifications - Expected: 200, Got: 0.000135 (0.000135s)[0m
+[0;36m[12:09:55][0m Running: Mark Notification as Read
+[0;31m❌ Mark Notification as Read - Expected: 200, Got: 0.000190 (0.000190s)[0m
+[0;36m[12:09:55][0m Running: Delete Notification
+[0;31m❌ Delete Notification - Expected: 204, Got: 0.000155 (0.000155s)[0m
+[0;36m[12:09:55][0m Running: Broadcast Notification
+[0;31m❌ Broadcast Notification - Expected: 200, Got: 0.000209 (0.000209s)[0m
+[0;36m[12:09:55][0m Running: Get Notification Statistics
+[0;31m❌ Get Notification Statistics - Expected: 200, Got: 0.000161 (0.000161s)[0m
+[0;36m[12:09:55][0m Running: Access Protected Endpoint - Valid Token
+[0;31m❌ Access Protected Endpoint - Valid Token - Expected: 200, Got: 0.000174 (0.000174s)[0m
+[0;36m[12:09:55][0m Running: Access Protected Endpoint - Invalid Token
+[0;31m❌ Access Protected Endpoint - Invalid Token - Expected: 401, Got: 0.000198 (0.000198s)[0m
+[0;36m[12:09:55][0m Running: Access Admin Endpoint - User Token
+[0;31m❌ Access Admin Endpoint - User Token - Expected: 403, Got: 0.000159 (0.000159s)[0m
+[0;36m[12:09:55][0m Running: Rate Limiting Test - Multiple Requests
+[0;31m❌ Rate Limiting Test - Multiple Requests - Expected: 429, Got: 0.000189 (0.000189s)[0m
+[0;34mℹ️ Running performance tests (response time checks)...[0m
+[0;32m✅ Health Check Performance - Response time: 0s (within 1.0s limit)[0m
+[0;32m✅ Login Performance - Response time: 0s (within 2.0s limit)[0m
+[0;36m[12:09:55][0m Testing completed at Qua 27 Ago 2025 12:09:55 -03

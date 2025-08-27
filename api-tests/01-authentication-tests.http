@@ -1,0 +1,304 @@
+### Java Login System - Authentication API Tests
+### Base URL: http://localhost:8080/api/v1
+
+@baseUrl = http://localhost:8080/api/v1
+@contentType = application/json
+
+###########################################################################
+# 🔐 AUTHENTICATION TESTS
+###########################################################################
+
+### 1. 🚀 Admin Login - Valid Credentials
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "rememberMe": true
+}
+
+### 2. 🔑 Moderator Login - Valid Credentials  
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "username": "moderator", 
+  "password": "mod123",
+  "rememberMe": false
+}
+
+### 3. 👤 Regular User Login - Valid Credentials
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "username": "testuser",
+  "password": "password123", 
+  "rememberMe": false
+}
+
+### 4. ❌ Invalid Login - Wrong Password
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "wrongpassword",
+  "rememberMe": false
+}
+
+### 5. ❌ Invalid Login - Non-existent User
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "username": "nonexistent",
+  "password": "anypassword",
+  "rememberMe": false
+}
+
+### 6. ❌ Invalid Login - Empty Credentials
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "username": "",
+  "password": "",
+  "rememberMe": false
+}
+
+### 7. ❌ Invalid Login - Missing Fields
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin"
+}
+
+###########################################################################
+# 📝 USER REGISTRATION TESTS  
+###########################################################################
+
+### 8. ✅ Register New User - Valid Data
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "username": "newuser2025",
+  "password": "newuser123",
+  "email": "newuser2025@example.com",
+  "firstName": "New",
+  "lastName": "User",
+  "role": "USER"
+}
+
+### 9. ❌ Register User - Duplicate Username
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "newpass123",
+  "email": "duplicate@example.com",
+  "firstName": "Duplicate",
+  "lastName": "User",
+  "role": "USER"
+}
+
+### 10. ❌ Register User - Invalid Email
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "username": "invaliduser",
+  "password": "validpass123",
+  "email": "invalid-email-format",
+  "firstName": "Invalid",
+  "lastName": "User",
+  "role": "USER"
+}
+
+### 11. ❌ Register User - Weak Password
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "username": "weakpassuser",
+  "password": "123",
+  "email": "weak@example.com",
+  "firstName": "Weak",
+  "lastName": "Password",
+  "role": "USER"
+}
+
+### 12. ❌ Register User - Missing Required Fields
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "username": "incomplete",
+  "email": "incomplete@example.com"
+}
+
+###########################################################################
+# 🔐 PASSWORD MANAGEMENT TESTS
+###########################################################################
+
+### 13. ✅ Change Password - Valid Request (Admin)
+PUT {{baseUrl}}/auth/change-password
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "currentPassword": "admin123",
+  "newPassword": "newadmin123",
+  "confirmPassword": "newadmin123"
+}
+
+### 14. ❌ Change Password - Wrong Current Password
+PUT {{baseUrl}}/auth/change-password
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "currentPassword": "wrongcurrent",
+  "newPassword": "newpass123",
+  "confirmPassword": "newpass123"
+}
+
+### 15. ❌ Change Password - Password Mismatch
+PUT {{baseUrl}}/auth/change-password
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "currentPassword": "admin123",
+  "newPassword": "newpass123",
+  "confirmPassword": "differentpass123"
+}
+
+### 16. ❌ Change Password - Weak New Password
+PUT {{baseUrl}}/auth/change-password
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "currentPassword": "admin123",
+  "newPassword": "123",
+  "confirmPassword": "123"
+}
+
+###########################################################################
+# 🚪 LOGOUT TESTS
+###########################################################################
+
+### 17. ✅ Logout - Valid Session
+POST {{baseUrl}}/auth/logout
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+### 18. ❌ Logout - Invalid Token
+POST {{baseUrl}}/auth/logout
+Content-Type: {{contentType}}
+Authorization: Bearer invalid-token-here
+
+### 19. ❌ Logout - No Authorization Header
+POST {{baseUrl}}/auth/logout
+Content-Type: {{contentType}}
+
+###########################################################################
+# 🔄 PASSWORD RESET TESTS
+###########################################################################
+
+### 20. ✅ Request Password Reset - Valid Email
+POST {{baseUrl}}/auth/reset-password
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@system.com"
+}
+
+### 21. ❌ Request Password Reset - Invalid Email
+POST {{baseUrl}}/auth/reset-password
+Content-Type: {{contentType}}
+
+{
+  "email": "nonexistent@example.com"
+}
+
+### 22. ❌ Request Password Reset - Malformed Email
+POST {{baseUrl}}/auth/reset-password
+Content-Type: {{contentType}}
+
+{
+  "email": "invalid-email-format"
+}
+
+###########################################################################
+# 🔒 TOKEN VALIDATION TESTS
+###########################################################################
+
+### 23. ✅ Validate Token - Valid Token
+GET {{baseUrl}}/auth/validate
+Authorization: Bearer {{authToken}}
+
+### 24. ❌ Validate Token - Invalid Token
+GET {{baseUrl}}/auth/validate
+Authorization: Bearer invalid-token-12345
+
+### 25. ❌ Validate Token - Expired Token
+GET {{baseUrl}}/auth/validate
+Authorization: Bearer expired-token-example
+
+### 26. ❌ Validate Token - No Authorization Header
+GET {{baseUrl}}/auth/validate
+
+###########################################################################
+# 📊 AUTHENTICATION STATISTICS
+###########################################################################
+
+### 27. 📈 Get Authentication Stats
+GET {{baseUrl}}/auth/stats
+Authorization: Bearer {{adminToken}}
+
+### 28. 🔍 Get Failed Login Attempts
+GET {{baseUrl}}/auth/failed-attempts
+Authorization: Bearer {{adminToken}}
+
+###########################################################################
+# 🛡️ SECURITY TESTS
+###########################################################################
+
+### 29. 🔐 Test Rate Limiting - Multiple Quick Requests
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "wrongpassword"
+}
+
+### 30. 🔐 Test Account Lockout Protection
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "username": "testuser",
+  "password": "wrongpassword"
+}
+
+###########################################################################
+# 📝 TEST NOTES
+###########################################################################
+
+# To run these tests:
+# 1. Ensure your Java application is running on localhost:8080
+# 2. Use VS Code with REST Client extension or Thunder Client
+# 3. Update {{authToken}} and {{adminToken}} variables with actual tokens from login responses
+# 4. Tests are organized by functionality for systematic validation
+# 5. Each test includes expected behavior and validation criteria
+
+# Variables to set:
+# @authToken = your-jwt-token-here
+# @adminToken = admin-jwt-token-here

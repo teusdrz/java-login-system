@@ -1,0 +1,481 @@
+### Java Login System - User Management API Tests
+### Base URL: http://localhost:8080/api/v1
+
+@baseUrl = http://localhost:8080/api/v1
+@contentType = application/json
+@authToken = your-jwt-token-here
+@adminToken = admin-jwt-token-here
+
+###########################################################################
+# 👥 USER MANAGEMENT TESTS
+###########################################################################
+
+### 1. 📊 Get All Users - Admin Access
+GET {{baseUrl}}/users?page=0&size=10
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 2. 📊 Get All Users - Pagination Test
+GET {{baseUrl}}/users?page=1&size=5&sortBy=username&sortDirection=ASC
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 3. 📊 Get All Users - Large Page Size
+GET {{baseUrl}}/users?page=0&size=100
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 4. ❌ Get All Users - Non-Admin Access (Should Fail)
+GET {{baseUrl}}/users
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 5. ❌ Get All Users - No Authorization
+GET {{baseUrl}}/users
+Accept: {{contentType}}
+
+###########################################################################
+# 🔍 USER SEARCH TESTS
+###########################################################################
+
+### 6. 🔍 Search Users by Role - Admin
+GET {{baseUrl}}/users/search?role=ADMIN
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 7. 🔍 Search Users by Role - User
+GET {{baseUrl}}/users/search?role=USER
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 8. 🔍 Search Users by Role - Moderator
+GET {{baseUrl}}/users/search?role=MODERATOR
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 9. 🔍 Search Users by Status - Active
+GET {{baseUrl}}/users/search?active=true
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 10. 🔍 Search Users by Status - Inactive
+GET {{baseUrl}}/users/search?active=false
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 11. 🔍 Search Users by Username Pattern
+GET {{baseUrl}}/users/search?username=admin
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 12. 🔍 Search Users by Email Pattern  
+GET {{baseUrl}}/users/search?email=@system.com
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 13. 🔍 Complex Search - Multiple Criteria
+GET {{baseUrl}}/users/search?role=USER&active=true&page=0&size=5
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 14. ❌ Search Users - Invalid Role
+GET {{baseUrl}}/users/search?role=INVALID_ROLE
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+###########################################################################
+# 👤 INDIVIDUAL USER OPERATIONS
+###########################################################################
+
+### 15. 👤 Get User by ID - Valid User
+GET {{baseUrl}}/users/1
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 16. 👤 Get Current User Profile
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 17. ❌ Get User by ID - Non-existent User
+GET {{baseUrl}}/users/99999
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 18. ❌ Get User by ID - Invalid ID Format
+GET {{baseUrl}}/users/invalid-id
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 19. ❌ Get User by ID - No Authorization
+GET {{baseUrl}}/users/1
+Accept: {{contentType}}
+
+###########################################################################
+# ✏️ USER CREATION TESTS
+###########################################################################
+
+### 20. ✅ Create New User - Valid Data (Admin)
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "username": "newuser_{{$timestamp}}",
+  "password": "newuser123",
+  "email": "newuser_{{$timestamp}}@example.com",
+  "firstName": "New",
+  "lastName": "TestUser",
+  "role": "USER",
+  "active": true
+}
+
+### 21. ✅ Create New Moderator - Valid Data (Admin)
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "username": "moderator_{{$timestamp}}",
+  "password": "moderator123",
+  "email": "moderator_{{$timestamp}}@example.com",
+  "firstName": "Test",
+  "lastName": "Moderator",
+  "role": "MODERATOR",
+  "active": true
+}
+
+### 22. ❌ Create User - Duplicate Username
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "username": "admin",
+  "password": "duplicate123",
+  "email": "duplicate@example.com",
+  "firstName": "Duplicate",
+  "lastName": "User",
+  "role": "USER"
+}
+
+### 23. ❌ Create User - Invalid Email Format
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "username": "invalidemail",
+  "password": "valid123",
+  "email": "invalid-email-format",
+  "firstName": "Invalid",
+  "lastName": "Email",
+  "role": "USER"
+}
+
+### 24. ❌ Create User - Weak Password
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "username": "weakpass",
+  "password": "123",
+  "email": "weak@example.com",
+  "firstName": "Weak",
+  "lastName": "Password",
+  "role": "USER"
+}
+
+### 25. ❌ Create User - Missing Required Fields
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "username": "incomplete",
+  "email": "incomplete@example.com"
+}
+
+### 26. ❌ Create User - Invalid Role
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "username": "invalidrole",
+  "password": "valid123",
+  "email": "valid@example.com",
+  "firstName": "Invalid",
+  "lastName": "Role",
+  "role": "INVALID_ROLE"
+}
+
+### 27. ❌ Create User - Non-Admin Access (Should Fail)
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "username": "unauthorized",
+  "password": "valid123",
+  "email": "unauth@example.com",
+  "firstName": "Unauthorized",
+  "lastName": "Creation",
+  "role": "USER"
+}
+
+###########################################################################
+# ✏️ USER UPDATE TESTS
+###########################################################################
+
+### 28. ✅ Update User Profile - Valid Data
+PUT {{baseUrl}}/users/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "firstName": "Updated",
+  "lastName": "Administrator",
+  "email": "updated_admin@system.com",
+  "phoneNumber": "+1-555-0123",
+  "active": true
+}
+
+### 29. ✅ Update User - Change Role (Admin Only)
+PUT {{baseUrl}}/users/2
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "role": "MODERATOR",
+  "active": true
+}
+
+### 30. ✅ Update Current User Profile (Self)
+PUT {{baseUrl}}/users/me
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "firstName": "Self",
+  "lastName": "Updated",
+  "email": "self_updated@example.com",
+  "phoneNumber": "+1-555-9999"
+}
+
+### 31. ❌ Update User - Invalid Email Format
+PUT {{baseUrl}}/users/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "firstName": "Valid",
+  "lastName": "Name",
+  "email": "invalid-email-format"
+}
+
+### 32. ❌ Update User - Non-existent User
+PUT {{baseUrl}}/users/99999
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "firstName": "Non",
+  "lastName": "Existent"
+}
+
+### 33. ❌ Update User - Insufficient Permissions
+PUT {{baseUrl}}/users/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "firstName": "Unauthorized",
+  "lastName": "Update",
+  "role": "ADMIN"
+}
+
+### 34. ❌ Update User - Invalid Role Change
+PUT {{baseUrl}}/users/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "role": "INVALID_ROLE"
+}
+
+###########################################################################
+# 🔄 USER STATUS MANAGEMENT
+###########################################################################
+
+### 35. ✅ Activate User Account
+PUT {{baseUrl}}/users/2/activate
+Authorization: Bearer {{adminToken}}
+
+### 36. ✅ Deactivate User Account
+PUT {{baseUrl}}/users/2/deactivate
+Authorization: Bearer {{adminToken}}
+
+### 37. ❌ Activate Non-existent User
+PUT {{baseUrl}}/users/99999/activate
+Authorization: Bearer {{adminToken}}
+
+### 38. ❌ Deactivate Own Account (Should Fail)
+PUT {{baseUrl}}/users/1/deactivate
+Authorization: Bearer {{adminToken}}
+
+### 39. ❌ Activate User - Insufficient Permissions
+PUT {{baseUrl}}/users/2/activate
+Authorization: Bearer {{authToken}}
+
+###########################################################################
+# 🗑️ USER DELETION TESTS
+###########################################################################
+
+### 40. ✅ Delete User - Valid Request
+DELETE {{baseUrl}}/users/3
+Authorization: Bearer {{adminToken}}
+
+### 41. ❌ Delete Non-existent User
+DELETE {{baseUrl}}/users/99999
+Authorization: Bearer {{adminToken}}
+
+### 42. ❌ Delete Own Account (Should Fail)
+DELETE {{baseUrl}}/users/1
+Authorization: Bearer {{adminToken}}
+
+### 43. ❌ Delete User - Insufficient Permissions
+DELETE {{baseUrl}}/users/2
+Authorization: Bearer {{authToken}}
+
+### 44. ❌ Delete User - No Authorization
+DELETE {{baseUrl}}/users/2
+
+###########################################################################
+# 📊 USER STATISTICS AND ANALYTICS
+###########################################################################
+
+### 45. 📈 Get User Statistics - Admin View
+GET {{baseUrl}}/users/stats
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 46. 📊 Get User Activity Summary
+GET {{baseUrl}}/users/activity
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 47. 🔍 Get Recent User Registrations
+GET {{baseUrl}}/users/recent?days=7
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 48. ❌ Get User Statistics - Non-Admin Access
+GET {{baseUrl}}/users/stats
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+###########################################################################
+# 🔐 PERMISSION AND ROLE TESTS
+###########################################################################
+
+### 49. ✅ Get User Permissions
+GET {{baseUrl}}/users/1/permissions
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 50. 🔍 Check Specific Permission
+GET {{baseUrl}}/users/1/permissions/USER_MANAGEMENT
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 51. 📋 Get Available Roles
+GET {{baseUrl}}/users/roles
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 52. ❌ Get Permissions - Insufficient Access
+GET {{baseUrl}}/users/1/permissions
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+###########################################################################
+# 🔍 ADVANCED SEARCH AND FILTERING
+###########################################################################
+
+### 53. 🔍 Search Users with Date Range
+GET {{baseUrl}}/users/search?createdAfter=2025-01-01&createdBefore=2025-12-31
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 54. 🔍 Search Users by Multiple Roles
+GET {{baseUrl}}/users/search?roles=ADMIN,MODERATOR
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 55. 🔍 Search Users with Full Text Search
+GET {{baseUrl}}/users/search?query=admin
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 56. 📊 Advanced User Analytics
+GET {{baseUrl}}/users/analytics?groupBy=role&period=month
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+###########################################################################
+# 🔄 BULK OPERATIONS
+###########################################################################
+
+### 57. ✅ Bulk Update Users
+PUT {{baseUrl}}/users/bulk
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "userIds": [2, 3],
+  "updates": {
+    "active": true
+  }
+}
+
+### 58. ✅ Bulk Delete Users
+DELETE {{baseUrl}}/users/bulk
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "userIds": [4, 5],
+  "confirm": true
+}
+
+### 59. ❌ Bulk Operations - Insufficient Permissions
+PUT {{baseUrl}}/users/bulk
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "userIds": [2],
+  "updates": {
+    "active": false
+  }
+}
+
+###########################################################################
+# 📝 TEST EXECUTION NOTES
+###########################################################################
+
+# To run these tests:
+# 1. Update @authToken and @adminToken variables with actual JWT tokens
+# 2. Ensure your Java application is running on localhost:8080
+# 3. Run tests sequentially for dependencies (create before update/delete)
+# 4. Monitor logs for security events and permissions validation
+# 5. Verify audit trail for all administrative operations
+
+# Expected Test Results:
+# ✅ = Should succeed (200, 201, 204 status codes)
+# ❌ = Should fail (400, 401, 403, 404 status codes)
+# 🔍 = Data retrieval operation
+# ✏️ = Data modification operation
+# 🗑️ = Data deletion operation

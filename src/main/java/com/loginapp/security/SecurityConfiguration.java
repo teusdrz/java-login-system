@@ -1,11 +1,10 @@
 package com.loginapp.security;
 
-import com.loginapp.model.User;
-import com.loginapp.model.Role;
-import com.loginapp.services.AuditService;
 import com.loginapp.model.AuditAction;
 import com.loginapp.model.AuditLevel;
-
+import com.loginapp.model.Role;
+import com.loginapp.model.User;
+import com.loginapp.services.AuditService;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;

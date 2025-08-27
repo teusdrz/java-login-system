@@ -1,0 +1,593 @@
+### Java Login System - Notification API Tests
+### Base URL: http://localhost:8080/api/v1
+
+@baseUrl = http://localhost:8080/api/v1
+@contentType = application/json
+@authToken = your-jwt-token-here
+@adminToken = admin-jwt-token-here
+
+###########################################################################
+# 🔔 NOTIFICATION MANAGEMENT TESTS
+###########################################################################
+
+### 1. ✉️ Send Notification - Info Message
+POST {{baseUrl}}/notifications/send
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "Test Notification {{$timestamp}}",
+  "message": "This is a test notification sent via API testing",
+  "type": "INFO",
+  "priority": "MEDIUM",
+  "recipientUsername": "testuser",
+  "expirationTime": "2025-12-31T23:59:59Z",
+  "requiresAcknowledgment": false
+}
+
+### 2. ⚠️ Send Warning Notification
+POST {{baseUrl}}/notifications/send
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "Warning: System Maintenance",
+  "message": "Scheduled maintenance will begin in 1 hour. Please save your work.",
+  "type": "WARNING",
+  "priority": "HIGH",
+  "recipientUsername": "admin",
+  "expirationTime": "2025-08-28T12:00:00Z",
+  "requiresAcknowledgment": true
+}
+
+### 3. 🚨 Send Critical Alert
+POST {{baseUrl}}/notifications/send
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "CRITICAL: Security Alert",
+  "message": "Suspicious login activity detected on your account.",
+  "type": "ALERT",
+  "priority": "CRITICAL",
+  "recipientUsername": "moderator",
+  "expirationTime": "2025-08-30T23:59:59Z",
+  "requiresAcknowledgment": true
+}
+
+### 4. 📢 Send System Announcement
+POST {{baseUrl}}/notifications/send
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "System Update Available",
+  "message": "A new system update is available. Please review the changelog.",
+  "type": "SYSTEM",
+  "priority": "LOW",
+  "recipientUsername": "testuser",
+  "expirationTime": "2025-09-15T00:00:00Z",
+  "requiresAcknowledgment": false
+}
+
+### 5. ❌ Send Notification - Invalid Recipient
+POST {{baseUrl}}/notifications/send
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "Invalid Recipient Test",
+  "message": "This should fail",
+  "type": "INFO",
+  "priority": "MEDIUM",
+  "recipientUsername": "nonexistent_user",
+  "requiresAcknowledgment": false
+}
+
+### 6. ❌ Send Notification - Missing Required Fields
+POST {{baseUrl}}/notifications/send
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "Incomplete Notification",
+  "message": ""
+}
+
+### 7. ❌ Send Notification - Invalid Priority
+POST {{baseUrl}}/notifications/send
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "Invalid Priority Test",
+  "message": "Testing invalid priority",
+  "type": "INFO",
+  "priority": "INVALID_PRIORITY",
+  "recipientUsername": "testuser"
+}
+
+### 8. ❌ Send Notification - Non-Admin Access
+POST {{baseUrl}}/notifications/send
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Unauthorized Send",
+  "message": "This should fail",
+  "type": "INFO",
+  "priority": "MEDIUM",
+  "recipientUsername": "admin"
+}
+
+###########################################################################
+# 📬 NOTIFICATION RETRIEVAL TESTS
+###########################################################################
+
+### 9. 📋 Get User Notifications - All
+GET {{baseUrl}}/notifications?page=0&size=20
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 10. 👁️ Get Unread Notifications Only
+GET {{baseUrl}}/notifications?unreadOnly=true
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 11. 📋 Get Notifications - Pagination
+GET {{baseUrl}}/notifications?page=1&size=5&sortBy=createdAt&sortDirection=DESC
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 12. 🔍 Filter Notifications by Type
+GET {{baseUrl}}/notifications?type=WARNING
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 13. 🔍 Filter Notifications by Priority
+GET {{baseUrl}}/notifications?priority=HIGH
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 14. 📅 Filter Notifications by Date Range
+GET {{baseUrl}}/notifications?startDate=2025-08-01&endDate=2025-08-31
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 15. 🔍 Get Notification by ID
+GET {{baseUrl}}/notifications/1
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 16. ❌ Get Non-existent Notification
+GET {{baseUrl}}/notifications/99999
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 17. ❌ Get Notifications - No Authorization
+GET {{baseUrl}}/notifications
+Accept: {{contentType}}
+
+###########################################################################
+# ✅ NOTIFICATION INTERACTION TESTS
+###########################################################################
+
+### 18. ✅ Mark Notification as Read
+PUT {{baseUrl}}/notifications/1/read
+Authorization: Bearer {{authToken}}
+
+### 19. ✅ Mark Multiple Notifications as Read
+PUT {{baseUrl}}/notifications/bulk/read
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "notificationIds": [1, 2, 3]
+}
+
+### 20. ✅ Acknowledge Notification
+PUT {{baseUrl}}/notifications/2/acknowledge
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "acknowledgmentNote": "Acknowledged via API test"
+}
+
+### 21. ❌ Mark Non-existent Notification as Read
+PUT {{baseUrl}}/notifications/99999/read
+Authorization: Bearer {{authToken}}
+
+### 22. ❌ Mark Notification as Read - Unauthorized
+PUT {{baseUrl}}/notifications/1/read
+Authorization: Bearer invalid-token
+
+### 23. 🗑️ Delete Notification
+DELETE {{baseUrl}}/notifications/3
+Authorization: Bearer {{authToken}}
+
+### 24. ❌ Delete Non-existent Notification
+DELETE {{baseUrl}}/notifications/99999
+Authorization: Bearer {{authToken}}
+
+### 25. ❌ Delete Notification - No Authorization
+DELETE {{baseUrl}}/notifications/1
+
+###########################################################################
+# 📢 BROADCAST NOTIFICATION TESTS
+###########################################################################
+
+### 26. 📢 Broadcast to All Users
+POST {{baseUrl}}/notifications/broadcast
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "System-wide Announcement {{$timestamp}}",
+  "message": "This is a system-wide broadcast message for all users.",
+  "type": "SYSTEM",
+  "priority": "MEDIUM",
+  "targetRoles": ["USER", "ADMIN", "MODERATOR"],
+  "expirationTime": "2025-12-31T23:59:59Z",
+  "requiresAcknowledgment": false
+}
+
+### 27. 📢 Broadcast to Specific Roles
+POST {{baseUrl}}/notifications/broadcast
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "Admin Broadcast {{$timestamp}}",
+  "message": "This message is only for administrators and moderators.",
+  "type": "SYSTEM",
+  "priority": "HIGH",
+  "targetRoles": ["ADMIN", "MODERATOR"],
+  "expirationTime": "2025-09-30T23:59:59Z",
+  "requiresAcknowledgment": true
+}
+
+### 28. 📢 Emergency Broadcast
+POST {{baseUrl}}/notifications/broadcast
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "EMERGENCY: System Security Alert",
+  "message": "Immediate action required: Security breach detected. All users must change passwords.",
+  "type": "ALERT",
+  "priority": "CRITICAL",
+  "targetRoles": ["USER", "ADMIN", "MODERATOR"],
+  "expirationTime": "2025-08-28T23:59:59Z",
+  "requiresAcknowledgment": true
+}
+
+### 29. ❌ Broadcast - Invalid Role Target
+POST {{baseUrl}}/notifications/broadcast
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "Invalid Broadcast",
+  "message": "This should fail",
+  "type": "INFO",
+  "priority": "MEDIUM",
+  "targetRoles": ["INVALID_ROLE"]
+}
+
+### 30. ❌ Broadcast - Non-Admin Access
+POST {{baseUrl}}/notifications/broadcast
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Unauthorized Broadcast",
+  "message": "This should fail",
+  "type": "INFO",
+  "priority": "MEDIUM",
+  "targetRoles": ["USER"]
+}
+
+###########################################################################
+# 📊 NOTIFICATION STATISTICS TESTS
+###########################################################################
+
+### 31. 📈 Get Notification Statistics - User View
+GET {{baseUrl}}/notifications/stats
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 32. 📈 Get Notification Statistics - Admin View
+GET {{baseUrl}}/notifications/stats/admin
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 33. 📊 Get Notification Statistics by Type
+GET {{baseUrl}}/notifications/stats/types
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 34. 📊 Get Notification Statistics by Priority
+GET {{baseUrl}}/notifications/stats/priorities
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 35. 📅 Get Notification Statistics - Time-based
+GET {{baseUrl}}/notifications/stats/timeline?period=DAILY&days=7
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 36. 📊 Get Delivery Statistics
+GET {{baseUrl}}/notifications/stats/delivery
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 37. 📈 Get User Engagement Statistics
+GET {{baseUrl}}/notifications/stats/engagement
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 38. ❌ Get Admin Statistics - Non-Admin Access
+GET {{baseUrl}}/notifications/stats/admin
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+###########################################################################
+# 🧹 NOTIFICATION MAINTENANCE TESTS
+###########################################################################
+
+### 39. 🧹 Cleanup Expired Notifications
+POST {{baseUrl}}/notifications/cleanup
+Authorization: Bearer {{adminToken}}
+
+### 40. 🧹 Cleanup Read Notifications (Older than 30 days)
+POST {{baseUrl}}/notifications/cleanup/read
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "olderThanDays": 30,
+  "keepUnread": true,
+  "dryRun": true
+}
+
+### 41. 🧹 Archive Old Notifications
+POST {{baseUrl}}/notifications/archive
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "olderThanDays": 90,
+  "archiveRead": true,
+  "archiveAcknowledged": true
+}
+
+### 42. 📊 Get Cleanup Statistics
+GET {{baseUrl}}/notifications/cleanup/stats
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 43. ❌ Cleanup Notifications - Non-Admin Access
+POST {{baseUrl}}/notifications/cleanup
+Authorization: Bearer {{authToken}}
+
+###########################################################################
+# 🚨 ALERT MANAGEMENT TESTS
+###########################################################################
+
+### 44. 🚨 Get System Alerts
+GET {{baseUrl}}/notifications/alerts
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 45. 🚨 Get Active Alerts Only
+GET {{baseUrl}}/notifications/alerts?status=ACTIVE
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 46. 🚨 Get Critical Alerts
+GET {{baseUrl}}/notifications/alerts?severity=CRITICAL
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 47. 🚨 Get High Priority Alerts
+GET {{baseUrl}}/notifications/alerts?severity=HIGH
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 48. 🔕 Acknowledge Alert
+PUT {{baseUrl}}/notifications/alerts/1/acknowledge
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "acknowledgmentNote": "Alert reviewed and acknowledged by admin via API."
+}
+
+### 49. 🔕 Dismiss Alert
+PUT {{baseUrl}}/notifications/alerts/2/dismiss
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "dismissalReason": "False positive - no action required"
+}
+
+### 50. 🚨 Create Security Alert
+POST {{baseUrl}}/notifications/alerts/security
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "Security Incident Detected",
+  "description": "Multiple failed login attempts from suspicious IP",
+  "severity": "HIGH",
+  "source": "SecurityMonitor",
+  "affectedUsers": ["admin", "moderator"],
+  "recommendedActions": ["Review logs", "Check IP restrictions", "Notify users"]
+}
+
+### 51. ❌ Get Alerts - Non-Admin Access
+GET {{baseUrl}}/notifications/alerts
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 52. ❌ Acknowledge Alert - Insufficient Permissions
+PUT {{baseUrl}}/notifications/alerts/1/acknowledge
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "acknowledgmentNote": "Should fail"
+}
+
+###########################################################################
+# 🔔 NOTIFICATION PREFERENCES TESTS
+###########################################################################
+
+### 53. ⚙️ Get User Notification Preferences
+GET {{baseUrl}}/notifications/preferences
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 54. ⚙️ Update Notification Preferences
+PUT {{baseUrl}}/notifications/preferences
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "emailNotifications": true,
+  "smsNotifications": false,
+  "pushNotifications": true,
+  "notificationTypes": {
+    "INFO": true,
+    "WARNING": true,
+    "ALERT": true,
+    "SYSTEM": true
+  },
+  "quietHours": {
+    "enabled": true,
+    "startTime": "22:00",
+    "endTime": "07:00"
+  }
+}
+
+### 55. ⚙️ Get Default Notification Settings
+GET {{baseUrl}}/notifications/preferences/defaults
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 56. ⚙️ Update Default Notification Settings (Admin)
+PUT {{baseUrl}}/notifications/preferences/defaults
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "defaultEmailNotifications": true,
+  "defaultPushNotifications": true,
+  "maxNotificationsPerDay": 50,
+  "autoCleanupAfterDays": 30
+}
+
+### 57. ❌ Update Default Settings - Non-Admin Access
+PUT {{baseUrl}}/notifications/preferences/defaults
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "defaultEmailNotifications": false
+}
+
+###########################################################################
+# 📱 NOTIFICATION DELIVERY TESTS
+###########################################################################
+
+### 58. 📱 Get Notification Delivery Status
+GET {{baseUrl}}/notifications/1/delivery
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 59. 📱 Get Failed Deliveries
+GET {{baseUrl}}/notifications/delivery/failed
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 60. 📱 Retry Failed Delivery
+POST {{baseUrl}}/notifications/1/retry
+Authorization: Bearer {{adminToken}}
+
+### 61. 📊 Get Delivery Report
+GET {{baseUrl}}/notifications/delivery/report?days=7
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 62. ❌ Get Delivery Status - Unauthorized
+GET {{baseUrl}}/notifications/1/delivery
+Authorization: Bearer invalid-token
+Accept: {{contentType}}
+
+###########################################################################
+# 🔍 NOTIFICATION SEARCH TESTS
+###########################################################################
+
+### 63. 🔍 Search Notifications by Content
+GET {{baseUrl}}/notifications/search?query=security&page=0&size=10
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 64. 🔍 Advanced Notification Search
+GET {{baseUrl}}/notifications/search?query=system&type=SYSTEM&priority=HIGH&read=false
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 65. 🔍 Search by Sender
+GET {{baseUrl}}/notifications/search?sender=admin
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 66. 🔍 Search by Tags
+GET {{baseUrl}}/notifications/search?tags=security,alert
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 67. ❌ Search Notifications - Invalid Query
+GET {{baseUrl}}/notifications/search?query=
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+###########################################################################
+# 📝 TEST EXECUTION NOTES
+###########################################################################
+
+# Test Categories:
+# ✅ = Should succeed (expect 200, 201, 204 status codes)
+# ❌ = Should fail (expect 400, 401, 403, 404 status codes)
+# 📔 = Read operations
+# ✉️ = Send operations
+# 🗑️ = Delete operations
+# 📢 = Broadcast operations
+
+# Prerequisites:
+# 1. Admin token from successful admin login
+# 2. Regular user token for user-level operations
+# 3. System should be running on localhost:8080
+# 4. Test users (admin, moderator, testuser) should exist
+
+# Expected Behaviors:
+# - Regular users can only see their own notifications
+# - Admin users can send notifications to any user
+# - Broadcast requires admin privileges
+# - Cleanup operations require admin privileges
+# - Alert management requires admin privileges
+
+# Audit Expectations:
+# - All notification operations should generate audit logs
+# - Failed permission attempts should be logged
+# - Broadcast operations should create detailed audit entries
+# - Alert acknowledgments should be audited
+
+# Performance Considerations:
+# - Notification listing should support pagination
+# - Search operations should be efficient
+# - Bulk operations should be atomic
+# - Cleanup operations should not impact performance

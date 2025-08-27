@@ -1,0 +1,672 @@
+{
+    "info": {
+        "_postman_id": "audit-system-api-collection",
+        "name": "📊 Audit & System API",
+        "description": "Comprehensive test suite for audit logging, system statistics, backup operations, and health monitoring endpoints.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "📋 Audit Operations",
+            "item": [
+                {
+                    "name": "📊 Get Audit Logs",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Audit logs returned', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "    pm.expect(jsonData.data).to.have.property('auditEntries');",
+                                    "    pm.expect(jsonData.data.auditEntries).to.be.an('array');",
+                                    "});",
+                                    "",
+                                    "pm.test('Audit entries have required fields', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    if (jsonData.data.auditEntries.length > 0) {",
+                                    "        const entry = jsonData.data.auditEntries[0];",
+                                    "        pm.expect(entry).to.have.property('id');",
+                                    "        pm.expect(entry).to.have.property('action');",
+                                    "        pm.expect(entry).to.have.property('level');",
+                                    "        pm.expect(entry).to.have.property('username');",
+                                    "        pm.expect(entry).to.have.property('timestamp');",
+                                    "    }",
+                                    "});",
+                                    "",
+                                    "pm.test('Pagination information included', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('pagination');",
+                                    "    pm.expect(jsonData.data.pagination).to.have.property('totalElements');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{fullApiUrl}}/audit?page=0&size=20&startDate=2025-01-01&endDate=2025-12-31",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "audit"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "startDate",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2025-12-31"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "🔍 Filter Audit Logs by User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Filtered results for specific user', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    if (jsonData.data.auditEntries.length > 0) {",
+                                    "        jsonData.data.auditEntries.forEach(entry => {",
+                                    "            pm.expect(entry.username).to.eql('admin');",
+                                    "        });",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{fullApiUrl}}/audit?username=admin&page=0&size=10",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "audit"
+                            ],
+                            "query": [
+                                {
+                                    "key": "username",
+                                    "value": "admin"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "⚠️ Filter Audit Logs by Level",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Filtered results for warning level', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    if (jsonData.data.auditEntries.length > 0) {",
+                                    "        jsonData.data.auditEntries.forEach(entry => {",
+                                    "            pm.expect(entry.level).to.eql('WARNING');",
+                                    "        });",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{fullApiUrl}}/audit?level=WARNING",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "audit"
+                            ],
+                            "query": [
+                                {
+                                    "key": "level",
+                                    "value": "WARNING"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "📈 Get Audit Statistics",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Statistics data returned', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "    pm.expect(jsonData.data).to.have.property('statistics');",
+                                    "});",
+                                    "",
+                                    "pm.test('Statistics include key metrics', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const stats = jsonData.data.statistics;",
+                                    "    pm.expect(stats).to.have.property('totalEntries');",
+                                    "    pm.expect(stats).to.have.property('entriesByLevel');",
+                                    "    pm.expect(stats).to.have.property('entriesByAction');",
+                                    "    pm.expect(stats).to.have.property('recentActivity');",
+                                    "});",
+                                    "",
+                                    "pm.test('Numeric values are valid', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const stats = jsonData.data.statistics;",
+                                    "    pm.expect(stats.totalEntries).to.be.a('number');",
+                                    "    pm.expect(stats.totalEntries).to.be.at.least(0);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{fullApiUrl}}/audit/stats",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "audit",
+                                "stats"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Audit logging and monitoring operations for security and compliance."
+        },
+        {
+            "name": "💾 Backup Management",
+            "item": [
+                {
+                    "name": "🔄 Create Backup",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Generate unique backup name",
+                                    "const timestamp = new Date().toISOString().replace(/[:.]/g, '-');",
+                                    "const backupName = `api-test-backup-${timestamp}`;",
+                                    "pm.environment.set('testBackupName', backupName);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200 or 201', function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test('Backup creation successful', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "});",
+                                    "",
+                                    "pm.test('Backup metadata returned', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('backup');",
+                                    "    pm.expect(jsonData.data.backup).to.have.property('id');",
+                                    "    pm.expect(jsonData.data.backup).to.have.property('name');",
+                                    "    pm.expect(jsonData.data.backup).to.have.property('createdAt');",
+                                    "});",
+                                    "",
+                                    "// Save backup ID for subsequent tests",
+                                    "if (pm.response.code === 200 || pm.response.code === 201) {",
+                                    "    const responseData = pm.response.json();",
+                                    "    if (responseData.success && responseData.data.backup) {",
+                                    "        pm.environment.set('testBackupId', responseData.data.backup.id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "{{contentType}}"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"{{testBackupName}}\",\n    \"description\": \"API test backup created via Postman\",\n    \"includeUserData\": true,\n    \"includeAuditLogs\": true,\n    \"compressionLevel\": \"STANDARD\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{fullApiUrl}}/backup/create",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "backup",
+                                "create"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "📋 List Backups",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Backup list returned', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "    pm.expect(jsonData.data).to.have.property('backups');",
+                                    "    pm.expect(jsonData.data.backups).to.be.an('array');",
+                                    "});",
+                                    "",
+                                    "pm.test('Backup entries have metadata', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    if (jsonData.data.backups.length > 0) {",
+                                    "        const backup = jsonData.data.backups[0];",
+                                    "        pm.expect(backup).to.have.property('id');",
+                                    "        pm.expect(backup).to.have.property('name');",
+                                    "        pm.expect(backup).to.have.property('status');",
+                                    "        pm.expect(backup).to.have.property('createdAt');",
+                                    "        pm.expect(backup).to.have.property('size');",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{fullApiUrl}}/backup?status=COMPLETED&page=0&size=10",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "backup"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "COMPLETED"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "🔄 Restore Backup",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Check if we have a backup ID to restore",
+                                    "if (!pm.environment.get('testBackupId')) {",
+                                    "    throw new Error('No backup ID available. Please run backup creation test first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Restore operation initiated', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "});",
+                                    "",
+                                    "pm.test('Restore job information provided', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('restoreJob');",
+                                    "    pm.expect(jsonData.data.restoreJob).to.have.property('id');",
+                                    "    pm.expect(jsonData.data.restoreJob).to.have.property('status');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "{{contentType}}"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"restoreUserData\": false,\n    \"restoreSystemSettings\": false,\n    \"confirmRestore\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{fullApiUrl}}/backup/{{testBackupId}}/restore",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "backup",
+                                "{{testBackupId}}",
+                                "restore"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "🗑️ Delete Backup",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Backup deletion successful', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "});",
+                                    "",
+                                    "pm.test('Deletion confirmation message', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.message).to.include('deleted');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{fullApiUrl}}/backup/{{testBackupId}}",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "backup",
+                                "{{testBackupId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Backup and restore operations for data protection and disaster recovery."
+        },
+        {
+            "name": "📊 System Monitoring",
+            "item": [
+                {
+                    "name": "📈 Get System Statistics",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('System statistics returned', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "    pm.expect(jsonData.data).to.have.property('statistics');",
+                                    "});",
+                                    "",
+                                    "pm.test('Statistics include user metrics', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const stats = jsonData.data.statistics;",
+                                    "    pm.expect(stats).to.have.property('userStats');",
+                                    "    pm.expect(stats.userStats).to.have.property('totalUsers');",
+                                    "    pm.expect(stats.userStats).to.have.property('activeUsers');",
+                                    "    pm.expect(stats.userStats).to.have.property('usersByRole');",
+                                    "});",
+                                    "",
+                                    "pm.test('Statistics include system metrics', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const stats = jsonData.data.statistics;",
+                                    "    pm.expect(stats).to.have.property('systemStats');",
+                                    "    pm.expect(stats.systemStats).to.have.property('uptime');",
+                                    "    pm.expect(stats.systemStats).to.have.property('sessionCount');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{fullApiUrl}}/system/stats",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "system",
+                                "stats"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "❤️ Health Check",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Health check successful', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "    pm.expect(jsonData.data.status).to.eql('UP');",
+                                    "});",
+                                    "",
+                                    "pm.test('Health data includes components', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('components');",
+                                    "    pm.expect(jsonData.data.components).to.have.property('database');",
+                                    "    pm.expect(jsonData.data.components).to.have.property('auditService');",
+                                    "    pm.expect(jsonData.data.components).to.have.property('backupService');",
+                                    "});",
+                                    "",
+                                    "pm.test('Timestamp is present', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('timestamp');",
+                                    "});",
+                                    "",
+                                    "pm.test('Response time is fast', function () {",
+                                    "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "{{acceptType}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{fullApiUrl}}/system/health",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "system",
+                                "health"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "description": "System health monitoring and performance statistics."
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{authToken}}",
+                "type": "string"
+            }
+        ]
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "id": "audit-system-prerequest",
+                "type": "text/javascript",
+                "exec": [
+                    "console.log('📊 Audit & System API Request: ' + pm.info.requestName);"
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,525 @@
+### Java Login System - System & Audit API Tests
+### Base URL: http://localhost:8080/api/v1
+
+@baseUrl = http://localhost:8080/api/v1
+@contentType = application/json
+@authToken = your-jwt-token-here
+@adminToken = admin-jwt-token-here
+
+###########################################################################
+# 📊 SYSTEM STATISTICS TESTS
+###########################################################################
+
+### 1. 📈 Get System Statistics - Admin Access
+GET {{baseUrl}}/system/stats
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 2. 📊 Get Detailed System Metrics
+GET {{baseUrl}}/system/metrics
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 3. ❌ Get System Statistics - Non-Admin Access
+GET {{baseUrl}}/system/stats
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 4. ❌ Get System Statistics - No Authorization
+GET {{baseUrl}}/system/stats
+Accept: {{contentType}}
+
+###########################################################################
+# ❤️ HEALTH CHECK TESTS
+###########################################################################
+
+### 5. ❤️ Basic Health Check
+GET {{baseUrl}}/system/health
+Accept: {{contentType}}
+
+### 6. ❤️ Detailed Health Check
+GET {{baseUrl}}/system/health/detailed
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 7. 🔍 Database Health Check
+GET {{baseUrl}}/system/health/database
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 8. 🔍 Service Dependencies Health
+GET {{baseUrl}}/system/health/services
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 9. 📊 Performance Health Metrics
+GET {{baseUrl}}/system/health/performance
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+###########################################################################
+# 📋 AUDIT LOG TESTS
+###########################################################################
+
+### 10. 📊 Get All Audit Logs - Recent
+GET {{baseUrl}}/audit?page=0&size=20&sortBy=timestamp&sortDirection=DESC
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 11. 📊 Get Audit Logs - Pagination Test
+GET {{baseUrl}}/audit?page=1&size=10
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 12. 🔍 Filter Audit Logs by User
+GET {{baseUrl}}/audit?username=admin&page=0&size=15
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 13. 🔍 Filter Audit Logs by Action
+GET {{baseUrl}}/audit?action=LOGIN&page=0&size=10
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 14. 🔍 Filter Audit Logs by Level
+GET {{baseUrl}}/audit?level=INFO&page=0&size=10
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 15. 🔍 Filter Audit Logs by Level - Warning
+GET {{baseUrl}}/audit?level=WARNING
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 16. 🔍 Filter Audit Logs by Level - Error
+GET {{baseUrl}}/audit?level=ERROR
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 17. 📅 Filter Audit Logs by Date Range
+GET {{baseUrl}}/audit?startDate=2025-08-01&endDate=2025-08-31
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 18. 📅 Filter Audit Logs - Today Only
+GET {{baseUrl}}/audit?startDate=2025-08-27&endDate=2025-08-27
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 19. 🔍 Complex Audit Filter - Multiple Criteria
+GET {{baseUrl}}/audit?username=admin&action=LOGIN&level=INFO&startDate=2025-08-01
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 20. ❌ Get Audit Logs - Non-Admin Access
+GET {{baseUrl}}/audit
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+### 21. ❌ Get Audit Logs - No Authorization
+GET {{baseUrl}}/audit
+Accept: {{contentType}}
+
+###########################################################################
+# 📈 AUDIT STATISTICS TESTS
+###########################################################################
+
+### 22. 📈 Get Audit Statistics - Overview
+GET {{baseUrl}}/audit/stats
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 23. 📊 Get Audit Statistics - By Action
+GET {{baseUrl}}/audit/stats/actions
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 24. 📊 Get Audit Statistics - By User
+GET {{baseUrl}}/audit/stats/users
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 25. 📊 Get Audit Statistics - By Level
+GET {{baseUrl}}/audit/stats/levels
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 26. 📅 Get Audit Statistics - Time-based
+GET {{baseUrl}}/audit/stats/timeline?period=DAILY&days=7
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 27. 📅 Get Audit Statistics - Monthly Trends
+GET {{baseUrl}}/audit/stats/timeline?period=MONTHLY&months=6
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 28. 🔍 Get Security Events Summary
+GET {{baseUrl}}/audit/security-events
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 29. ❌ Get Audit Statistics - Non-Admin Access
+GET {{baseUrl}}/audit/stats
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+###########################################################################
+# 💾 BACKUP MANAGEMENT TESTS
+###########################################################################
+
+### 30. 🔄 Create System Backup - Full
+POST {{baseUrl}}/backup/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "full_backup_{{$timestamp}}",
+  "description": "Full system backup created via API test",
+  "includeUserData": true,
+  "includeAuditLogs": true,
+  "includeSystemSettings": true,
+  "compressionLevel": "STANDARD"
+}
+
+### 31. 🔄 Create System Backup - Users Only
+POST {{baseUrl}}/backup/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "users_backup_{{$timestamp}}",
+  "description": "User data backup only",
+  "includeUserData": true,
+  "includeAuditLogs": false,
+  "includeSystemSettings": false,
+  "compressionLevel": "HIGH"
+}
+
+### 32. 🔄 Create System Backup - Audit Logs Only
+POST {{baseUrl}}/backup/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "audit_backup_{{$timestamp}}",
+  "description": "Audit logs backup only",
+  "includeUserData": false,
+  "includeAuditLogs": true,
+  "includeSystemSettings": false,
+  "compressionLevel": "LOW"
+}
+
+### 33. ❌ Create Backup - Invalid Configuration
+POST {{baseUrl}}/backup/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "",
+  "description": "Invalid backup",
+  "includeUserData": false,
+  "includeAuditLogs": false,
+  "includeSystemSettings": false
+}
+
+### 34. ❌ Create Backup - Non-Admin Access
+POST {{baseUrl}}/backup/create
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "unauthorized_backup",
+  "description": "Should fail",
+  "includeUserData": true
+}
+
+###########################################################################
+# 📋 BACKUP LISTING AND MANAGEMENT
+###########################################################################
+
+### 35. 📋 List All Backups
+GET {{baseUrl}}/backup?page=0&size=10&sortBy=createdAt&sortDirection=DESC
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 36. 📋 List Backups - Filter by Status
+GET {{baseUrl}}/backup?status=COMPLETED
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 37. 📋 List Backups - Filter by Type
+GET {{baseUrl}}/backup?type=FULL
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 38. 📋 List Backups - Date Range
+GET {{baseUrl}}/backup?createdAfter=2025-08-01&createdBefore=2025-08-31
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 39. 🔍 Get Backup Details by ID
+GET {{baseUrl}}/backup/1
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 40. ❌ Get Non-existent Backup
+GET {{baseUrl}}/backup/99999
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 41. ❌ List Backups - Non-Admin Access
+GET {{baseUrl}}/backup
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+###########################################################################
+# 🔄 BACKUP RESTORE TESTS
+###########################################################################
+
+### 42. 🔄 Restore Backup - Users Only (Safe)
+POST {{baseUrl}}/backup/1/restore
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "restoreUserData": false,
+  "restoreAuditLogs": false,
+  "restoreSystemSettings": false,
+  "confirmRestore": true,
+  "restoreNote": "API test restore - no actual data changed"
+}
+
+### 43. ❌ Restore Backup - Missing Confirmation
+POST {{baseUrl}}/backup/1/restore
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "restoreUserData": true,
+  "restoreAuditLogs": true,
+  "confirmRestore": false
+}
+
+### 44. ❌ Restore Non-existent Backup
+POST {{baseUrl}}/backup/99999/restore
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "restoreUserData": false,
+  "confirmRestore": true
+}
+
+### 45. ❌ Restore Backup - Non-Admin Access
+POST {{baseUrl}}/backup/1/restore
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "restoreUserData": false,
+  "confirmRestore": true
+}
+
+###########################################################################
+# 🗑️ BACKUP DELETION TESTS
+###########################################################################
+
+### 46. 🗑️ Delete Backup - Test Backup
+DELETE {{baseUrl}}/backup/3
+Authorization: Bearer {{adminToken}}
+
+### 47. ❌ Delete Non-existent Backup
+DELETE {{baseUrl}}/backup/99999
+Authorization: Bearer {{adminToken}}
+
+### 48. ❌ Delete Backup - Non-Admin Access
+DELETE {{baseUrl}}/backup/2
+Authorization: Bearer {{authToken}}
+
+### 49. ❌ Delete Backup - No Authorization
+DELETE {{baseUrl}}/backup/2
+
+###########################################################################
+# 📊 SYSTEM MONITORING TESTS
+###########################################################################
+
+### 50. 🖥️ Get System Information
+GET {{baseUrl}}/system/info
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 51. 📈 Get System Performance Metrics
+GET {{baseUrl}}/system/performance
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 52. 💾 Get Memory Usage Statistics
+GET {{baseUrl}}/system/memory
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 53. 💽 Get Storage Information
+GET {{baseUrl}}/system/storage
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 54. 🔄 Get System Uptime
+GET {{baseUrl}}/system/uptime
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 55. 🌐 Get Network Configuration
+GET {{baseUrl}}/system/network
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 56. ⚙️ Get System Configuration
+GET {{baseUrl}}/system/config
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 57. ❌ Get System Info - Non-Admin Access
+GET {{baseUrl}}/system/info
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+###########################################################################
+# 🔧 SYSTEM MAINTENANCE TESTS
+###########################################################################
+
+### 58. 🧹 Cleanup Audit Logs - Old Entries
+POST {{baseUrl}}/system/cleanup/audit
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "olderThanDays": 90,
+  "keepMinimumEntries": 1000,
+  "dryRun": true
+}
+
+### 59. 🧹 Cleanup Temporary Files
+POST {{baseUrl}}/system/cleanup/temp
+Authorization: Bearer {{adminToken}}
+
+### 60. 🔄 System Cache Refresh
+POST {{baseUrl}}/system/cache/refresh
+Authorization: Bearer {{adminToken}}
+
+### 61. 📊 Get Cleanup Statistics
+GET {{baseUrl}}/system/cleanup/stats
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 62. ❌ System Cleanup - Non-Admin Access
+POST {{baseUrl}}/system/cleanup/audit
+Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+
+{
+  "olderThanDays": 30,
+  "dryRun": true
+}
+
+###########################################################################
+# 🚨 SYSTEM ALERTS AND NOTIFICATIONS
+###########################################################################
+
+### 63. 🚨 Get System Alerts
+GET {{baseUrl}}/system/alerts
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 64. 🚨 Get Active System Alerts
+GET {{baseUrl}}/system/alerts?status=ACTIVE
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 65. 🚨 Get Critical System Alerts
+GET {{baseUrl}}/system/alerts?severity=CRITICAL
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 66. 🔔 Get System Notifications
+GET {{baseUrl}}/system/notifications
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 67. ✅ Acknowledge System Alert
+PUT {{baseUrl}}/system/alerts/1/acknowledge
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "acknowledgedBy": "admin",
+  "note": "Alert acknowledged via API test"
+}
+
+### 68. ❌ Get System Alerts - Non-Admin Access
+GET {{baseUrl}}/system/alerts
+Authorization: Bearer {{authToken}}
+Accept: {{contentType}}
+
+###########################################################################
+# 🔍 ADVANCED MONITORING TESTS
+###########################################################################
+
+### 69. 📊 Get Real-time System Metrics
+GET {{baseUrl}}/system/metrics/realtime
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 70. 📈 Get Historical Performance Data
+GET {{baseUrl}}/system/metrics/history?hours=24&interval=1h
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 71. 🔥 Get System Load Information
+GET {{baseUrl}}/system/load
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 72. 👥 Get Active Sessions Information
+GET {{baseUrl}}/system/sessions
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 73. 🔐 Get Security Status
+GET {{baseUrl}}/system/security/status
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+### 74. 📊 Get Comprehensive System Report
+GET {{baseUrl}}/system/report?includePerformance=true&includeAudit=true&includeSecurity=true
+Authorization: Bearer {{adminToken}}
+Accept: {{contentType}}
+
+###########################################################################
+# 📝 TEST EXECUTION NOTES
+###########################################################################
+
+# Test Categories:
+# ✅ = Should succeed (expect 200, 201 status codes)
+# ❌ = Should fail (expect 400, 401, 403, 404 status codes)
+# 📊 = Data retrieval operations
+# 🔄 = Data modification operations
+# 🗑️ = Data deletion operations
+# 🔧 = System maintenance operations
+
+# Prerequisites:
+# 1. Admin token must be obtained from successful admin login
+# 2. Regular user token for permission testing
+# 3. System should be running on localhost:8080
+# 4. Backup operations are safe - use dryRun when possible
+
+# Expected Audit Events:
+# - All admin operations should generate audit logs
+# - Failed permission attempts should be logged
+# - System operations should create appropriate audit entries
+
+# Security Considerations:
+# - Non-admin users should be denied access to system operations
+# - Audit logs should not be accessible to regular users
+# - Backup operations require highest privileges
+# - All operations should validate authentication tokens

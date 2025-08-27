@@ -1,0 +1,245 @@
+=== Admin Login - Valid Credentials ===
+Method: POST
+Endpoint: http://localhost:8080/api/v1/auth/login
+Status Code: 0.000242
+Response Time: 0.000242s
+Response Body: 000
+
+=== Invalid Login - Wrong Password ===
+Method: POST
+Endpoint: http://localhost:8080/api/v1/auth/login
+Status Code: 0.000250
+Response Time: 0.000250s
+Response Body: 000
+
+=== Invalid Login - Non-existent User ===
+Method: POST
+Endpoint: http://localhost:8080/api/v1/auth/login
+Status Code: 0.000204
+Response Time: 0.000204s
+Response Body: 000
+
+=== Invalid Login - Empty Credentials ===
+Method: POST
+Endpoint: http://localhost:8080/api/v1/auth/login
+Status Code: 0.000206
+Response Time: 0.000206s
+Response Body: 000
+
+=== User Registration - Valid Data ===
+Method: POST
+Endpoint: http://localhost:8080/api/v1/auth/register
+Status Code: 0.000206
+Response Time: 0.000206s
+Response Body: 000
+
+=== User Registration - Duplicate Username ===
+Method: POST
+Endpoint: http://localhost:8080/api/v1/auth/register
+Status Code: 0.000210
+Response Time: 0.000210s
+Response Body: 000
+
+=== Get All Users - Admin Access ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/users?page=0&size=10
+Status Code: 0.000205
+Response Time: 0.000205s
+Response Body: 000
+
+=== Get All Users - Non-Admin Access ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/users
+Status Code: 0.000224
+Response Time: 0.000224s
+Response Body: 000
+
+=== Get All Users - No Authorization ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/users
+Status Code: 0.000194
+Response Time: 0.000194s
+Response Body: 000
+
+=== Search Users by Role ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/users/search?role=ADMIN
+Status Code: 0.000200
+Response Time: 0.000200s
+Response Body: 000
+
+=== Get User by ID - Valid ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/users/1
+Status Code: 0.000163
+Response Time: 0.000163s
+Response Body: 000
+
+=== Get User by ID - Non-existent ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/users/99999
+Status Code: 0.000168
+Response Time: 0.000168s
+Response Body: 000
+
+=== Create New User - Valid Data ===
+Method: POST
+Endpoint: http://localhost:8080/api/v1/users
+Status Code: 0.000158
+Response Time: 0.000158s
+Response Body: 000
+
+=== Create User - Duplicate Username ===
+Method: POST
+Endpoint: http://localhost:8080/api/v1/users
+Status Code: 0.000188
+Response Time: 0.000188s
+Response Body: 000
+
+=== Update User Profile ===
+Method: PUT
+Endpoint: http://localhost:8080/api/v1/users/1
+Status Code: 0.000168
+Response Time: 0.000168s
+Response Body: 000
+
+=== Delete User - Valid Request ===
+Method: DELETE
+Endpoint: http://localhost:8080/api/v1/users/3
+Status Code: 0.000186
+Response Time: 0.000186s
+Response Body: 000
+
+=== Delete Non-existent User ===
+Method: DELETE
+Endpoint: http://localhost:8080/api/v1/users/99999
+Status Code: 0.000131
+Response Time: 0.000131s
+Response Body: 000
+
+=== Get System Statistics ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/system/stats
+Status Code: 0.000164
+Response Time: 0.000164s
+Response Body: 000
+
+=== System Health Check ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/system/health
+Status Code: 0.000179
+Response Time: 0.000179s
+Response Body: 000
+
+=== Get Audit Logs ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/audit?page=0&size=20
+Status Code: 0.000182
+Response Time: 0.000182s
+Response Body: 000
+
+=== Filter Audit Logs by User ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/audit?username=admin
+Status Code: 0.000156
+Response Time: 0.000156s
+Response Body: 000
+
+=== Get Audit Statistics ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/audit/stats
+Status Code: 0.000218
+Response Time: 0.000218s
+Response Body: 000
+
+=== Create System Backup ===
+Method: POST
+Endpoint: http://localhost:8080/api/v1/backup/create
+Status Code: 0.000180
+Response Time: 0.000180s
+Response Body: 000
+
+=== List Backups ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/backup?page=0&size=10
+Status Code: 0.000210
+Response Time: 0.000210s
+Response Body: 000
+
+=== Send Notification ===
+Method: POST
+Endpoint: http://localhost:8080/api/v1/notifications/send
+Status Code: 0.000172
+Response Time: 0.000172s
+Response Body: 000
+
+=== Get User Notifications ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/notifications?page=0&size=20
+Status Code: 0.000204
+Response Time: 0.000204s
+Response Body: 000
+
+=== Get Unread Notifications ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/notifications?unreadOnly=true
+Status Code: 0.000135
+Response Time: 0.000135s
+Response Body: 000
+
+=== Mark Notification as Read ===
+Method: PUT
+Endpoint: http://localhost:8080/api/v1/notifications/1/read
+Status Code: 0.000190
+Response Time: 0.000190s
+Response Body: 000
+
+=== Delete Notification ===
+Method: DELETE
+Endpoint: http://localhost:8080/api/v1/notifications/1
+Status Code: 0.000155
+Response Time: 0.000155s
+Response Body: 000
+
+=== Broadcast Notification ===
+Method: POST
+Endpoint: http://localhost:8080/api/v1/notifications/broadcast
+Status Code: 0.000209
+Response Time: 0.000209s
+Response Body: 000
+
+=== Get Notification Statistics ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/notifications/stats
+Status Code: 0.000161
+Response Time: 0.000161s
+Response Body: 000
+
+=== Access Protected Endpoint - Valid Token ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/users/me
+Status Code: 0.000174
+Response Time: 0.000174s
+Response Body: 000
+
+=== Access Protected Endpoint - Invalid Token ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/users/me
+Status Code: 0.000198
+Response Time: 0.000198s
+Response Body: 000
+
+=== Access Admin Endpoint - User Token ===
+Method: GET
+Endpoint: http://localhost:8080/api/v1/users
+Status Code: 0.000159
+Response Time: 0.000159s
+Response Body: 000
+
+=== Rate Limiting Test - Multiple Requests ===
+Method: POST
+Endpoint: http://localhost:8080/api/v1/auth/login
+Status Code: 0.000189
+Response Time: 0.000189s
+Response Body: 000
+

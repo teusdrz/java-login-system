@@ -1,0 +1,195 @@
+{
+    "users": {
+        "admin": {
+            "username": "admin",
+            "password": "admin123",
+            "email": "admin@system.com",
+            "role": "ADMIN",
+            "active": true
+        },
+        "testUser": {
+            "username": "testuser",
+            "password": "test123",
+            "email": "test@example.com",
+            "role": "USER",
+            "active": true
+        },
+        "moderator": {
+            "username": "moderator",
+            "password": "mod123",
+            "email": "mod@system.com",
+            "role": "MODERATOR",
+            "active": true
+        },
+        "inactiveUser": {
+            "username": "inactive",
+            "password": "inactive123",
+            "email": "inactive@example.com",
+            "role": "USER",
+            "active": false
+        }
+    },
+    "credentials": {
+        "valid": [
+            {
+                "username": "admin",
+                "password": "admin123"
+            },
+            {
+                "username": "testuser",
+                "password": "test123"
+            },
+            {
+                "username": "moderator",
+                "password": "mod123"
+            }
+        ],
+        "invalid": [
+            {
+                "username": "admin",
+                "password": "wrongpassword"
+            },
+            {
+                "username": "nonexistent",
+                "password": "anypassword"
+            },
+            {
+                "username": "",
+                "password": ""
+            },
+            {
+                "username": "admin",
+                "password": ""
+            }
+        ]
+    },
+    "testData": {
+        "newUser": {
+            "username": "newuser{{timestamp}}",
+            "password": "newuser123",
+            "email": "newuser{{timestamp}}@example.com",
+            "role": "USER"
+        },
+        "updateUser": {
+            "email": "updated{{timestamp}}@example.com",
+            "role": "MODERATOR"
+        },
+        "notification": {
+            "title": "Test Notification {{timestamp}}",
+            "message": "This is a test notification created for API testing",
+            "type": "INFO",
+            "priority": "MEDIUM"
+        },
+        "backup": {
+            "name": "api-test-backup-{{timestamp}}",
+            "description": "API test backup created via Postman collection",
+            "includeUserData": true,
+            "includeAuditLogs": true,
+            "compressionLevel": "STANDARD"
+        }
+    },
+    "apiEndpoints": {
+        "auth": {
+            "login": "/auth/login",
+            "register": "/auth/register",
+            "logout": "/auth/logout",
+            "changePassword": "/auth/change-password",
+            "resetPassword": "/auth/reset-password"
+        },
+        "users": {
+            "list": "/users",
+            "search": "/users/search",
+            "create": "/users",
+            "getById": "/users/{id}",
+            "update": "/users/{id}",
+            "delete": "/users/{id}",
+            "activate": "/users/{id}/activate",
+            "deactivate": "/users/{id}/deactivate"
+        },
+        "audit": {
+            "logs": "/audit",
+            "stats": "/audit/stats"
+        },
+        "backup": {
+            "create": "/backup/create",
+            "list": "/backup",
+            "restore": "/backup/{id}/restore",
+            "delete": "/backup/{id}"
+        },
+        "system": {
+            "stats": "/system/stats",
+            "health": "/system/health"
+        },
+        "notifications": {
+            "send": "/notifications/send",
+            "list": "/notifications",
+            "markRead": "/notifications/{id}/read",
+            "delete": "/notifications/{id}",
+            "broadcast": "/notifications/broadcast",
+            "stats": "/notifications/stats",
+            "cleanup": "/notifications/cleanup",
+            "alerts": "/notifications/alerts"
+        }
+    },
+    "responseTemplates": {
+        "success": {
+            "success": true,
+            "message": "Operation completed successfully",
+            "data": {}
+        },
+        "error": {
+            "success": false,
+            "message": "Operation failed",
+            "error": {
+                "code": "ERROR_CODE",
+                "details": "Error description"
+            }
+        },
+        "validation": {
+            "success": false,
+            "message": "Validation failed",
+            "errors": []
+        }
+    },
+    "testScenarios": {
+        "authentication": {
+            "validLogin": "Test successful login with valid credentials",
+            "invalidLogin": "Test login failure with invalid credentials",
+            "logout": "Test successful logout",
+            "registration": "Test user registration",
+            "passwordChange": "Test password change functionality"
+        },
+        "userManagement": {
+            "listUsers": "Test retrieving list of users",
+            "searchUsers": "Test user search functionality",
+            "createUser": "Test creating new user",
+            "updateUser": "Test updating user information",
+            "deleteUser": "Test user deletion",
+            "activateUser": "Test user activation",
+            "deactivateUser": "Test user deactivation"
+        },
+        "auditSystem": {
+            "getAuditLogs": "Test retrieving audit logs",
+            "filterAuditLogs": "Test filtering audit logs by criteria",
+            "getAuditStats": "Test retrieving audit statistics"
+        },
+        "backupManagement": {
+            "createBackup": "Test backup creation",
+            "listBackups": "Test retrieving backup list",
+            "restoreBackup": "Test backup restoration",
+            "deleteBackup": "Test backup deletion"
+        },
+        "systemMonitoring": {
+            "getSystemStats": "Test retrieving system statistics",
+            "healthCheck": "Test system health check"
+        },
+        "notifications": {
+            "sendNotification": "Test sending notification",
+            "getUserNotifications": "Test retrieving user notifications",
+            "markAsRead": "Test marking notification as read",
+            "deleteNotification": "Test notification deletion",
+            "broadcastNotification": "Test broadcasting notification",
+            "getNotificationStats": "Test retrieving notification statistics"
+        }
+    }
+}

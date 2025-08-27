@@ -1,0 +1,604 @@
+{
+    "info": {
+        "_postman_id": "user-management-api-collection",
+        "name": "👥 User Management API",
+        "description": "Comprehensive test suite for user management endpoints including user CRUD operations, role management, and user search functionality.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "📋 User Listing & Search",
+            "item": [
+                {
+                    "name": "📊 Get All Users",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Ensure we're authenticated as admin",
+                                    "if (!pm.environment.get('authToken')) {",
+                                    "    throw new Error('Authentication required. Please run admin login first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains users array', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "    pm.expect(jsonData.data).to.have.property('users');",
+                                    "    pm.expect(jsonData.data.users).to.be.an('array');",
+                                    "});",
+                                    "",
+                                    "pm.test('Users have required fields', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    if (jsonData.data.users.length > 0) {",
+                                    "        const user = jsonData.data.users[0];",
+                                    "        pm.expect(user).to.have.property('username');",
+                                    "        pm.expect(user).to.have.property('email');",
+                                    "        pm.expect(user).to.have.property('role');",
+                                    "        pm.expect(user).to.have.property('isActive');",
+                                    "    }",
+                                    "});",
+                                    "",
+                                    "pm.test('Response includes pagination info', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('pagination');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "{{acceptType}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{fullApiUrl}}/users?page=1&size=10",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "users"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "🔍 Search Users by Role",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('All returned users have admin role', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    if (jsonData.data.users.length > 0) {",
+                                    "        jsonData.data.users.forEach(user => {",
+                                    "            pm.expect(user.role).to.eql('ADMIN');",
+                                    "        });",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{fullApiUrl}}/users?role=ADMIN",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "users"
+                            ],
+                            "query": [
+                                {
+                                    "key": "role",
+                                    "value": "ADMIN"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "👤 Get User by ID",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('User data is returned', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "    pm.expect(jsonData.data).to.have.property('user');",
+                                    "});",
+                                    "",
+                                    "pm.test('User has detailed information', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const user = jsonData.data.user;",
+                                    "    pm.expect(user).to.have.property('username');",
+                                    "    pm.expect(user).to.have.property('email');",
+                                    "    pm.expect(user).to.have.property('firstName');",
+                                    "    pm.expect(user).to.have.property('lastName');",
+                                    "    pm.expect(user).to.have.property('role');",
+                                    "    pm.expect(user).to.have.property('permissions');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{fullApiUrl}}/users/admin",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "admin"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "❌ Get Non-existent User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 404', function () {",
+                                    "    pm.response.to.have.status(404);",
+                                    "});",
+                                    "",
+                                    "pm.test('Error response structure', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(false);",
+                                    "    pm.expect(jsonData).to.have.property('errorCode');",
+                                    "    pm.expect(jsonData.errorCode).to.eql('NOT_FOUND');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{fullApiUrl}}/users/nonexistent_user_12345",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "nonexistent_user_12345"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "description": "User listing, search, and retrieval operations."
+        },
+        {
+            "name": "✏️ User Modification",
+            "item": [
+                {
+                    "name": "✅ Update User Profile",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Update successful', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "});",
+                                    "",
+                                    "pm.test('Updated user data returned', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('user');",
+                                    "    pm.expect(jsonData.data.user.firstName).to.eql('Updated');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "{{contentType}}"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"firstName\": \"Updated\",\n    \"lastName\": \"Administrator\",\n    \"email\": \"admin@system.com\",\n    \"phoneNumber\": \"+1-555-0123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{fullApiUrl}}/users/admin",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "admin"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "❌ Update User - Invalid Data",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 400', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});",
+                                    "",
+                                    "pm.test('Validation error returned', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(false);",
+                                    "    pm.expect(jsonData).to.have.property('message');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "{{contentType}}"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"firstName\": \"\",\n    \"lastName\": \"\",\n    \"email\": \"invalid-email-format\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{fullApiUrl}}/users/admin",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "admin"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "🔒 Update User - Insufficient Permissions",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Note: This test assumes you switch to a regular user token",
+                                    "// In a real scenario, you'd login as a regular user first"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 403', function () {",
+                                    "    pm.response.to.have.status(403);",
+                                    "});",
+                                    "",
+                                    "pm.test('Permission denied error', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(false);",
+                                    "    pm.expect(jsonData.errorCode).to.include('PERMISSION');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "{{contentType}}"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"firstName\": \"Unauthorized\",\n    \"lastName\": \"Update\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{fullApiUrl}}/users/admin",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "admin"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "description": "User profile modification operations with permission testing."
+        },
+        {
+            "name": "🗑️ User Deletion",
+            "item": [
+                {
+                    "name": "✅ Delete User - Valid Request",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Create a test user to delete",
+                                    "const timestamp = Date.now();",
+                                    "const userToDelete = `delete_test_${timestamp}`;",
+                                    "pm.environment.set('userToDelete', userToDelete);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Deletion successful', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "});",
+                                    "",
+                                    "pm.test('Deletion confirmation message', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.message).to.include('deleted');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{fullApiUrl}}/users/{{userToDelete}}",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "{{userToDelete}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "❌ Delete Non-existent User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 404', function () {",
+                                    "    pm.response.to.have.status(404);",
+                                    "});",
+                                    "",
+                                    "pm.test('User not found error', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(false);",
+                                    "    pm.expect(jsonData.errorCode).to.eql('NOT_FOUND');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{fullApiUrl}}/users/nonexistent_user_999",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "nonexistent_user_999"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "🚫 Delete User - Self Deletion Attempt",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 400 or 403', function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([400, 403]);",
+                                    "});",
+                                    "",
+                                    "pm.test('Self deletion prevented', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(false);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{authToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{fullApiUrl}}/users/{{currentUserId}}",
+                            "host": [
+                                "{{fullApiUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "{{currentUserId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "description": "User deletion operations with safety checks and permission validation."
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{authToken}}",
+                "type": "string"
+            }
+        ]
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "id": "user-mgmt-prerequest",
+                "type": "text/javascript",
+                "exec": [
+                    "console.log('👥 User Management API Request: ' + pm.info.requestName);"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "id": "user-mgmt-test",
+                "type": "text/javascript",
+                "exec": [
+                    "// Global tests for user management",
+                    "pm.test('Response is JSON', function () {",
+                    "    pm.response.to.be.json;",
+                    "});",
+                    "",
+                    "pm.test('Response has standard structure', function () {",
+                    "    const jsonData = pm.response.json();",
+                    "    pm.expect(jsonData).to.have.property('success');",
+                    "});"
+                ]
+            }
+        }
+    ]
+}

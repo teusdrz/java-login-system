@@ -2,17 +2,16 @@ package com.loginapp.test;
 
 import com.loginapp.api.dto.ApiResponse;
 import com.loginapp.api.dto.UserDto;
-import com.loginapp.model.User;
-import com.loginapp.model.Role;
-import com.loginapp.model.AuditEntry;
 import com.loginapp.model.AuditAction;
+import com.loginapp.model.AuditEntry;
 import com.loginapp.model.AuditLevel;
-import com.loginapp.services.AuditService;
+import com.loginapp.model.Role;
+import com.loginapp.model.User;
 import com.loginapp.security.SecurityConfiguration;
-
+import com.loginapp.services.AuditService;
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ApiTestRunner - Comprehensive test suite for API components, Audit system, and Security
