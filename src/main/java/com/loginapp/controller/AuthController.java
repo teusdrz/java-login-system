@@ -1,9 +1,9 @@
 package com.loginapp.controller;
 
-import com.loginapp.model.User;
-import com.loginapp.model.Role;
-import com.loginapp.model.UserDatabase;
 import com.loginapp.model.RegistrationResult;
+import com.loginapp.model.Role;
+import com.loginapp.model.User;
+import com.loginapp.model.UserDatabase;
 import com.loginapp.services.PermissionService;
 import com.loginapp.view.ConsoleView;
 
