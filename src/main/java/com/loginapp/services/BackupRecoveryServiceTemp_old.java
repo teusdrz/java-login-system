@@ -12,23 +12,23 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
- * BackupRecoveryService - Simplified backup and recovery system
- * Features basic backup creation and restoration
+ * BackupRecoveryServiceTemp - Temporary backup and recovery system
+ * Features basic backup creation and restoration with notification integration
  */
-public class BackupRecoveryService {
+public class BackupRecoveryServiceTemp {
     
-    private static BackupRecoveryService instance;
+    private static BackupRecoveryServiceTemp instance;
     private final Map<String, BackupMetadata> backupRegistry;
     private final NotificationService notificationService;
     
-    private BackupRecoveryService() {
+    private BackupRecoveryServiceTemp() {
         this.backupRegistry = new ConcurrentHashMap<>();
         this.notificationService = NotificationService.getInstance();
     }
     
-    public static synchronized BackupRecoveryService getInstance() {
+    public static synchronized BackupRecoveryServiceTemp getInstance() {
         if (instance == null) {
-            instance = new BackupRecoveryService();
+            instance = new BackupRecoveryServiceTemp();
         }
         return instance;
     }

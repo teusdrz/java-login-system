@@ -9,21 +9,21 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
- * BackupRecoveryService - Simplified backup and recovery system
+ * BackupRecoveryServiceSimple - Simplified backup and recovery system
  * Features basic backup creation and restoration
  */
-public class BackupRecoveryService {
+public class BackupRecoveryServiceSimple {
     
-    private static BackupRecoveryService instance;
+    private static BackupRecoveryServiceSimple instance;
     private final Map<String, BackupMetadata> backupRegistry;
     
-    private BackupRecoveryService() {
+    private BackupRecoveryServiceSimple() {
         this.backupRegistry = new ConcurrentHashMap<>();
     }
     
-    public static synchronized BackupRecoveryService getInstance() {
+    public static synchronized BackupRecoveryServiceSimple getInstance() {
         if (instance == null) {
-            instance = new BackupRecoveryService();
+            instance = new BackupRecoveryServiceSimple();
         }
         return instance;
     }
