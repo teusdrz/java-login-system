@@ -1,6 +1,7 @@
 package com.loginapp.model;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,19 +33,19 @@ public class UserDatabase {
     private void initializeDefaultUsers() {
         // Create default admin user
         User adminUser = new User("admin", "admin123", "admin@system.com", 
-                                 "System", "Administrator", Role.ADMIN);
+                                     "System", "Administrator", Role.ADMIN);
         users.put(adminUser.getUsername(), adminUser);
         usersByEmail.put(adminUser.getEmail(), adminUser);
         
         // Create default moderator user
         User moderatorUser = new User("moderator", "mod123", "mod@system.com",
-                                     "Content", "Moderator", Role.MODERATOR);
+                                         "Content", "Moderator", Role.MODERATOR);
         users.put(moderatorUser.getUsername(), moderatorUser);
         usersByEmail.put(moderatorUser.getEmail(), moderatorUser);
         
         // Create default regular user
         User regularUser = new User("testuser", "password123", "test@example.com",
-                                   "Test", "User", Role.USER);
+                                       "Test", "User", Role.USER);
         users.put(regularUser.getUsername(), regularUser);
         usersByEmail.put(regularUser.getEmail(), regularUser);
         
@@ -126,7 +127,7 @@ public class UserDatabase {
         if (!user.getPassword().equals(password)) {
             user.incrementFailedAttempts();
             addLoginHistory("LOGIN FAILED: Invalid password - " + username + 
-                           " (Attempts: " + user.getFailedLoginAttempts() + ")");
+                               " (Attempts: " + user.getFailedLoginAttempts() + ")");
             
             if (user.isLocked()) {
                 addAuditLog("SYSTEM", "Account auto-locked due to failed attempts: " + username);
@@ -209,7 +210,7 @@ public class UserDatabase {
         user.setRole(newRole);
         
         addAuditLog(changedBy, "Role changed for " + username + 
-                   ": " + oldRole.getDisplayName() + " → " + newRole.getDisplayName());
+                       ": " + oldRole.getDisplayName() + " → " + newRole.getDisplayName());
         
         return true;
     }
@@ -257,14 +258,42 @@ public class UserDatabase {
     }
     
     /**
+     * Get all users in the system
+     * @return List of all users
+     */
+    public List<User> getAllUsers() {
+        return new ArrayList<>(users.values());
+    }
+    
+    /**
+     * Search users by username, email, or name
+     * @param searchTerm Term to search for
+     * @return List of matching users
+     */
+    public List<User> searchUsers(String searchTerm) {
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        String lowerSearchTerm = searchTerm.toLowerCase();
+        return users.values().stream()
+                .filter(user -> 
+                    user.getUsername().toLowerCase().contains(lowerSearchTerm) ||
+                    user.getEmail().toLowerCase().contains(lowerSearchTerm) ||
+                    user.getFullName().toLowerCase().contains(lowerSearchTerm)
+                )
+                .collect(Collectors.toList());
+    }
+    
+    /**
      * Get users by role
      * @param role Role to filter by
      * @return List of users with specified role
      */
     public List<User> getUsersByRole(Role role) {
         return users.values().stream()
-                .filter(user -> user.getRole() == role)
-                .collect(Collectors.toList());
+                    .filter(user -> user.getRole() == role)
+                    .collect(Collectors.toList());
     }
     
     /**
@@ -273,8 +302,8 @@ public class UserDatabase {
      */
     public List<User> getActiveUsers() {
         return users.values().stream()
-                .filter(User::isActive)
-                .collect(Collectors.toList());
+                    .filter(User::isActive)
+                    .collect(Collectors.toList());
     }
     
     /**
@@ -283,8 +312,8 @@ public class UserDatabase {
      */
     public List<User> getLockedUsers() {
         return users.values().stream()
-                .filter(User::isLocked)
-                .collect(Collectors.toList());
+                    .filter(User::isLocked)
+                    .collect(Collectors.toList());
     }
     
     /**
@@ -303,3 +332,111 @@ public class UserDatabase {
      */
     public boolean emailExists(String email) {
         return usersByEmail.containsKey(email);
+    }
+    
+    /**
+     * Get system statistics
+     * @return SystemStats object with current statistics
+     */
+    public SystemStats getSystemStats() {
+        return new SystemStats();
+    }
+    
+    /**
+     * Get complete login history
+     * @return List of login history entries
+     */
+    public List<String> getLoginHistory() {
+        return new ArrayList<>(loginHistory);
+    }
+    
+    /**
+     * Get recent login history
+     * @param limit Maximum number of entries to return
+     * @return List of recent login history entries
+     */
+    public List<String> getRecentLoginHistory(int limit) {
+        List<String> recent = new ArrayList<>();
+        int startIndex = Math.max(0, loginHistory.size() - limit);
+        
+        for (int i = startIndex; i < loginHistory.size(); i++) {
+            recent.add(loginHistory.get(i));
+        }
+        
+        return recent;
+    }
+    
+    /**
+     * Get audit log
+     * @return List of audit log entries
+     */
+    public List<String> getAuditLog() {
+        return new ArrayList<>(auditLog);
+    }
+    
+    /**
+     * Add entry to login history
+     * @param entry Login history entry
+     */
+    private void addLoginHistory(String entry) {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        loginHistory.add("[" + timestamp + "] " + entry);
+    }
+    
+    /**
+     * Add entry to audit log
+     * @param actor User performing action
+     * @param action Description of action
+     */
+    private void addAuditLog(String actor, String action) {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        auditLog.add("[" + timestamp + "] " + actor + ": " + action);
+    }
+    
+    /**
+     * Inner class for system statistics
+     */
+    public class SystemStats {
+        private final long totalUsers;
+        private final long activeUsers;
+        private final long inactiveUsers;
+        private final long lockedUsers;
+        private final Map<Role, Long> roleDistribution;
+        
+        public SystemStats() {
+            this.totalUsers = users.size();
+            this.activeUsers = users.values().stream().mapToLong(u -> u.isActive() ? 1 : 0).sum();
+            this.inactiveUsers = totalUsers - activeUsers;
+            this.lockedUsers = users.values().stream().mapToLong(u -> u.isLocked() ? 1 : 0).sum();
+            
+            // Calculate role distribution
+            this.roleDistribution = new HashMap<>();
+            for (Role role : Role.values()) {
+                long count = users.values().stream()
+                        .filter(user -> user.getRole() == role)
+                        .count();
+                roleDistribution.put(role, count);
+            }
+        }
+        
+        public long getTotalUsers() {
+            return totalUsers;
+        }
+        
+        public long getActiveUsers() {
+            return activeUsers;
+        }
+        
+        public long getInactiveUsers() {
+            return inactiveUsers;
+        }
+        
+        public long getLockedUsers() {
+            return lockedUsers;
+        }
+        
+        public Map<Role, Long> getRoleDistribution() {
+            return new HashMap<>(roleDistribution);
+        }
+    }
+}

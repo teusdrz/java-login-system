@@ -1,4 +1,4 @@
-package com.loginapp.service;
+package com.loginapp.services;
 
 import com.loginapp.model.Role;
 import com.loginapp.model.User;

@@ -1,86 +1,132 @@
 package com.loginapp.model;
 
 /**
- * Role enum - Defines user roles and their permissions
- * Used for access control throughout the application
+ * Role enum - Defines user roles with hierarchical levels and permissions
+ * Provides role-based access control functionality
  */
 public enum Role {
-    ADMIN("Administrator", 3, new String[]{
-        "USER_MANAGEMENT", "SYSTEM_STATS", "LOGIN_HISTORY", 
-        "DELETE_USERS", "MODIFY_ROLES", "SYSTEM_SETTINGS"
+    USER(1, "Regular User", new String[]{
+                    "VIEW_PROFILE", 
+                    "EDIT_PROFILE", 
+                    "CHANGE_PASSWORD"
     }),
     
-    MODERATOR("Moderator", 2, new String[]{
-        "USER_MANAGEMENT", "SYSTEM_STATS", "LOGIN_HISTORY",
-        "MODERATE_CONTENT", "VIEW_REPORTS"
+    MODERATOR(2, "Moderator", new String[]{
+                    "VIEW_PROFILE", 
+                    "EDIT_PROFILE", 
+                    "CHANGE_PASSWORD",
+                    "MODERATE_CONTENT", 
+                    "VIEW_REPORTS", 
+                    "SYSTEM_STATS", 
+                    "LOGIN_HISTORY",
+                    "USER_MANAGEMENT"
     }),
     
-    USER("Regular User", 1, new String[]{
-        "VIEW_PROFILE", "EDIT_PROFILE", "CHANGE_PASSWORD"
+    ADMIN(3, "Administrator", new String[]{
+                    "VIEW_PROFILE", 
+                    "EDIT_PROFILE", 
+                    "CHANGE_PASSWORD",
+                    "MODERATE_CONTENT", 
+                    "VIEW_REPORTS", 
+                    "SYSTEM_STATS", 
+                    "LOGIN_HISTORY",
+                    "USER_MANAGEMENT", 
+                    "DELETE_USERS", 
+                    "MODIFY_ROLES", 
+                    "SYSTEM_SETTINGS"
     });
-    
-    private final String displayName;
+
     private final int level;
+    private final String displayName;
     private final String[] permissions;
-    
-    // Constructor
-    Role(String displayName, int level, String[] permissions) {
-        this.displayName = displayName;
+
+    /**
+     * Constructor for Role enum
+     * @param level Hierarchical level of the role
+     * @param displayName Human-readable name
+     * @param permissions Array of permissions for this role
+     */
+    Role(int level, String displayName, String[] permissions) {
         this.level = level;
-        this.permissions = permissions;
+        this.displayName = displayName;
+        this.permissions = permissions.clone();
     }
-    
-    // Getters
-    public String getDisplayName() {
-        return displayName;
-    }
-    
+
+    /**
+     * Get the hierarchical level of this role
+     * @return Role level (higher number = more permissions)
+     */
     public int getLevel() {
         return level;
     }
-    
+
+    /**
+     * Get display name for this role
+     * @return Human-readable role name
+     */
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    /**
+     * Get all permissions for this role
+     * @return Array of permission strings
+     */
     public String[] getPermissions() {
         return permissions.clone();
     }
-    
+
     /**
-     * Check if role has specific permission
+     * Check if this role has a specific permission
      * @param permission Permission to check
      * @return true if role has permission, false otherwise
      */
     public boolean hasPermission(String permission) {
-        for (String perm : permissions) {
-            if (perm.equals(permission)) {
+        if (permission == null) {
+            return false;
+        }
+        
+        for (String rolePermission : permissions) {
+            if (rolePermission.equals(permission)) {
                 return true;
             }
         }
         return false;
     }
-    
+
     /**
-     * Check if this role can perform actions on target role
-     * @param targetRole Target role to check against
+     * Check if this role can manage another role
+     * @param targetRole Role to check management capability against
      * @return true if can manage, false otherwise
      */
     public boolean canManageRole(Role targetRole) {
+        if (targetRole == null) {
+            return false;
+        }
+        
+        // Higher level roles can manage lower level roles
+        // Same level roles cannot manage each other (except for some specific cases)
         return this.level > targetRole.level;
     }
-    
+
     /**
-     * Get role by name (case insensitive)
-     * @param roleName Name of the role
-     * @return Role enum or USER as default
+     * Get role by display name (case insensitive)
+     * @param displayName Display name to search for
+     * @return Role if found, null otherwise
      */
-    public static Role fromString(String roleName) {
-        if (roleName == null) return USER;
-        
-        try {
-            return Role.valueOf(roleName.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return USER; // Default role
+    public static Role getByDisplayName(String displayName) {
+        if (displayName == null) {
+            return null;
         }
+        
+        for (Role role : Role.values()) {
+            if (role.displayName.equalsIgnoreCase(displayName.trim())) {
+                return role;
+            }
+        }
+        return null;
     }
-    
+
     @Override
     public String toString() {
         return displayName + " (Level " + level + ")";
