@@ -8,15 +8,16 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * BackupController - Simplified backup and recovery management controller
+ * BackupControllerSimple - Simplified backup and recovery management controller
+ * Lightweight version with essential backup operations
  */
-public class BackupController {
+public class BackupControllerSimple {
     
     private final BackupRecoveryService backupService;
     private final ConsoleView consoleView;
     private final PermissionService permissionService;
     
-    public BackupController(ConsoleView consoleView) {
+    public BackupControllerSimple(ConsoleView consoleView) {
         this.backupService = BackupRecoveryService.getInstance();
         this.consoleView = consoleView;
         this.permissionService = PermissionService.getInstance();
@@ -110,7 +111,7 @@ public class BackupController {
         }
         
         System.out.print("Enter backup description: ");
-        String description = consoleView.getInput();
+        String description = consoleView.getStringInput();
         
         // Start backup
         System.out.println("\nStarting " + selectedType.getDisplayName().toLowerCase() + "...");
@@ -123,6 +124,10 @@ public class BackupController {
                     backupFuture = backupService.createFullBackup(null, user.getUsername(), description);
                     break;
                 case INCREMENTAL:
+                    backupFuture = backupService.createIncrementalBackup(null, user.getUsername(), description, null);
+                    break;
+                case DIFFERENTIAL:
+                    // Use incremental method for differential backup
                     backupFuture = backupService.createIncrementalBackup(null, user.getUsername(), description, null);
                     break;
                 case EMERGENCY:
