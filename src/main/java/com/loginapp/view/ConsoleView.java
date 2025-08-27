@@ -75,6 +75,12 @@ public class ConsoleView {
             System.out.println("7. System Administration");
         }
         
+        // NEW FUNCTIONALITIES - Available for ALL users
+        System.out.println();
+        System.out.println("ADVANCED FEATURES:");
+        System.out.println("8. Backup Management");
+        System.out.println("9. Notification Center");
+        
         System.out.println();
         System.out.println("0. Logout");
         System.out.println(SEPARATOR);

@@ -8,7 +8,9 @@ public enum Role {
     USER(1, "Regular User", new String[]{
                     "VIEW_PROFILE", 
                     "EDIT_PROFILE", 
-                    "CHANGE_PASSWORD"
+                    "CHANGE_PASSWORD",
+                    "BACKUP_SYSTEM",
+                    "NOTIFICATION_MANAGEMENT"
     }),
     
     MODERATOR(2, "Moderator", new String[]{
@@ -19,7 +21,9 @@ public enum Role {
                     "VIEW_REPORTS", 
                     "SYSTEM_STATS", 
                     "LOGIN_HISTORY",
-                    "USER_MANAGEMENT"
+                    "USER_MANAGEMENT",
+                    "BACKUP_SYSTEM",
+                    "NOTIFICATION_MANAGEMENT"
     }),
     
     ADMIN(3, "Administrator", new String[]{
@@ -33,7 +37,9 @@ public enum Role {
                     "USER_MANAGEMENT", 
                     "DELETE_USERS", 
                     "MODIFY_ROLES", 
-                    "SYSTEM_SETTINGS"
+                    "SYSTEM_SETTINGS",
+                    "BACKUP_SYSTEM",
+                    "NOTIFICATION_MANAGEMENT"
     });
 
     private final int level;
