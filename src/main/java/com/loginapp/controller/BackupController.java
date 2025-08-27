@@ -59,33 +59,41 @@ public class BackupController {
     }
     
     private void displayBackupMenu(User user) {
-        System.out.println("\n" + "=".repeat(50));
-        System.out.println("         BACKUP & RECOVERY MANAGEMENT");
-        System.out.println("=".repeat(50));
-        System.out.println("1. Create backup");
-        System.out.println("2. Restore system");
-        System.out.println("3. View backups");
-        System.out.println("4. Backup status");
-        System.out.println("5. Verify backup integrity");
-        System.out.println("6. Backup maintenance");
-        System.out.println("0. Back to main menu");
-        System.out.print("\nChoose an option: ");
+        int unreadBackupNotifications = getBackupNotificationCount(user);
+        
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("           BACKUP & RECOVERY MANAGEMENT CENTER");
+        System.out.println("=".repeat(60));
+        System.out.println("Welcome, " + user.getUsername() + " (" + user.getRole() + ")");
+        if (unreadBackupNotifications > 0) {
+            System.out.println("🔔 " + unreadBackupNotifications + " backup notifications pending");
+        }
+        System.out.println("-".repeat(60));
+        System.out.println("1. Create Backup        - Create new system backup");
+        System.out.println("2. Restore System       - Restore from existing backup");
+        System.out.println("3. View Backups         - List all available backups");
+        System.out.println("4. Backup Status        - Check backup system status");
+        System.out.println("5. Verify Integrity     - Verify backup file integrity");
+        System.out.println("6. Maintenance          - Cleanup and management tools");
+        System.out.println("0. Back to Main Menu    - Return to previous menu");
+        System.out.println("=".repeat(60));
+        System.out.print("Choose an option (0-6): ");
     }
     
     private void handleCreateBackup(User user) {
-        System.out.println("\n=== CREATE BACKUP ===");
+        System.out.println("\n=== BACKUP CREATION SYSTEM ===");
         
         try {
             if (!permissionService.hasPermission(user, "BACKUP_SYSTEM")) {
-                consoleView.displayErrorMessage("Access denied. Insufficient permissions.");
+                consoleView.displayErrorMessage("Access denied. You need BACKUP_SYSTEM permissions.");
                 return;
             }
             
             // Select backup type
             System.out.println("Select backup type:");
-            System.out.println("1. Full Backup");
-            System.out.println("2. Incremental Backup");
-            System.out.println("3. Emergency Backup");
+            System.out.println("1. Full Backup     - Complete system backup");
+            System.out.println("2. Incremental     - Changes since last backup");
+            System.out.println("3. Emergency       - Critical state backup");
             System.out.println("0. Cancel");
             
             int choice = consoleView.getMenuChoice();
@@ -94,7 +102,10 @@ public class BackupController {
                 case 2 -> BackupMetadata.BackupType.INCREMENTAL;
                 case 3 -> BackupMetadata.BackupType.EMERGENCY;
                 case 0 -> null;
-                default -> null;
+                default -> {
+                    consoleView.displayErrorMessage("Invalid selection. Operation cancelled.");
+                    yield null;
+                }
             };
             
             if (selectedType == null) {
@@ -104,8 +115,13 @@ public class BackupController {
             System.out.print("Enter backup description: ");
             String description = consoleView.getStringInput();
             
+            if (description == null || description.trim().isEmpty()) {
+                description = "Backup created by " + user.getUsername() + " - " + selectedType.getDisplayName();
+            }
+            
             // Start backup
             System.out.println("\nStarting " + selectedType.getDisplayName().toLowerCase() + "...");
+            System.out.println("Description: " + description);
             
             CompletableFuture<BackupMetadata> backupFuture = switch (selectedType) {
                 case FULL -> backupService.createFullBackup(null, user.getUsername(), description);
@@ -116,28 +132,49 @@ public class BackupController {
             
             if (backupFuture != null) {
                 try {
-                    BackupMetadata result = backupFuture.get(10, TimeUnit.MINUTES);
-                    consoleView.displaySuccessMessage("Backup completed successfully!");
-                    System.out.println("Backup ID: " + result.getBackupId());
+                    System.out.println("⏳ Backup in progress...");
+                    BackupMetadata result = backupFuture.get(15, TimeUnit.MINUTES);
+                    
+                    if (result.getStatus() == BackupMetadata.BackupStatus.COMPLETED) {
+                        consoleView.displaySuccessMessage("Backup completed successfully!");
+                        System.out.println("📦 Backup ID: " + result.getBackupId());
+                        System.out.println("📍 Location: " + result.getBackupPath());
+                        System.out.println("📏 Size: " + result.getFormattedBackupSize());
+                    } else {
+                        consoleView.displayErrorMessage("Backup failed with status: " + result.getStatus());
+                        if (result.getErrorMessage() != null) {
+                            System.out.println("Error details: " + result.getErrorMessage());
+                        }
+                    }
+                    
                 } catch (TimeoutException e) {
-                    consoleView.displayInfoMessage("Backup is taking longer than expected.");
-                } catch (ExecutionException | InterruptedException e) {
-                    consoleView.displayErrorMessage("Backup failed: " + e.getMessage());
+                    consoleView.displayErrorMessage("Backup is taking longer than expected (15 minutes timeout).");
+                    consoleView.displayInfoMessage("The backup may still be running in the background.");
+                } catch (ExecutionException e) {
+                    consoleView.displayErrorMessage("Backup execution failed: " + e.getCause().getMessage());
+                } catch (InterruptedException e) {
+                    consoleView.displayErrorMessage("Backup was interrupted: " + e.getMessage());
+                    Thread.currentThread().interrupt();
                 }
+            } else {
+                consoleView.displayErrorMessage("Failed to initiate backup operation.");
             }
+            
         } catch (Exception e) {
             consoleView.displayErrorMessage("Failed to start backup: " + e.getMessage());
+            System.err.println("BackupController.handleCreateBackup error: " + e.getMessage());
+            e.printStackTrace();
         }
         
         consoleView.waitForEnter();
     }
     
     private void handleRestoreSystem(User user) {
-        System.out.println("\n=== RESTORE SYSTEM ===");
+        System.out.println("\n=== SYSTEM RESTORE CENTER ===");
         
         try {
             if (!permissionService.hasPermission(user, "RESTORE_SYSTEM")) {
-                consoleView.displayErrorMessage("Access denied. Insufficient permissions.");
+                consoleView.displayErrorMessage("Access denied. You need RESTORE_SYSTEM permissions.");
                 return;
             }
             
@@ -145,14 +182,19 @@ public class BackupController {
             
             if (availableBackups.isEmpty()) {
                 consoleView.displayInfoMessage("No completed backups available for restore.");
+                consoleView.displayInfoMessage("Please create a backup first before attempting restore.");
                 return;
             }
             
-            System.out.println("\nAvailable backups:");
+            System.out.println("\n📦 Available backups for restore:");
+            System.out.println("-".repeat(80));
             for (int i = 0; i < availableBackups.size(); i++) {
                 BackupMetadata backup = availableBackups.get(i);
-                System.out.printf("%d. %s - %s (%s)\n", 
-                    i + 1, backup.getBackupId(), backup.getDescription(), backup.getCreatedAt());
+                System.out.printf("%d. %s\n", i + 1, backup.getSummary());
+                System.out.printf("   📅 Created: %s by %s\n", backup.getCreatedAt(), backup.getCreatedBy());
+                System.out.printf("   📝 Description: %s\n", backup.getDescription());
+                System.out.printf("   📏 Size: %s\n", backup.getFormattedBackupSize());
+                System.out.println("-".repeat(80));
             }
             
             System.out.print("Select backup to restore (0 to cancel): ");
@@ -161,33 +203,64 @@ public class BackupController {
             if (choice > 0 && choice <= availableBackups.size()) {
                 BackupMetadata selectedBackup = availableBackups.get(choice - 1);
                 
-                if (consoleView.getConfirmation("Are you sure you want to restore from backup " + 
-                                               selectedBackup.getBackupId() + "?")) {
-                    
-                    System.out.println("Starting system restore...");
-                    
-                    try {
-                        CompletableFuture<Boolean> restoreFuture = 
-                            backupService.restoreFromBackup(selectedBackup.getBackupId(), null, user.getUsername(), true);
-                        
-                        Boolean result = restoreFuture.get(15, TimeUnit.MINUTES);
-                        
-                        if (result) {
-                            consoleView.displaySuccessMessage("System restore completed successfully!");
-                            consoleView.displayInfoMessage("Please restart the application to use restored data.");
-                        } else {
-                            consoleView.displayErrorMessage("Restore failed");
-                        }
-                        
-                    } catch (TimeoutException e) {
-                        consoleView.displayErrorMessage("Restore timeout - operation may still be running.");
-                    } catch (ExecutionException | InterruptedException e) {
-                        consoleView.displayErrorMessage("Restore failed: " + e.getMessage());
-                    }
+                // Show detailed information about selected backup
+                System.out.println("\n🔍 Selected backup details:");
+                System.out.println(selectedBackup.getDetailedInfo());
+                
+                // Multiple confirmation for safety
+                System.out.println("\n⚠️  WARNING: System restore will replace current data!");
+                System.out.println("This operation cannot be undone unless you have another backup.");
+                
+                if (!consoleView.getConfirmation("Do you want to proceed with restore from backup " + selectedBackup.getBackupId() + "?")) {
+                    consoleView.displayInfoMessage("Restore operation cancelled by user.");
+                    return;
                 }
+                
+                if (!consoleView.getConfirmation("Are you absolutely sure? This will overwrite current system data!")) {
+                    consoleView.displayInfoMessage("Restore operation cancelled by user.");
+                    return;
+                }
+                
+                System.out.println("\n🔄 Starting system restore...");
+                System.out.println("Creating pre-restore backup for safety...");
+                
+                try {
+                    CompletableFuture<Boolean> restoreFuture = 
+                        backupService.restoreFromBackup(selectedBackup.getBackupId(), null, user.getUsername(), true);
+                    
+                    System.out.println("⏳ Restore in progress... This may take several minutes.");
+                    Boolean result = restoreFuture.get(20, TimeUnit.MINUTES);
+                    
+                    if (result != null && result) {
+                        consoleView.displaySuccessMessage("System restore completed successfully!");
+                        consoleView.displayInfoMessage("✅ Data has been restored from backup: " + selectedBackup.getBackupId());
+                        consoleView.displayInfoMessage("🔄 Please restart the application to use restored data.");
+                        consoleView.displayInfoMessage("📝 A pre-restore backup was created for safety.");
+                    } else {
+                        consoleView.displayErrorMessage("❌ Restore operation failed.");
+                        consoleView.displayInfoMessage("Your original data should still be intact.");
+                    }
+                    
+                } catch (TimeoutException e) {
+                    consoleView.displayErrorMessage("⏰ Restore operation timed out (20 minutes).");
+                    consoleView.displayInfoMessage("The operation may still be running in the background.");
+                    consoleView.displayInfoMessage("Please check system status before attempting another restore.");
+                } catch (ExecutionException e) {
+                    consoleView.displayErrorMessage("❌ Restore execution failed: " + e.getCause().getMessage());
+                    consoleView.displayInfoMessage("Your original data should still be intact.");
+                } catch (InterruptedException e) {
+                    consoleView.displayErrorMessage("❌ Restore was interrupted: " + e.getMessage());
+                    consoleView.displayInfoMessage("Your original data should still be intact.");
+                    Thread.currentThread().interrupt();
+                }
+            } else if (choice != 0) {
+                consoleView.displayErrorMessage("Invalid selection. Please choose a valid backup number.");
             }
+            
         } catch (Exception e) {
             consoleView.displayErrorMessage("Error in restore operation: " + e.getMessage());
+            System.err.println("BackupController.handleRestoreSystem error: " + e.getMessage());
+            e.printStackTrace();
         }
         
         consoleView.waitForEnter();
@@ -378,9 +451,32 @@ public class BackupController {
     }
     
     /**
+     * Get backup notification count for user dashboard
+     */
+    private int getBackupNotificationCount(User user) {
+        try {
+            // Count failed backups as notifications
+            List<BackupMetadata> failedBackups = backupService.getBackupsByStatus(BackupMetadata.BackupStatus.FAILED);
+            List<BackupMetadata> expiredBackups = backupService.getExpiredBackups();
+            
+            return failedBackups.size() + expiredBackups.size();
+        } catch (Exception e) {
+            System.err.println("Error getting backup notification count: " + e.getMessage());
+            return 0;
+        }
+    }
+    
+    /**
      * Check if user has backup-related notifications
      */
     public void checkBackupNotifications(User user) {
-        // Simplified implementation - no notifications to check
+        try {
+            int notificationCount = getBackupNotificationCount(user);
+            if (notificationCount > 0) {
+                consoleView.displayInfoMessage("🔔 You have " + notificationCount + " backup-related notifications.");
+            }
+        } catch (Exception e) {
+            System.err.println("Error checking backup notifications: " + e.getMessage());
+        }
     }
 }
