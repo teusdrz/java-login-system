@@ -14,6 +14,8 @@ public class AuthController {
     private final UserDatabase userDatabase;
     private final ConsoleView consoleView;
     private final PermissionService permissionService;
+    private final NotificationController notificationController;
+    private final BackupController backupController;
     private User currentUser;
     private boolean applicationRunning;
 
@@ -22,6 +24,8 @@ public class AuthController {
         this.userDatabase = userDatabase;
         this.consoleView = consoleView;
         this.permissionService = PermissionService.getInstance();
+        this.notificationController = new NotificationController(consoleView);
+        this.backupController = new BackupController(consoleView);
         this.currentUser = null;
         this.applicationRunning = true;
     }
@@ -71,8 +75,11 @@ public class AuthController {
         System.out.println("4. Delete User");
         System.out.println("5. User Statistics");
         System.out.println("6. Change Password");
+        System.out.println("7. View Notifications");
         if (hasAdminAccess()) {
-            System.out.println("7. System Status");
+            System.out.println("8. Backup Management");
+            System.out.println("9. Notification Management");
+            System.out.println("10. System Status");
         }
         System.out.println("0. Logout");
         System.out.print("Choose an option: ");
@@ -99,6 +106,23 @@ public class AuthController {
                 handleChangePassword();
                 break;
             case 7:
+                handleViewNotifications();
+                break;
+            case 8:
+                if (hasAdminAccess()) {
+                    handleBackupManagement();
+                } else {
+                    consoleView.displayErrorMessage("Access denied. Admin privileges required.");
+                }
+                break;
+            case 9:
+                if (hasAdminAccess()) {
+                    handleNotificationManagement();
+                } else {
+                    consoleView.displayErrorMessage("Access denied. Admin privileges required.");
+                }
+                break;
+            case 10:
                 if (hasAdminAccess()) {
                     handleSystemStatus();
                 } else {
@@ -124,8 +148,13 @@ public class AuthController {
         if (user != null) {
             currentUser = user;
             consoleView.displaySuccessMessage("Login successful! Welcome, " + user.getUsername() + "!");
+            
+            // Display user info
             System.out.println("User: " + user.getUsername());
             System.out.println("Role: " + user.getRole());
+            
+            // Check for pending notifications
+            notificationController.checkPendingNotifications(currentUser);
         } else {
             consoleView.displayErrorMessage("Invalid username or password.");
         }
@@ -161,15 +190,7 @@ public class AuthController {
     }
 
     private void handleUserProfile() {
-        System.out.println("\n=== USER PROFILE ===");
-        System.out.println("Username: " + currentUser.getUsername());
-        System.out.println("Email: " + currentUser.getEmail());
-        System.out.println("First Name: " + currentUser.getFirstName());
-        System.out.println("Last Name: " + currentUser.getLastName());
-        System.out.println("Role: " + currentUser.getRole());
-        System.out.println("Created: " + currentUser.getCreatedAt());
-        System.out.println("Last Login: " + currentUser.getLastLoginAt());
-        consoleView.waitForEnter();
+        consoleView.displayUserProfile(currentUser, userDatabase);
     }
 
     private void handleListUsers() {
@@ -178,11 +199,7 @@ public class AuthController {
             return;
         }
         
-        System.out.println("\n=== USER LIST ===");
-        userDatabase.getAllUsers().forEach(user -> {
-            System.out.println("- " + user.getUsername() + " (" + user.getRole() + ")");
-        });
-        consoleView.waitForEnter();
+        consoleView.displayUserList(userDatabase.getAllUsers());
     }
 
     private void handleCreateUser() {
@@ -191,11 +208,11 @@ public class AuthController {
             return;
         }
         
-        System.out.println("\n=== CREATE NEW USER ===");
+        consoleView.displaySectionHeader("CREATE NEW USER");
         
         String username = consoleView.getUsername();
         
-        if (userDatabase.getAllUsers().stream().anyMatch(u -> u.getUsername().equals(username))) {
+        if (userDatabase.userExists(username)) {
             consoleView.displayErrorMessage("Username already exists.");
             return;
         }
@@ -203,14 +220,12 @@ public class AuthController {
         String password = consoleView.getPassword();
         Role role = consoleView.selectRole();
         
-        User newUser = new User(username, password, username + "@example.com", 
-                                "First", "Last", role);
-        RegistrationResult result = userDatabase.registerUser(newUser, currentUser.getUsername());
+        RegistrationResult result = userDatabase.registerUser(username, password, role);
         
-        if (result.isSuccess()) {
+        if (result == RegistrationResult.SUCCESS) {
             consoleView.displaySuccessMessage("User created successfully!");
         } else {
-            consoleView.displayErrorMessage("User creation failed: " + result.getMessage());
+            consoleView.displayErrorMessage("User creation failed: " + result.getDescription());
         }
     }
 
@@ -220,11 +235,11 @@ public class AuthController {
             return;
         }
         
-        System.out.println("\n=== DELETE USER ===");
+        consoleView.displaySectionHeader("DELETE USER");
         
         String username = consoleView.getUsername();
         
-        if (userDatabase.getAllUsers().stream().noneMatch(u -> u.getUsername().equals(username))) {
+        if (!userDatabase.userExists(username)) {
             consoleView.displayErrorMessage("User not found.");
             return;
         }
@@ -235,7 +250,7 @@ public class AuthController {
         }
         
         if (consoleView.getConfirmation("Are you sure you want to delete user: " + username + "?")) {
-            boolean success = userDatabase.deleteUser(username, currentUser.getUsername());
+            boolean success = userDatabase.deleteUser(username);
             if (success) {
                 consoleView.displaySuccessMessage("User deleted successfully!");
             } else {
@@ -251,40 +266,49 @@ public class AuthController {
         }
         
         UserDatabase.SystemStats stats = userDatabase.getSystemStats();
-        System.out.println("\n=== USER STATISTICS ===");
-        System.out.println("Total Users: " + stats.getTotalUsers());
-        consoleView.waitForEnter();
+        consoleView.displayDetailedStatistics(stats);
     }
 
     private void handleChangePassword() {
-        System.out.println("\n=== CHANGE PASSWORD ===");
+        consoleView.displaySectionHeader("CHANGE PASSWORD");
         
-        System.out.print("Enter current password: ");
-        String currentPassword = consoleView.getPassword();
+        String currentPassword = consoleView.getPassword("Enter current password: ");
         
-        User authUser = userDatabase.authenticateUser(currentUser.getUsername(), currentPassword);
-        if (authUser == null) {
+        if (!userDatabase.verifyPassword(currentUser.getUsername(), currentPassword)) {
             consoleView.displayErrorMessage("Current password is incorrect.");
             return;
         }
         
-        System.out.print("Enter new password: ");
-        String newPassword = consoleView.getPassword();
-        System.out.print("Confirm new password: ");
-        String confirmPassword = consoleView.getPassword();
+        String newPassword = consoleView.getPassword("Enter new password: ");
+        String confirmPassword = consoleView.getPassword("Confirm new password: ");
         
         if (!newPassword.equals(confirmPassword)) {
             consoleView.displayErrorMessage("Passwords do not match.");
             return;
         }
         
-        // Update password (simplified approach)
-        currentUser.setPassword(newPassword);
-        consoleView.displaySuccessMessage("Password changed successfully!");
+        boolean success = userDatabase.changePassword(currentUser.getUsername(), newPassword);
+        if (success) {
+            consoleView.displaySuccessMessage("Password changed successfully!");
+        } else {
+            consoleView.displayErrorMessage("Failed to change password.");
+        }
+    }
+
+    private void handleViewNotifications() {
+        notificationController.handleNotificationManagement(currentUser);
+    }
+
+    private void handleBackupManagement() {
+        backupController.handleBackupManagement(currentUser);
+    }
+
+    private void handleNotificationManagement() {
+        notificationController.handleNotificationManagement(currentUser);
     }
 
     private void handleSystemStatus() {
-        System.out.println("\n=== SYSTEM STATUS ===");
+        consoleView.displaySectionHeader("SYSTEM STATUS");
         
         UserDatabase.SystemStats stats = userDatabase.getSystemStats();
         
@@ -293,6 +317,11 @@ public class AuthController {
         System.out.println("Active Sessions: 1"); // Current user
         System.out.println("System Uptime: " + getCurrentTimestamp());
         System.out.println("Database Status: OPERATIONAL");
+        
+        // Additional system information
+        System.out.println("\n=== USER BREAKDOWN ===");
+        System.out.println("Administrators: " + stats.getAdminCount());
+        System.out.println("Regular Users: " + stats.getUserCount());
         
         System.out.println("\n=== RECENT ACTIVITY ===");
         System.out.println("Last Login: " + getCurrentTimestamp());
@@ -310,10 +339,7 @@ public class AuthController {
 
     private void handlePublicStatistics() {
         UserDatabase.SystemStats stats = userDatabase.getSystemStats();
-        System.out.println("\n=== PUBLIC STATISTICS ===");
-        System.out.println("Total Registered Users: " + stats.getTotalUsers());
-        System.out.println("System Active Since: " + getCurrentTimestamp());
-        consoleView.waitForEnter();
+        consoleView.displayPublicStatistics(stats);
     }
 
     // Helper methods
