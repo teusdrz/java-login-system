@@ -188,7 +188,7 @@ public class AuthController {
     }
 
     private void handleListUsers() {
-        if (!hasPermission("VIEW_USERS")) {
+        if (!hasPermission("USER_MANAGEMENT")) {
             consoleView.displayErrorMessage("Access denied. Insufficient permissions.");
             return;
         }
@@ -201,7 +201,7 @@ public class AuthController {
     }
 
     private void handleCreateUser() {
-        if (!hasPermission("CREATE_USER")) {
+        if (!hasPermission("USER_MANAGEMENT")) {
             consoleView.displayErrorMessage("Access denied. Insufficient permissions.");
             return;
         }
@@ -230,7 +230,7 @@ public class AuthController {
     }
 
     private void handleDeleteUser() {
-        if (!hasPermission("DELETE_USER")) {
+        if (!hasPermission("DELETE_USERS")) {
             consoleView.displayErrorMessage("Access denied. Insufficient permissions.");
             return;
         }
@@ -260,7 +260,7 @@ public class AuthController {
     }
 
     private void handleUserStatistics() {
-        if (!hasPermission("VIEW_STATISTICS")) {
+        if (!hasPermission("SYSTEM_STATS")) {
             consoleView.displayErrorMessage("Access denied. Insufficient permissions.");
             return;
         }
