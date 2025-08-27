@@ -56,7 +56,7 @@ public class Main {
             System.out.println();
             
             // Run the main application loop
-            authController.startApplication();
+            authController.run();
             
         } catch (Exception e) {
             System.err.println("FATAL ERROR: Application failed to start");
