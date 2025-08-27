@@ -85,8 +85,8 @@ public class BackupMetadata {
     private String encryptionAlgorithm;
     private CompressionLevel compressionLevel;
     private String errorMessage;
-    private Map<String, Object> backupStatistics;
-    private List<String> includedDataTypes;
+    private final Map<String, Object> backupStatistics;
+    private final List<String> includedDataTypes;
     private String parentBackupId; // For incremental backups
     private int retentionDays;
     private boolean isVerified;
@@ -125,13 +125,12 @@ public class BackupMetadata {
      * Get default retention days based on backup type
      */
     private int getDefaultRetentionDays(BackupType type) {
-        switch (type) {
-            case FULL: return 90; // 3 months
-            case INCREMENTAL: return 30; // 1 month
-            case DIFFERENTIAL: return 60; // 2 months
-            case EMERGENCY: return 365; // 1 year
-            default: return 30;
-        }
+        return switch (type) {
+            case FULL -> 90;        // 3 months
+            case INCREMENTAL -> 30; // 1 month
+            case DIFFERENTIAL -> 60; // 2 months
+            case EMERGENCY -> 365;  // 1 year
+        };
     }
     
     // Getters
