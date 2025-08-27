@@ -439,4 +439,54 @@ public class UserDatabase {
             return new HashMap<>(roleDistribution);
         }
     }
+    
+    // Additional methods for REST API compatibility
+    
+    /**
+     * Find user by username (alias for getUserByUsername)
+     * @param username Username to search
+     * @return User object or null if not found
+     */
+    public User findByUsername(String username) {
+        return getUserByUsername(username);
+    }
+    
+    /**
+     * Find user by ID
+     * @param userId User ID to search
+     * @return User object or null if not found
+     */
+    public User findById(String userId) {
+        return users.values().stream()
+            .filter(user -> user.getUserId().equals(userId))
+            .findFirst()
+            .orElse(null);
+    }
+    
+    /**
+     * Add user to database (alias for registerUser)
+     * @param user User to add
+     * @return true if added successfully
+     */
+    public boolean addUser(User user) {
+        RegistrationResult result = registerUser(user);
+        return result.isSuccess();
+    }
+    
+    /**
+     * Remove user from database
+     * @param user User to remove
+     * @return true if removed successfully
+     */
+    public boolean removeUser(User user) {
+        return deleteUser(user.getUsername(), "system");
+    }
+    
+    /**
+     * Get singleton instance
+     * @return UserDatabase instance
+     */
+    public static UserDatabase getInstance() {
+        return new UserDatabase();
+    }
 }

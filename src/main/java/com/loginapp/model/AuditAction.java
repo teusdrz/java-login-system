@@ -31,6 +31,7 @@ public enum AuditAction {
     SYSTEM_STARTUP("System Startup"),
     SYSTEM_SHUTDOWN("System Shutdown"),
     SYSTEM_CONFIG_CHANGED("System Configuration Changed"),
+    SYSTEM_ERROR("System Error"),
     DATABASE_BACKUP("Database Backup"),
     DATABASE_RESTORE("Database Restore"),
     

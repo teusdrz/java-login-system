@@ -1,6 +1,6 @@
 package com.loginapp.api.dto;
 
-import java.util.Set;
+import com.loginapp.model.Role;
 
 /**
  * UserUpdateDto - User update request DTO
@@ -9,17 +9,17 @@ public class UserUpdateDto {
     private String email;
     private String firstName;
     private String lastName;
-    private Set<String> roles;
-    private boolean active;
+    private Role role;
+    private Boolean active;
 
     // Constructors
     public UserUpdateDto() {}
 
-    public UserUpdateDto(String email, String firstName, String lastName, Set<String> roles, boolean active) {
+    public UserUpdateDto(String email, String firstName, String lastName, Role role, Boolean active) {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.roles = roles;
+        this.role = role;
         this.active = active;
     }
 
@@ -48,19 +48,23 @@ public class UserUpdateDto {
         this.lastName = lastName;
     }
 
-    public Set<String> getRoles() {
-        return roles;
+    public Role getRole() {
+        return role;
     }
     
-    public void setRoles(Set<String> roles) {
-        this.roles = roles;
+    public void setRole(Role role) {
+        this.role = role;
     }
 
-    public boolean isActive() {
+    public Boolean isActive() {
         return active;
     }
     
-    public void setActive(boolean active) {
+    public Boolean getIsActive() {
+        return active;
+    }
+    
+    public void setActive(Boolean active) {
         this.active = active;
     }
 }

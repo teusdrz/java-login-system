@@ -1,96 +1,102 @@
 package com.loginapp.api.dto;
 
+import com.loginapp.model.Role;
+
 /**
- * UserRegistrationDto - User registration request DTO
+ * UserRegistrationDto - DTO for user registration
+ * Contains all required information for creating a new user account
  */
 public class UserRegistrationDto {
+    
     private String username;
-    private String password;
-    private String confirmPassword;
     private String email;
+    private String password;
     private String firstName;
     private String lastName;
-    private String ipAddress;
-    private String userAgent;
-
-    // Constructors
-    public UserRegistrationDto() {}
-
-    public UserRegistrationDto(String username, String password, String confirmPassword, 
-                              String email, String firstName, String lastName, 
-                              String ipAddress, String userAgent) {
+    private Role role = Role.USER; // Default role
+    
+    // Default constructor
+    public UserRegistrationDto() {
+    }
+    
+    // Constructor with all fields
+    public UserRegistrationDto(String username, String email, String password, 
+                               String firstName, String lastName, Role role) {
         this.username = username;
-        this.password = password;
-        this.confirmPassword = confirmPassword;
         this.email = email;
+        this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.ipAddress = ipAddress;
-        this.userAgent = userAgent;
+        this.role = role != null ? role : Role.USER;
     }
-
-    // Getters and Setters
+    
+    // Getters
     public String getUsername() {
         return username;
     }
     
-    public void setUsername(String username) {
-        this.username = username;
+    public String getEmail() {
+        return email;
     }
-
+    
     public String getPassword() {
         return password;
     }
     
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getConfirmPassword() {
-        return confirmPassword;
+    public String getFirstName() {
+        return firstName;
     }
     
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
+    public String getLastName() {
+        return lastName;
     }
-
-    public String getEmail() {
-        return email;
+    
+    public Role getRole() {
+        return role;
+    }
+    
+    // Setters
+    public void setUsername(String username) {
+        this.username = username;
     }
     
     public void setEmail(String email) {
         this.email = email;
     }
-
-    public String getFirstName() {
-        return firstName;
+    
+    public void setPassword(String password) {
+        this.password = password;
     }
     
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
-
-    public String getLastName() {
-        return lastName;
-    }
     
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
-
-    public String getIpAddress() {
-        return ipAddress;
+    
+    public void setRole(Role role) {
+        this.role = role != null ? role : Role.USER;
     }
     
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
-    public String getUserAgent() {
-        return userAgent;
+    // Validation helper methods
+    public boolean isValid() {
+        return username != null && !username.trim().isEmpty() &&
+               email != null && !email.trim().isEmpty() &&
+               password != null && !password.trim().isEmpty() &&
+               firstName != null && !firstName.trim().isEmpty() &&
+               lastName != null && !lastName.trim().isEmpty();
     }
     
-    public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
+    @Override
+    public String toString() {
+        return "UserRegistrationDto{" +
+               "username='" + username + '\'' +
+               ", email='" + email + '\'' +
+               ", firstName='" + firstName + '\'' +
+               ", lastName='" + lastName + '\'' +
+               ", role=" + role +
+               '}';
     }
 }

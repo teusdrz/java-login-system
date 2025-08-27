@@ -285,4 +285,22 @@ public class User {
     public int hashCode() {
         return userId.hashCode();
     }
+    
+    // Additional methods for REST API compatibility
+    
+    /**
+     * Set failed login attempts
+     * @param attempts Number of failed attempts
+     */
+    public void setFailedLoginAttempts(int attempts) {
+        this.failedLoginAttempts = attempts;
+    }
+    
+    /**
+     * Set last modified timestamp
+     * @param dateTime Last modified date and time
+     */
+    public void setLastModifiedAt(LocalDateTime dateTime) {
+        this.lastModifiedAt = dateTime;
+    }
 }
