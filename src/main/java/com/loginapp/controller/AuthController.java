@@ -14,6 +14,8 @@ public class AuthController {
     private final UserDatabase userDatabase;
     private final ConsoleView consoleView;
     private final PermissionService permissionService;
+    private final BackupController backupController;
+    private final NotificationController notificationController;
     private User currentUser;
     private boolean applicationRunning;
 
@@ -22,6 +24,8 @@ public class AuthController {
         this.userDatabase = userDatabase;
         this.consoleView = consoleView;
         this.permissionService = PermissionService.getInstance();
+        this.backupController = new BackupController(consoleView);
+        this.notificationController = new NotificationController(consoleView);
         this.currentUser = null;
         this.applicationRunning = true;
     }
@@ -74,6 +78,11 @@ public class AuthController {
         if (hasAdminAccess()) {
             System.out.println("7. System Status");
         }
+        
+        // New functionalities
+        System.out.println("8. Backup Management");
+        System.out.println("9. Notification Center");
+        
         System.out.println("0. Logout");
         System.out.print("Choose an option: ");
         
@@ -104,6 +113,12 @@ public class AuthController {
                 } else {
                     consoleView.displayErrorMessage("Access denied. Admin privileges required.");
                 }
+                break;
+            case 8:
+                handleBackupManagement();
+                break;
+            case 9:
+                handleNotificationCenter();
                 break;
             case 0:
                 handleLogout();
@@ -328,6 +343,52 @@ public class AuthController {
     private String getCurrentTimestamp() {
         return java.time.LocalDateTime.now().format(
             java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    /**
+     * Handle backup management operations
+     */
+    private void handleBackupManagement() {
+        try {
+            if (currentUser != null) {
+                System.out.println("\n=== ACCESSING BACKUP MANAGEMENT SYSTEM ===");
+                System.out.println("Initializing backup management for user: " + currentUser.getUsername());
+                System.out.println("User role: " + currentUser.getRole().getDisplayName());
+                System.out.println("");
+                
+                // Pass the current user to the backup controller
+                backupController.handleBackupManagement(currentUser);
+            } else {
+                consoleView.displayErrorMessage("Error: No authenticated user found.");
+            }
+        } catch (Exception e) {
+            consoleView.displayErrorMessage("Error accessing backup management: " + e.getMessage());
+            System.err.println("Backup management error details: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Handle notification center operations
+     */
+    private void handleNotificationCenter() {
+        try {
+            if (currentUser != null) {
+                System.out.println("\n=== ACCESSING NOTIFICATION CENTER ===");
+                System.out.println("Opening notification center for user: " + currentUser.getUsername());
+                System.out.println("User role: " + currentUser.getRole().getDisplayName());
+                System.out.println("");
+                
+                // Pass the current user to the notification controller
+                notificationController.handleNotificationManagement(currentUser);
+            } else {
+                consoleView.displayErrorMessage("Error: No authenticated user found.");
+            }
+        } catch (Exception e) {
+            consoleView.displayErrorMessage("Error accessing notification center: " + e.getMessage());
+            System.err.println("Notification center error details: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // Shutdown method
