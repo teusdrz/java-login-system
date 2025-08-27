@@ -1,25 +1,33 @@
 package com.loginapp.controller;
 
-import com.loginapp.model.RegistrationResult;
-import com.loginapp.model.Role;
 import com.loginapp.model.User;
+import com.loginapp.model.Role;
+import com.loginapp.model.Notification;
+import com.loginapp.model.BackupMetadata;
+import com.loginapp.model.BackupStatus;
 import com.loginapp.model.UserDatabase;
+import com.loginapp.model.RegistrationResult;
 import com.loginapp.services.PermissionService;
+import com.loginapp.services.NotificationService;
+import com.loginapp.services.BackupRecoveryService;
+import com.loginapp.controller.NotificationController;
+import com.loginapp.controller.BackupController;
 import com.loginapp.view.ConsoleView;
+
 import java.util.List;
+import java.util.Map;
 
 /**
- * AuthController class - Enhanced with role-based access control
- * Manages authentication        // Validate new password
-        if (newPassword.length() < 6 || newPassword.length() > 50) {
-            consoleView.displayErrorMessage("Password must be between 6 and 50 characters.");
-            return;
-        } and user operations with permission checking
+ * AuthController class - Enhanced with role-based access control,
+ * notifications, and backup system integration
  */
 public class AuthController {
     private UserDatabase userDatabase;
     private ConsoleView consoleView;
     private PermissionService permissionService;
+    private NotificationController notificationController;
+    private BackupController backupController;
+    private NotificationService notificationService;
     private User currentUser;
     private boolean applicationRunning;
 
@@ -28,8 +36,21 @@ public class AuthController {
         this.userDatabase = userDatabase;
         this.consoleView = consoleView;
         this.permissionService = PermissionService.getInstance();
+        this.notificationService = NotificationService.getInstance();
+        this.notificationController = new NotificationController(consoleView);
+        this.backupController = new BackupController(consoleView);
         this.currentUser = null;
         this.applicationRunning = true;
+        
+        // Initialize notification observers for system events
+        initializeSystemNotifications();
+    }
+
+    /**
+     * Initialize system notifications for important events
+     */
+    private void initializeSystemNotifications() {
+        // System would set up observers for login events, security issues, etc.
     }
 
     /**
@@ -45,7 +66,7 @@ public class AuthController {
         }
 
         // Clean up resources
-        consoleView.close();
+        shutdown();
         consoleView.displayInfoMessage("Application closed. Goodbye!");
     }
 
@@ -76,9 +97,15 @@ public class AuthController {
     }
 
     /**
-     * Handle user dashboard interactions
+     * Enhanced user dashboard with new advanced features
      */
     private void handleUserDashboard() {
+        // Check for pending notifications before showing dashboard
+        notificationController.checkPendingNotifications(currentUser);
+        
+        // Check backup-related notifications for admins
+        backupController.checkBackupNotifications(currentUser);
+        
         consoleView.displayUserDashboard(currentUser);
         int choice = consoleView.getMenuChoice();
 
@@ -120,6 +147,16 @@ public class AuthController {
                     consoleView.displayErrorMessage("Access denied. Insufficient permissions.");
                 }
                 break;
+            case 8: // NEW: Notification Center
+                handleNotificationCenter();
+                break;
+            case 9: // NEW: Backup & Recovery
+                if (permissionService.hasPermission(currentUser, "BACKUP_SYSTEM")) {
+                    backupController.handleBackupManagement(currentUser, userDatabase);
+                } else {
+                    consoleView.displayErrorMessage("Access denied. Backup system permission required.");
+                }
+                break;
             case 0:
                 handleLogout();
                 break;
@@ -127,6 +164,13 @@ public class AuthController {
                 consoleView.displayErrorMessage("Invalid option. Please try again.");
                 break;
         }
+    }
+
+    /**
+     * Handle notification center access
+     */
+    private void handleNotificationCenter() {
+        notificationController.handleNotificationManagement(currentUser);
     }
 
     /**
@@ -191,6 +235,12 @@ public class AuthController {
                 case 4:
                     handleSecurityReport();
                     break;
+                case 5:
+                    handleNotificationManagement();
+                    break;
+                case 6:
+                    handleBackupSystemStatus();
+                    break;
                 case 0:
                     inSystemAdmin = false;
                     break;
@@ -202,7 +252,7 @@ public class AuthController {
     }
 
     /**
-     * Handle user login process with enhanced security
+     * Enhanced login with security notifications
      */
     private void handleLogin() {
         System.out.println("\n=== LOGIN ===");
@@ -224,14 +274,45 @@ public class AuthController {
             consoleView.displaySuccessMessage("Login successful! Welcome, " +
                                             authenticatedUser.getFullName() + " (" +
                                             authenticatedUser.getRole().getDisplayName() + ")!");
+            
+            // Send login success notification
+            notificationService.sendNotification(username,
+                Notification.NotificationType.LOGIN_SUCCESS,
+                "Login Successful",
+                "Successful login from " + getCurrentTimestamp());
+            
+            // Check for system alerts for admins
+            if (authenticatedUser.getRole().hasPermission("NOTIFICATION_ADMIN")) {
+                checkAndSendSystemAlerts(authenticatedUser);
+            }
+            
         } else {
             User user = userDatabase.getUserByUsername(username);
             if (user != null && user.isLocked()) {
                 consoleView.displayErrorMessage("Account is locked due to multiple failed login attempts. Contact administrator.");
+                
+                // Send security alert to admins
+                sendSecurityAlertToAdmins("Account Lock Attempt", 
+                    "User " + username + " attempted to login with locked account");
+                    
             } else if (user != null && !user.isActive()) {
                 consoleView.displayErrorMessage("Account is inactive. Contact administrator.");
             } else {
                 consoleView.displayErrorMessage("Invalid username or password.");
+                
+                // Send failed login notification if user exists
+                if (user != null) {
+                    notificationService.sendNotification(username,
+                        Notification.NotificationType.LOGIN_FAILURE,
+                        "Login Failed",
+                        "Failed login attempt from " + getCurrentTimestamp());
+                    
+                    // Send security alert if multiple failures
+                    if (user.getFailedLoginAttempts() >= 3) {
+                        sendSecurityAlertToAdmins("Multiple Failed Login Attempts",
+                            "User " + username + " has " + user.getFailedLoginAttempts() + " failed attempts");
+                    }
+                }
             }
         }
     }
@@ -282,6 +363,13 @@ public class AuthController {
             RegistrationResult registrationResult = userDatabase.registerUser(newUser);
             if (registrationResult.isSuccess()) {
                 consoleView.displaySuccessMessage("Registration successful! You can now login with your credentials.");
+                
+                // Send welcome notification
+                notificationService.sendNotification(username,
+                    Notification.NotificationType.USER_CREATED,
+                    "Welcome to the System",
+                    "Your account has been created successfully. Welcome aboard!");
+                    
             } else {
                 consoleView.displayErrorMessage("Registration failed: " + registrationResult.getMessage());
             }
@@ -352,6 +440,12 @@ public class AuthController {
         if (updated) {
             userDatabase.updateUser(currentUser.getUsername(), currentUser, currentUser.getUsername());
             consoleView.displaySuccessMessage("Profile updated successfully!");
+            
+            // Send profile update notification
+            notificationService.sendNotification(currentUser.getUsername(),
+                Notification.NotificationType.PROFILE_UPDATED,
+                "Profile Updated",
+                "Your profile information has been updated successfully");
         } else {
             consoleView.displayInfoMessage("No changes made to profile.");
         }
@@ -365,7 +459,7 @@ public class AuthController {
     }
 
     /**
-     * Handle change password functionality
+     * Enhanced password change with notifications
      */
     private void handleChangePassword() {
         System.out.println("\n=== CHANGE PASSWORD ===");
@@ -400,15 +494,30 @@ public class AuthController {
         currentUser.setPassword(newPassword);
         userDatabase.updateUser(currentUser.getUsername(), currentUser, currentUser.getUsername());
         consoleView.displaySuccessMessage("Password changed successfully!");
+        
+        // Send notification about password change
+        notificationService.sendNotification(currentUser.getUsername(),
+            Notification.NotificationType.PASSWORD_CHANGED,
+            "Password Changed",
+            "Your password was successfully changed at " + getCurrentTimestamp());
     }
 
     /**
      * Handle logout functionality
      */
     private void handleLogout() {
-        String username = currentUser.getUsername();
-        currentUser = null;
-        consoleView.displaySuccessMessage("Logout successful. Goodbye, " + username + "!");
+        if (currentUser != null) {
+            String username = currentUser.getUsername();
+            consoleView.displaySuccessMessage("Logout successful. Goodbye, " + username + "!");
+            
+            // Send logout notification
+            notificationService.sendNotification(username,
+                Notification.NotificationType.LOGOUT,
+                "Logout Successful",
+                "Successfully logged out at " + getCurrentTimestamp());
+                
+            currentUser = null;
+        }
     }
 
     /**
@@ -483,7 +592,7 @@ public class AuthController {
     }
 
     /**
-     * Handle create user functionality (admin)
+     * Enhanced user creation with notifications
      */
     private void handleCreateUser() {
         System.out.println("\n=== CREATE NEW USER ===");
@@ -517,12 +626,25 @@ public class AuthController {
             return;
         }
 
-        // Register user with simplified boolean return
+        // Register user
         try {
-            RegistrationResult registrationResult = userDatabase.registerUser(newUser);
+            RegistrationResult registrationResult = userDatabase.registerUser(newUser, currentUser.getUsername());
             if (registrationResult.isSuccess()) {
                 consoleView.displaySuccessMessage("User created successfully: " + username +
                                                 " (" + selectedRole.getDisplayName() + ")");
+                
+                // Send notification to new user
+                notificationService.sendNotification(username,
+                    Notification.NotificationType.USER_CREATED,
+                    "Welcome to the System",
+                    "Your account has been created successfully by " + currentUser.getUsername());
+                
+                // Send notification to creator
+                notificationService.sendNotification(currentUser.getUsername(),
+                    Notification.NotificationType.USER_CREATED,
+                    "User Created",
+                    "Successfully created user: " + username + " (" + selectedRole.getDisplayName() + ")");
+                    
             } else {
                 consoleView.displayErrorMessage("User creation failed: " + registrationResult.getMessage());
             }
@@ -532,7 +654,7 @@ public class AuthController {
     }
 
     /**
-     * Handle modify user role functionality
+     * Enhanced role modification with notifications
      */
     private void handleModifyUserRole() {
         System.out.println("\n=== MODIFY USER ROLE ===");
@@ -584,6 +706,19 @@ public class AuthController {
         // Perform role change
         if (userDatabase.changeUserRole(username, newRole, currentUser.getUsername())) {
             consoleView.displaySuccessMessage("Role changed successfully for user: " + username);
+            
+            // Send notification to affected user
+            notificationService.sendNotification(username,
+                Notification.NotificationType.ROLE_CHANGED,
+                "Role Changed",
+                "Your role has been changed to " + newRole.getDisplayName() + " by " + currentUser.getUsername());
+            
+            // Send notification to administrator
+            notificationService.sendNotification(currentUser.getUsername(),
+                Notification.NotificationType.ROLE_CHANGED,
+                "Role Change Completed",
+                "Successfully changed " + username + "'s role to " + newRole.getDisplayName());
+                
         } else {
             consoleView.displayErrorMessage("Failed to change user role.");
         }
@@ -757,11 +892,80 @@ public class AuthController {
         consoleView.waitForEnter();
     }
 
+    private void handleNotificationManagement() {
+        notificationController.handleAdminNotificationManagement(currentUser);
+    }
+
+    private void handleBackupSystemStatus() {
+        backupController.handleBackupSystemStatus(currentUser);
+    }
+
     /**
      * Exit the application
      */
     private void exitApplication() {
         applicationRunning = false;
+    }
+
+    /**
+     * Helper method to get current timestamp
+     */
+    private String getCurrentTimestamp() {
+        return java.time.LocalDateTime.now().format(
+            java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    /**
+     * Check and send system alerts for administrators
+     */
+    private void checkAndSendSystemAlerts(User admin) {
+        // Check for users with multiple failed login attempts
+        List<User> usersWithFailures = userDatabase.getAllUsers().stream()
+            .filter(user -> user.getFailedLoginAttempts() >= 3)
+            .collect(java.util.stream.Collectors.toList());
+        
+        if (!usersWithFailures.isEmpty()) {
+            notificationService.sendNotification(admin.getUsername(),
+                Notification.NotificationType.SECURITY_ALERT,
+                "Users with Failed Login Attempts",
+                usersWithFailures.size() + " user(s) have multiple failed login attempts");
+        }
+        
+        // Check for locked accounts
+        List<User> lockedUsers = userDatabase.getLockedUsers();
+        if (!lockedUsers.isEmpty()) {
+            notificationService.sendNotification(admin.getUsername(),
+                Notification.NotificationType.SECURITY_ALERT,
+                "Locked Accounts Alert",
+                lockedUsers.size() + " account(s) are currently locked");
+        }
+    }
+
+    /**
+     * Send security alert to all administrators
+     */
+    private void sendSecurityAlertToAdmins(String title, String message) {
+        List<User> admins = userDatabase.getUsersByRole(Role.ADMIN);
+        for (User admin : admins) {
+            notificationService.sendNotification(admin.getUsername(),
+                Notification.NotificationType.SECURITY_ALERT,
+                Notification.NotificationPriority.HIGH,
+                title,
+                message,
+                "Immediate attention may be required");
+        }
+    }
+
+    /**
+     * Enhanced cleanup on application shutdown
+     */
+    public void shutdown() {
+        if (notificationController != null) {
+            notificationController.shutdown();
+        }
+        
+        // Clean up other resources
+        consoleView.close();
     }
 
     /**
