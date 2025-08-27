@@ -46,14 +46,44 @@ class ApiService {
     // Authentication methods
     async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
         try {
+            // Smart email conversion for BasicApiServer compatibility
+            let emailToSend = credentials.username;
+
+            // If username doesn't contain @, try common conversions
+            if (!credentials.username.includes('@')) {
+                // Check if it matches known usernames and convert to email
+                const usernameToEmailMap: { [key: string]: string } = {
+                    'admin': 'admin@admin.com',
+                    'user': 'user@user.com',
+                    'Matheus': 'matheus@gmail.com',
+                    'matheus': 'matheus@gmail.com'
+                };
+
+                emailToSend = usernameToEmailMap[credentials.username] || credentials.username;
+            }
+
+            const loginData = {
+                email: emailToSend, // BasicApiServer expects email field
+                password: credentials.password,
+                ipAddress: credentials.ipAddress,
+                userAgent: credentials.userAgent,
+                rememberMe: credentials.rememberMe
+            };
+
+            console.log('Sending login data:', loginData);
+
             const response: AxiosResponse<ApiResponse<LoginResponse>> = await this.api.post(
                 '/auth/login',
-                credentials
+                loginData
             );
+
+            console.log('Login response:', response.data);
 
             if (response.data.success && response.data.data?.token) {
                 localStorage.setItem('authToken', response.data.data.token);
                 localStorage.setItem('user', JSON.stringify(response.data.data.user));
+                console.log('Token saved:', response.data.data.token);
+                console.log('User saved:', response.data.data.user);
             }
 
             return response.data;

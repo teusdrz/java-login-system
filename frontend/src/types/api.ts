@@ -1,17 +1,17 @@
 // API Types for Java Login System
 
 export interface User {
-    id: string;
+    id?: string;
     username: string;
     email: string;
-    firstName: string;
-    lastName: string;
+    firstName?: string;
+    lastName?: string;
     role: Role;
-    active: boolean;
-    createdAt: string;
-    lastModifiedAt: string;
+    active?: boolean;
+    createdAt?: string;
+    lastModifiedAt?: string;
     lastLoginAt?: string;
-    failedLoginAttempts: number;
+    failedLoginAttempts?: number;
 }
 
 export enum Role {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Lock, User, Shield, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -25,10 +25,9 @@ const LoginPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-    // Hooks for navigation and notifications
+    // Hooks for notifications
     const { login } = useAuth();
     const { showToast } = useToast();
-    const navigate = useNavigate();
 
     /**
      * Handle input field changes with validation
@@ -74,7 +73,10 @@ const LoginPage: React.FC = () => {
      * @param e - Form submit event
      */
     const handleSubmit = async (e: React.FormEvent) => {
+        // CRITICAL: Prevent any default form submission
         e.preventDefault();
+
+        console.log('🔄 Form submitted, preventing default behavior...');
 
         if (!validateForm()) {
             showToast({
@@ -86,6 +88,7 @@ const LoginPage: React.FC = () => {
         }
 
         setLoading(true);
+        console.log('📡 Starting login request...');
 
         try {
             // Prepare login data with browser information
@@ -95,21 +98,28 @@ const LoginPage: React.FC = () => {
                 userAgent: navigator.userAgent,
             };
 
+            console.log('📨 Sending login request:', loginData);
             const response = await ApiService.login(loginData);
-
-            if (response.success && response.data) {
+            console.log('📥 LoginPage received response:', response); if (response.success && response.data) {
                 // Successful login
+                console.log('✅ Login successful! Calling AuthContext login...');
+                console.log('Token:', response.data.token);
+                console.log('User:', response.data.user);
+
+                // Update auth context
                 login(response.data.token, response.data.user);
 
                 showToast({
                     type: 'success',
                     title: 'Welcome Back!',
-                    message: `Successfully logged in as ${response.data.user.firstName}`,
+                    message: `Successfully logged in as ${response.data.user.username}`,
                 });
 
-                navigate('/dashboard');
+                console.log('🚀 Redirecting to dashboard...');
+                window.location.href = '/dashboard';
             } else {
                 // Login failed
+                console.error('❌ Login failed:', response.message);
                 showToast({
                     type: 'error',
                     title: 'Login Failed',
@@ -130,17 +140,61 @@ const LoginPage: React.FC = () => {
 
     /**
      * Quick login with demo account
-     * @param username - Demo account username
+     * @param username - Demo account username  
      * @param password - Demo account password
      */
     const handleDemoLogin = async (username: string, password: string) => {
-        setFormData(prev => ({ ...prev, username, password }));
+        console.log('🎯 Demo login clicked:', username);
 
-        // Simulate a small delay for better UX
-        setTimeout(() => {
-            const event = new Event('submit', { bubbles: true, cancelable: true });
-            document.getElementById('loginForm')?.dispatchEvent(event);
-        }, 100);
+        // Update form data
+        setFormData(prev => ({ ...prev, username, password }));
+        setLoading(true);
+
+        try {
+            // Prepare login data with browser information
+            const loginData: LoginRequest = {
+                username,
+                password,
+                rememberMe: false,
+                ipAddress: '127.0.0.1',
+                userAgent: navigator.userAgent,
+            };
+
+            console.log('📨 Demo login request:', loginData);
+            const response = await ApiService.login(loginData);
+            console.log('📥 Demo login response:', response);
+
+            if (response.success && response.data) {
+                // Successful login
+                console.log('✅ Demo login successful!');
+                login(response.data.token, response.data.user);
+
+                showToast({
+                    type: 'success',
+                    title: 'Welcome Back!',
+                    message: `Successfully logged in as ${response.data.user.username}`,
+                });
+
+                console.log('🚀 Demo redirecting to dashboard...');
+                window.location.href = '/dashboard';
+            } else {
+                console.error('❌ Demo login failed:', response.message);
+                showToast({
+                    type: 'error',
+                    title: 'Login Failed',
+                    message: response.message || 'Invalid credentials',
+                });
+            }
+        } catch (error) {
+            console.error('💥 Demo login error:', error);
+            showToast({
+                type: 'error',
+                title: 'Network Error',
+                message: 'Unable to connect to the server. Please try again.',
+            });
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (

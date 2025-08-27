@@ -8,16 +8,3 @@
    POST http://localhost:8080/api/auth/logout
    GET  http://localhost:8080/api/test
 Press Enter to stop the server...
-Failed to start server: Input/output error
-Login request: {"email":"admin@admin.com","password":"admin123"}
-Register request: {"username":"testuser","email":"test@test.com","password":"test123"}
-Login request: {"email": "admin@admin.com", "password": "admin123"}
-Login request: {"email": "user@user.com", "password": "user123"}
-Register request: {"email": "teste@teste.com", "password": "teste123", "username": "teste"}
-Login request: {"email": "wrong@email.com", "password": "wrongpass"}
-Register request: {"email": "admin@admin.com", "password": "newpass", "username": "newadmin"}
-Login request: {"email": "admin@admin.com", "password": "admin123"}
-Login request: {"email": "admin@admin.com", "password": "admin123"}
-Login request: {"email": "user@user.com", "password": "user123"}
-Register request: {"email": "novo@teste.com", "password": "novo123", "username": "novo"}
-Login request: {"email": "inexistente@teste.com", "password": "senha_errada"}

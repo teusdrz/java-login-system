@@ -163,6 +163,8 @@ const Dashboard: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRole, setFilterRole] = useState<Role | 'all'>('all');
     const [realTimeData, setRealTimeData] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterRole, setFilterRole] = useState<Role | 'all'>('all');
 
     const isModerator = user?.role === Role.ADMIN || user?.role === Role.MODERATOR;
 
@@ -191,11 +193,7 @@ const Dashboard: React.FC = () => {
             totalUsers: 1247,
             activeUsers: 892,
             newUsersToday: 23,
-            onlineUsers: 156,
-            totalSessions: 3245,
-            avgSessionTime: '24m',
-            systemUptime: '15d 8h 32m',
-            errorRate: 2.1
+            onlineUsers: 156
         });
     };
 

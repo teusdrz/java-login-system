@@ -11,7 +11,22 @@ import './App.css';
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { state } = useAuth();
-  return state.isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+  console.log('ProtectedRoute: Auth state:', state);
+
+  // Check if user is authenticated or has token in localStorage
+  const hasToken = localStorage.getItem('authToken');
+  const hasUser = localStorage.getItem('user');
+  console.log('Has token in localStorage:', !!hasToken);
+  console.log('Has user in localStorage:', !!hasUser);
+  console.log('State isAuthenticated:', state.isAuthenticated);
+
+  if (state.isAuthenticated || hasToken) {
+    console.log('User is authenticated or has token, rendering protected content');
+    return <>{children}</>;
+  } else {
+    console.log('User not authenticated, redirecting to login');
+    return <Navigate to="/login" />;
+  }
 };
 
 // Public Route Component (redirect to dashboard if authenticated)

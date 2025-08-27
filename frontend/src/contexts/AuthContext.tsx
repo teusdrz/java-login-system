@@ -17,13 +17,17 @@ type AuthAction =
     | { type: 'UPDATE_USER'; payload: User };
 
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
+    console.log('AuthReducer called with action:', action.type, 'payload' in action ? action.payload : 'no payload');
+
     switch (action.type) {
         case 'LOGIN':
-            return {
+            const newState = {
                 isAuthenticated: true,
                 user: action.payload.user,
                 token: action.payload.token,
             };
+            console.log('AuthReducer LOGIN - new state:', newState);
+            return newState;
         case 'LOGOUT':
             return {
                 isAuthenticated: false,
@@ -58,13 +62,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const token = ApiService.getAuthToken();
         const user = ApiService.getCurrentUser();
 
+        console.log('Initializing auth state from localStorage:', { token, user });
+
         if (token && user) {
+            console.log('Valid token and user found, setting authenticated state');
             dispatch({ type: 'LOGIN', payload: { token, user } });
+        } else {
+            console.log('No valid auth data found in localStorage');
         }
     }, []);
 
     const login = (token: string, user: User) => {
+        console.log('AuthContext login called with:', { token, user });
+
+        // Save to localStorage first
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        console.log('Saved to localStorage - token:', token, 'user:', user);
+
+        // Then dispatch to update state
         dispatch({ type: 'LOGIN', payload: { token, user } });
+        console.log('Login dispatch completed, new state should be authenticated');
     };
 
     const logout = () => {

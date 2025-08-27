@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { User, Role } from '../types/api';
@@ -37,28 +37,9 @@ import {
     Database,
     Server,
     Wifi,
-    WifiOff,
-    Plus,
-    Minus,
-    ChevronDown,
-    ChevronUp
+    WifiOff
 } from 'lucide-react';
-import { 
-    PieChart, 
-    Pie, 
-    Cell, 
-    BarChart, 
-    Bar, 
-    XAxis, 
-    YAxis, 
-    CartesianGrid, 
-    Tooltip, 
-    ResponsiveContainer, 
-    LineChart, 
-    Line, 
-    Area, 
-    AreaChart 
-} from 'recharts';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Area, AreaChart } from 'recharts';
 
 interface DashboardStats {
     totalUsers: number;
@@ -163,6 +144,8 @@ const Dashboard: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRole, setFilterRole] = useState<Role | 'all'>('all');
     const [realTimeData, setRealTimeData] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterRole, setFilterRole] = useState<Role | 'all'>('all');
 
     const isModerator = user?.role === Role.ADMIN || user?.role === Role.MODERATOR;
 
@@ -191,11 +174,7 @@ const Dashboard: React.FC = () => {
             totalUsers: 1247,
             activeUsers: 892,
             newUsersToday: 23,
-            onlineUsers: 156,
-            totalSessions: 3245,
-            avgSessionTime: '24m',
-            systemUptime: '15d 8h 32m',
-            errorRate: 2.1
+            onlineUsers: 156
         });
     };
 
