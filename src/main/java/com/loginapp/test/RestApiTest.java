@@ -1,9 +1,8 @@
 package com.loginapp.test;
 
-import com.loginapp.controller.RestApiController;
 import com.loginapp.api.dto.*;
+import com.loginapp.controller.RestApiController;
 import com.loginapp.model.*;
-import com.loginapp.services.*;
 
 /**
  * RestApiTest - Simple test class for REST API functionality
