@@ -1,0 +1,606 @@
+/* Professional Enterprise Intro Animation - White Theme */
+.professional-intro-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    overflow: hidden;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Advanced Background Elements */
+.professional-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.advanced-grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.4;
+}
+
+.corporate-grid-node {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow:
+        0 0 10px rgba(59, 130, 246, 0.4),
+        0 0 20px rgba(59, 130, 246, 0.2);
+    animation: corporateGridPulse 3s ease-in-out infinite;
+    transform-origin: center;
+}
+
+.grid-node-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+.grid-node-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 50%;
+    animation: corporateRingExpand 4s ease-in-out infinite;
+}
+
+.grid-node-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
+    border: 2px solid rgba(59, 130, 246, 0.2);
+    border-radius: 50%;
+    animation: corporatePulseExpand 5s ease-in-out infinite;
+}
+
+/* Enterprise Network Connections */
+.enterprise-network-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 800px;
+    opacity: 0.6;
+}
+
+.enterprise-connection {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 3px;
+    height: 100px;
+    transform-origin: center bottom;
+    animation: enterpriseConnectionFlow 6s ease-in-out infinite;
+}
+
+.connection-pulse {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.8);
+    animation: connectionPulseMove 3s ease-in-out infinite;
+}
+
+.connection-data {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 60px;
+    background: linear-gradient(to bottom,
+            transparent 0%,
+            rgba(59, 130, 246, 0.8) 20%,
+            rgba(59, 130, 246, 0.4) 80%,
+            transparent 100%);
+    animation: connectionDataFlow 4s ease-in-out infinite;
+}
+
+.connection-trail {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 100px;
+    background: linear-gradient(to bottom,
+            rgba(59, 130, 246, 0.6) 0%,
+            rgba(59, 130, 246, 0.2) 50%,
+            transparent 100%);
+}
+
+/* Advanced Data Particles */
+.advanced-particles-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.7;
+}
+
+.advanced-data-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+    animation: advancedParticleFloat 8s ease-in-out infinite;
+}
+
+.particle-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+}
+
+.particle-trail {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 50%;
+    animation: particleTrailExpand 3s ease-in-out infinite;
+}
+
+.particle-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+    animation: particleGlowPulse 4s ease-in-out infinite;
+}
+
+/* Professional Logo Styling */
+.professional-logo-wrapper {
+    position: relative;
+    z-index: 5;
+    margin-bottom: 40px;
+    filter: drop-shadow(0 10px 30px rgba(59, 130, 246, 0.2));
+}
+
+.professional-logo-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.professional-logo-svg {
+    filter: drop-shadow(0 5px 15px rgba(59, 130, 246, 0.15));
+    animation: professionalLogoFloat 6s ease-in-out infinite;
+}
+
+/* Professional Text Styling */
+.professional-text-container {
+    position: relative;
+    z-index: 5;
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.professional-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 10px 0;
+    text-shadow: 0 2px 10px rgba(30, 41, 59, 0.1);
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.professional-subtitle {
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #64748b;
+    margin: 0;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* Professional Loading Interface */
+.professional-loading-container {
+    position: relative;
+    z-index: 5;
+    width: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+.professional-status-display {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px 25px;
+    border-radius: 15px;
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.1),
+        0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.status-indicator-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.professional-status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    position: relative;
+    animation: statusIndicatorPulse 2s ease-in-out infinite;
+}
+
+.professional-status-indicator.connecting {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+}
+
+.professional-status-indicator.authenticating {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+}
+
+.professional-status-indicator.loading {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+.professional-status-indicator.finalizing {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+}
+
+.professional-status-indicator.ready {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+}
+
+.status-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #374151;
+    letter-spacing: 0.02em;
+}
+
+/* Professional Progress Bar */
+.professional-progress-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.progress-background {
+    width: 100%;
+    height: 8px;
+    background: rgba(229, 231, 235, 0.8);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.professional-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg,
+            #3b82f6 0%,
+            #2563eb 25%,
+            #1d4ed8 50%,
+            #2563eb 75%,
+            #3b82f6 100%);
+    border-radius: 10px;
+    box-shadow:
+        0 0 20px rgba(59, 130, 246, 0.4),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3);
+    position: relative;
+    transition: width 0.3s ease-out;
+}
+
+.professional-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.4) 50%,
+            transparent 100%);
+    animation: progressShimmer 2s ease-in-out infinite;
+}
+
+.progress-text {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.progress-percentage {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.progress-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Advanced Animations */
+@keyframes corporateGridPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: scale(1.3);
+        opacity: 1;
+    }
+}
+
+@keyframes corporateRingExpand {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.1;
+    }
+}
+
+@keyframes corporatePulseExpand {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.2;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+@keyframes enterpriseConnectionFlow {
+
+    0%,
+    100% {
+        transform: rotate(0deg) scale(1);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: rotate(180deg) scale(1.1);
+        opacity: 1;
+    }
+}
+
+@keyframes connectionPulseMove {
+
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(0px);
+        opacity: 1;
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(80px);
+        opacity: 0.3;
+    }
+}
+
+@keyframes connectionDataFlow {
+
+    0%,
+    100% {
+        transform: translateX(-50%) scaleY(1);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: translateX(-50%) scaleY(1.5);
+        opacity: 0.4;
+    }
+}
+
+@keyframes advancedParticleFloat {
+
+    0%,
+    100% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.7;
+    }
+
+    25% {
+        transform: translateY(-20px) rotate(90deg);
+        opacity: 1;
+    }
+
+    50% {
+        transform: translateY(0px) rotate(180deg);
+        opacity: 0.7;
+    }
+
+    75% {
+        transform: translateY(-10px) rotate(270deg);
+        opacity: 1;
+    }
+}
+
+@keyframes particleTrailExpand {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.8);
+        opacity: 0.1;
+    }
+}
+
+@keyframes particleGlowPulse {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.2;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.4;
+    }
+}
+
+@keyframes professionalLogoFloat {
+
+    0%,
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-10px) rotate(1deg);
+    }
+}
+
+@keyframes statusIndicatorPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.3);
+        opacity: 0.7;
+    }
+}
+
+@keyframes progressShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .professional-title {
+        font-size: 2.5rem;
+    }
+
+    .professional-subtitle {
+        font-size: 1.2rem;
+    }
+
+    .professional-loading-container {
+        width: 90%;
+        max-width: 400px;
+    }
+
+    .professional-logo-svg {
+        width: 180px;
+        height: 180px;
+    }
+}
+
+@media (max-width: 480px) {
+    .professional-title {
+        font-size: 2rem;
+    }
+
+    .professional-subtitle {
+        font-size: 1rem;
+    }
+
+    .professional-loading-container {
+        width: 95%;
+        max-width: 350px;
+    }
+
+    .professional-logo-svg {
+        width: 150px;
+        height: 150px;
+    }
+}
