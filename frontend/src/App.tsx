@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
-import IntroAnimation from './components/IntroAnimation';
+import VideoIntro from './components/VideoIntro';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import Dashboard from './pages/Dashboard_Business_Professional';
+import Dashboard from './pages/Dashboard';
 import ProfilePage from './pages/ProfilePage';
 import './App.css';
 
@@ -41,10 +41,17 @@ function App() {
 
   const handleIntroComplete = () => {
     setShowIntro(false);
+    // Simular autenticação automática para ir direto ao dashboard
+    localStorage.setItem('authToken', 'quantum-system-authenticated');
+    localStorage.setItem('user', JSON.stringify({
+      id: 1,
+      name: 'Quantum User',
+      email: 'admin@quantumsystems.com'
+    }));
   };
 
   if (showIntro) {
-    return <IntroAnimation onComplete={handleIntroComplete} />;
+    return <VideoIntro onComplete={handleIntroComplete} />;
   }
 
   return (
