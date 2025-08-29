@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Lock, User, Shield, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, Lock, User, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { LoadingButton } from '../components/Loading';
@@ -205,10 +206,27 @@ const LoginPage: React.FC = () => {
 
                 {/* Header Section */}
                 <div className="text-center">
-                    <div className="mx-auto h-16 w-16 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <Shield className="h-8 w-8 text-white" />
+                    {/* Logo extraordinária igual ao dashboard */}
+                    <div className="mx-auto flex items-center justify-center space-x-3 mb-6">
+                        <div className="relative group">
+                            <div className="w-16 h-16 bg-gradient-to-br from-blue-50 via-white to-blue-50 rounded-2xl flex items-center justify-center shadow-xl border border-blue-100/30 group-hover:shadow-2xl group-hover:scale-105 transition-all duration-500">
+                                <div className="relative w-8 h-8">
+                                    <motion.div
+                                        className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg shadow-sm"
+                                        animate={{ rotate: [0, 90] }}
+                                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                    />
+                                    <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-white rounded-full transform -translate-x-1/2 -translate-y-1/2 shadow-inner"></div>
+                                </div>
+                            </div>
+                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-gray-900 animate-pulse"></div>
+                        </div>
+                        <div className="leading-tight">
+                            <h1 className="text-3xl font-extralight text-white tracking-wide">Nexus</h1>
+                            <p className="text-sm text-gray-400 font-light tracking-[0.3em] uppercase">Enterprise</p>
+                        </div>
                     </div>
-                    <h2 className="mt-6 text-3xl font-bold text-white">
+                    <h2 className="mt-6 text-2xl font-bold text-white">
                         Welcome Back
                     </h2>
                     <p className="mt-2 text-sm text-gray-400">
