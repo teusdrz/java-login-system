@@ -1,0 +1,796 @@
+// ===============================================
+// STEP 7: RESTFUL API CONTROLLER
+// ===============================================
+
+package com.loginapp.api.controller;
+
+import com.loginapp.api.dto.*;
+import com.loginapp.model.*;
+import com.loginapp.services.*;
+import com.loginapp.database.UserDatabase;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * RestApiController - Comprehensive RESTful API endpoints
+ * 
+ * This controller provides a complete REST API for the authentication system
+ * with proper error handling, validation, and security controls.
+ */
+@RestController
+@RequestMapping("/api/v1")
+@CrossOrigin(origins = "*", maxAge = 3600)
+public class RestApiController {
+
+    @Autowired
+    private UserDatabase userDatabase;
+    
+    @Autowired
+    private AuditService auditService;
+    
+    @Autowired
+    private BackupRecoveryService backupService;
+    
+    @Autowired
+    private NotificationService notificationService;
+    
+    @Autowired
+    private PermissionService permissionService;
+
+    // ===============================================
+    // AUTHENTICATION ENDPOINTS
+    // ===============================================
+
+    /**
+     * User login endpoint
+     */
+    @PostMapping("/auth/login")
+    public ResponseEntity<ApiResponse<LoginResponseDto>> login(
+            @Valid @RequestBody LoginRequestDto loginRequest,
+            HttpServletRequest request) {
+        
+        try {
+            // Set IP and User Agent if not provided
+            if (loginRequest.getIpAddress() == null) {
+                loginRequest.setIpAddress(getClientIpAddress(request));
+            }
+            if (loginRequest.getUserAgent() == null) {
+                loginRequest.setUserAgent(request.getHeader("User-Agent"));
+            }
+
+            // Authenticate user
+            User user = userDatabase.authenticateUser(
+                loginRequest.getUsername(), 
+                loginRequest.getPassword()
+            );
+
+            if (user == null) {
+                auditService.logAuditEntry(
+                    AuditAction.LOGIN_FAILED,
+                    AuditLevel.WARNING,
+                    loginRequest.getUsername(),
+                    loginRequest.getIpAddress(),
+                    loginRequest.getUserAgent(),
+                    "Invalid credentials provided"
+                );
+                
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Invalid username or password", "AUTH_001"));
+            }
+
+            if (!user.isActive()) {
+                auditService.logAuditEntry(
+                    AuditAction.LOGIN_FAILED,
+                    AuditLevel.WARNING,
+                    loginRequest.getUsername(),
+                    loginRequest.getIpAddress(),
+                    loginRequest.getUserAgent(),
+                    "Account is inactive"
+                );
+                
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Account is inactive", "AUTH_002"));
+            }
+
+            // Update last login
+            user.setLastLogin(LocalDateTime.now());
+            userDatabase.updateUser(user);
+
+            // Generate tokens (simplified - in real implementation use JWT)
+            String token = generateAccessToken(user);
+            String refreshToken = generateRefreshToken(user);
+
+            // Get user permissions
+            List<String> permissions = permissionService.getUserPermissions(user);
+
+            // Create response
+            LoginResponseDto loginResponse = new LoginResponseDto(
+                token,
+                "Bearer",
+                3600, // 1 hour expiry
+                refreshToken,
+                new UserDto(user),
+                permissions
+            );
+
+            // Log successful login
+            auditService.logAuditEntry(
+                AuditAction.LOGIN_SUCCESS,
+                AuditLevel.INFO,
+                user.getUsername(),
+                loginRequest.getIpAddress(),
+                loginRequest.getUserAgent(),
+                "User logged in successfully"
+            );
+
+            return ResponseEntity.ok(ApiResponse.success("Login successful", loginResponse));
+
+        } catch (Exception e) {
+            auditService.logAuditEntry(
+                AuditAction.LOGIN_FAILED,
+                AuditLevel.ERROR,
+                loginRequest.getUsername(),
+                loginRequest.getIpAddress(),
+                loginRequest.getUserAgent(),
+                "System error during login: " + e.getMessage()
+            );
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("System error occurred", "SYS_001"));
+        }
+    }
+
+    /**
+     * User registration endpoint
+     */
+    @PostMapping("/auth/register")
+    public ResponseEntity<ApiResponse<UserDto>> register(
+            @Valid @RequestBody UserRegistrationDto registrationRequest,
+            HttpServletRequest request) {
+        
+        try {
+            // Set IP and User Agent if not provided
+            if (registrationRequest.getIpAddress() == null) {
+                registrationRequest.setIpAddress(getClientIpAddress(request));
+            }
+            if (registrationRequest.getUserAgent() == null) {
+                registrationRequest.setUserAgent(request.getHeader("User-Agent"));
+            }
+
+            // Validate password confirmation
+            if (!registrationRequest.getPassword().equals(registrationRequest.getConfirmPassword())) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Password confirmation does not match", "VAL_001"));
+            }
+
+            // Check if username already exists
+            if (userDatabase.findUserByUsername(registrationRequest.getUsername()) != null) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Username already exists", "VAL_002"));
+            }
+
+            // Check if email already exists
+            if (userDatabase.findUserByEmail(registrationRequest.getEmail()) != null) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Email already registered", "VAL_003"));
+            }
+
+            // Create new user
+            User newUser = new User(
+                registrationRequest.getUsername(),
+                registrationRequest.getPassword() // Should be hashed in real implementation
+            );
+            newUser.setEmail(registrationRequest.getEmail());
+            newUser.setFirstName(registrationRequest.getFirstName());
+            newUser.setLastName(registrationRequest.getLastName());
+            newUser.setActive(true);
+
+            // Add default role
+            Role defaultRole = new Role("USER");
+            newUser.addRole(defaultRole);
+
+            // Save user
+            User savedUser = userDatabase.addUser(newUser);
+
+            // Log registration
+            auditService.logAuditEntry(
+                AuditAction.USER_CREATED,
+                AuditLevel.INFO,
+                savedUser.getUsername(),
+                registrationRequest.getIpAddress(),
+                registrationRequest.getUserAgent(),
+                "New user registered successfully"
+            );
+
+            // Send notification
+            notificationService.sendWelcomeNotification(savedUser);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("User registered successfully", new UserDto(savedUser)));
+
+        } catch (Exception e) {
+            auditService.logAuditEntry(
+                AuditAction.USER_CREATION_FAILED,
+                AuditLevel.ERROR,
+                registrationRequest.getUsername(),
+                registrationRequest.getIpAddress(),
+                registrationRequest.getUserAgent(),
+                "Registration failed: " + e.getMessage()
+            );
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Registration failed", "SYS_002"));
+        }
+    }
+
+    /**
+     * Logout endpoint
+     */
+    @PostMapping("/auth/logout")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<ApiResponse<Void>> logout(
+            HttpServletRequest request,
+            @RequestHeader("Authorization") String token) {
+        
+        try {
+            // Extract username from token (simplified)
+            String username = extractUsernameFromToken(token);
+            
+            // Invalidate token (in real implementation, add to blacklist)
+            invalidateToken(token);
+
+            // Log logout
+            auditService.logAuditEntry(
+                AuditAction.LOGOUT,
+                AuditLevel.INFO,
+                username,
+                getClientIpAddress(request),
+                request.getHeader("User-Agent"),
+                "User logged out successfully"
+            );
+
+            return ResponseEntity.ok(ApiResponse.success("Logged out successfully", null));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Failed to retrieve user", "SYS_005"));
+        }
+    }
+
+    /**
+     * Update user information
+     */
+    @PutMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #id == authentication.principal.id)")
+    public ResponseEntity<ApiResponse<UserDto>> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UserUpdateDto updateRequest,
+            HttpServletRequest request) {
+        
+        try {
+            User existingUser = userDatabase.findUserById(id);
+            if (existingUser == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Update user fields
+            if (updateRequest.getEmail() != null) {
+                existingUser.setEmail(updateRequest.getEmail());
+            }
+            if (updateRequest.getFirstName() != null) {
+                existingUser.setFirstName(updateRequest.getFirstName());
+            }
+            if (updateRequest.getLastName() != null) {
+                existingUser.setLastName(updateRequest.getLastName());
+            }
+
+            // Only admins can update roles and active status
+            String currentUsername = getCurrentUsername(request);
+            User currentUser = userDatabase.findUserByUsername(currentUsername);
+            
+            if (permissionService.hasRole(currentUser, "ADMIN")) {
+                existingUser.setActive(updateRequest.isActive());
+                
+                if (updateRequest.getRoles() != null) {
+                    existingUser.getRoles().clear();
+                    for (String roleName : updateRequest.getRoles()) {
+                        existingUser.addRole(new Role(roleName));
+                    }
+                }
+            }
+
+            User updatedUser = userDatabase.updateUser(existingUser);
+
+            // Log update
+            auditService.logAuditEntry(
+                AuditAction.USER_UPDATED,
+                AuditLevel.INFO,
+                currentUsername,
+                getClientIpAddress(request),
+                request.getHeader("User-Agent"),
+                "User updated: " + existingUser.getUsername()
+            );
+
+            return ResponseEntity.ok(ApiResponse.success("User updated successfully", new UserDto(updatedUser)));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Failed to update user", "SYS_006"));
+        }
+    }
+
+    /**
+     * Delete user (Admin only)
+     */
+    @DeleteMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(
+            @PathVariable Long id,
+            HttpServletRequest request) {
+        
+        try {
+            User userToDelete = userDatabase.findUserById(id);
+            if (userToDelete == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Prevent deleting the current admin user
+            String currentUsername = getCurrentUsername(request);
+            if (userToDelete.getUsername().equals(currentUsername)) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Cannot delete your own account", "VAL_004"));
+            }
+
+            userDatabase.deleteUser(id);
+
+            // Log deletion
+            auditService.logAuditEntry(
+                AuditAction.USER_DELETED,
+                AuditLevel.WARNING,
+                currentUsername,
+                getClientIpAddress(request),
+                request.getHeader("User-Agent"),
+                "User deleted: " + userToDelete.getUsername()
+            );
+
+            return ResponseEntity.ok(ApiResponse.success("User deleted successfully", null));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Failed to delete user", "SYS_007"));
+        }
+    }
+
+    /**
+     * Change password
+     */
+    @PostMapping("/users/{id}/change-password")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #id == authentication.principal.id)")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @PathVariable Long id,
+            @Valid @RequestBody PasswordChangeDto passwordRequest,
+            HttpServletRequest request) {
+        
+        try {
+            User user = userDatabase.findUserById(id);
+            if (user == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Validate current password (for non-admins)
+            String currentUsername = getCurrentUsername(request);
+            User currentUser = userDatabase.findUserByUsername(currentUsername);
+            
+            if (!permissionService.hasRole(currentUser, "ADMIN") && 
+                !user.getPassword().equals(passwordRequest.getCurrentPassword())) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Current password is incorrect", "VAL_005"));
+            }
+
+            // Validate new password confirmation
+            if (!passwordRequest.getNewPassword().equals(passwordRequest.getConfirmNewPassword())) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("New password confirmation does not match", "VAL_006"));
+            }
+
+            // Update password (should be hashed in real implementation)
+            user.setPassword(passwordRequest.getNewPassword());
+            userDatabase.updateUser(user);
+
+            // Log password change
+            auditService.logAuditEntry(
+                AuditAction.PASSWORD_CHANGED,
+                AuditLevel.INFO,
+                currentUsername,
+                getClientIpAddress(request),
+                request.getHeader("User-Agent"),
+                "Password changed for user: " + user.getUsername()
+            );
+
+            // Send notification
+            notificationService.sendPasswordChangeNotification(user);
+
+            return ResponseEntity.ok(ApiResponse.success("Password changed successfully", null));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Failed to change password", "SYS_008"));
+        }
+    }
+
+    // ===============================================
+    // AUDIT LOG ENDPOINTS
+    // ===============================================
+
+    /**
+     * Get audit logs (Admin and Moderator only)
+     */
+    @GetMapping("/audit")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    public ResponseEntity<ApiResponse<List<AuditEntryDto>>> getAuditLogs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size,
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String action) {
+        
+        try {
+            List<AuditEntry> auditEntries = auditService.getAuditEntries(page, size, username, action);
+            List<AuditEntryDto> auditDtos = auditEntries.stream()
+                .map(AuditEntryDto::new)
+                .collect(Collectors.toList());
+
+            return ResponseEntity.ok(ApiResponse.success(auditDtos));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Failed to retrieve audit logs", "SYS_009"));
+        }
+    }
+
+    /**
+     * Get audit statistics (Admin only)
+     */
+    @GetMapping("/audit/stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Object>> getAuditStats() {
+        try {
+            var stats = auditService.getAuditStatistics();
+            return ResponseEntity.ok(ApiResponse.success(stats));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Failed to retrieve audit statistics", "SYS_010"));
+        }
+    }
+
+    // ===============================================
+    // BACKUP MANAGEMENT ENDPOINTS
+    // ===============================================
+
+    /**
+     * Create backup (Admin only)
+     */
+    @PostMapping("/backup/create")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<BackupInfoDto>> createBackup(
+            @Valid @RequestBody BackupRequestDto backupRequest,
+            HttpServletRequest request) {
+        
+        try {
+            String currentUsername = getCurrentUsername(request);
+            
+            // Create backup
+            String backupId = backupService.createBackup(
+                backupRequest.getBackupType(),
+                backupRequest.getDescription(),
+                backupRequest.isIncludeUserData(),
+                backupRequest.isIncludeAuditLogs(),
+                backupRequest.isCompressBackup(),
+                currentUsername
+            );
+
+            // Get backup info
+            BackupInfoDto backupInfo = backupService.getBackupInfo(backupId);
+
+            // Log backup creation
+            auditService.logAuditEntry(
+                AuditAction.BACKUP_CREATED,
+                AuditLevel.INFO,
+                currentUsername,
+                getClientIpAddress(request),
+                request.getHeader("User-Agent"),
+                "Backup created: " + backupInfo.getFilename()
+            );
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Backup created successfully", backupInfo));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Failed to create backup", "SYS_011"));
+        }
+    }
+
+    /**
+     * Get all backups (Admin only)
+     */
+    @GetMapping("/backup")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<BackupInfoDto>>> getAllBackups() {
+        try {
+            List<BackupInfoDto> backups = backupService.getAllBackups();
+            return ResponseEntity.ok(ApiResponse.success(backups));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Failed to retrieve backups", "SYS_012"));
+        }
+    }
+
+    /**
+     * Restore from backup (Admin only)
+     */
+    @PostMapping("/backup/{backupId}/restore")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> restoreBackup(
+            @PathVariable String backupId,
+            HttpServletRequest request) {
+        
+        try {
+            String currentUsername = getCurrentUsername(request);
+            
+            boolean success = backupService.restoreFromBackup(backupId, currentUsername);
+            
+            if (!success) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Failed to restore backup", "BAK_001"));
+            }
+
+            // Log restore operation
+            auditService.logAuditEntry(
+                AuditAction.BACKUP_RESTORED,
+                AuditLevel.WARNING,
+                currentUsername,
+                getClientIpAddress(request),
+                request.getHeader("User-Agent"),
+                "System restored from backup: " + backupId
+            );
+
+            return ResponseEntity.ok(ApiResponse.success("Backup restored successfully", null));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Failed to restore backup", "SYS_013"));
+        }
+    }
+
+    /**
+     * Delete backup (Admin only)
+     */
+    @DeleteMapping("/backup/{backupId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteBackup(
+            @PathVariable String backupId,
+            HttpServletRequest request) {
+        
+        try {
+            String currentUsername = getCurrentUsername(request);
+            
+            boolean success = backupService.deleteBackup(backupId);
+            
+            if (!success) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Log backup deletion
+            auditService.logAuditEntry(
+                AuditAction.BACKUP_DELETED,
+                AuditLevel.WARNING,
+                currentUsername,
+                getClientIpAddress(request),
+                request.getHeader("User-Agent"),
+                "Backup deleted: " + backupId
+            );
+
+            return ResponseEntity.ok(ApiResponse.success("Backup deleted successfully", null));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Failed to delete backup", "SYS_014"));
+        }
+    }
+
+    // ===============================================
+    // SYSTEM STATISTICS ENDPOINTS
+    // ===============================================
+
+    /**
+     * Get system statistics (Admin only)
+     */
+    @GetMapping("/system/stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<SystemStatsDto>> getSystemStats() {
+        try {
+            SystemStatsDto stats = new SystemStatsDto();
+            
+            // Populate statistics
+            stats.setTotalUsers(userDatabase.getAllUsers().size());
+            stats.setActiveUsers(userDatabase.getActiveUserCount());
+            stats.setTotalAuditEntries(auditService.getTotalAuditEntries());
+            stats.setTotalBackups(backupService.getBackupCount());
+            stats.setSystemUptime(getSystemUptime());
+            stats.setMemoryUsage(getMemoryUsage());
+            stats.setDiskUsage(getDiskUsage());
+            stats.setLastBackup(backupService.getLastBackupDate());
+            
+            // Get recent users and audit entries
+            List<User> recentUsers = userDatabase.getRecentUsers(5);
+            stats.setRecentUsers(recentUsers.stream().map(UserDto::new).collect(Collectors.toList()));
+            
+            List<AuditEntry> recentAudit = auditService.getRecentAuditEntries(10);
+            stats.setRecentAuditEntries(recentAudit.stream().map(AuditEntryDto::new).collect(Collectors.toList()));
+
+            return ResponseEntity.ok(ApiResponse.success(stats));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Failed to retrieve system statistics", "SYS_015"));
+        }
+    }
+
+    /**
+     * Health check endpoint
+     */
+    @GetMapping("/system/health")
+    public ResponseEntity<ApiResponse<Object>> healthCheck() {
+        try {
+            var healthStatus = Map.of(
+                "status", "UP",
+                "timestamp", LocalDateTime.now(),
+                "database", userDatabase.isHealthy() ? "UP" : "DOWN",
+                "auditService", auditService.isHealthy() ? "UP" : "DOWN",
+                "backupService", backupService.isHealthy() ? "UP" : "DOWN"
+            );
+
+            return ResponseEntity.ok(ApiResponse.success(healthStatus));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ApiResponse.error("System unhealthy", "SYS_016"));
+        }
+    }
+
+    // ===============================================
+    // UTILITY METHODS
+    // ===============================================
+
+    /**
+     * Get client IP address from request
+     */
+    private String getClientIpAddress(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        
+        String xRealIp = request.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isEmpty()) {
+            return xRealIp;
+        }
+        
+        return request.getRemoteAddr();
+    }
+
+    /**
+     * Extract username from authentication token (simplified)
+     */
+    private String getCurrentUsername(HttpServletRequest request) {
+        // In real implementation, extract from JWT token or Spring Security context
+        return "current_user"; // Placeholder
+    }
+
+    /**
+     * Generate access token (simplified - should use JWT)
+     */
+    private String generateAccessToken(User user) {
+        // In real implementation, generate JWT token
+        return "access_token_" + user.getId() + "_" + System.currentTimeMillis();
+    }
+
+    /**
+     * Generate refresh token (simplified - should use JWT)
+     */
+    private String generateRefreshToken(User user) {
+        // In real implementation, generate JWT refresh token
+        return "refresh_token_" + user.getId() + "_" + System.currentTimeMillis();
+    }
+
+    /**
+     * Extract username from token (simplified)
+     */
+    private String extractUsernameFromToken(String token) {
+        // In real implementation, decode JWT token
+        return "extracted_username"; // Placeholder
+    }
+
+    /**
+     * Invalidate token (simplified)
+     */
+    private void invalidateToken(String token) {
+        // In real implementation, add token to blacklist or remove from cache
+    }
+
+    /**
+     * Get system uptime in seconds
+     */
+    private long getSystemUptime() {
+        return java.lang.management.ManagementFactory.getRuntimeMXBean().getUptime() / 1000;
+    }
+
+    /**
+     * Get memory usage percentage
+     */
+    private double getMemoryUsage() {
+        Runtime runtime = Runtime.getRuntime();
+        long totalMemory = runtime.totalMemory();
+        long freeMemory = runtime.freeMemory();
+        return ((double) (totalMemory - freeMemory) / totalMemory) * 100;
+    }
+
+    /**
+     * Get disk usage percentage (simplified)
+     */
+    private double getDiskUsage() {
+        java.io.File root = new java.io.File("/");
+        long totalSpace = root.getTotalSpace();
+        long freeSpace = root.getFreeSpace();
+        return ((double) (totalSpace - freeSpace) / totalSpace) * 100;
+    }
+}(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Logout failed", "SYS_003"));
+        }
+    }
+
+    // ===============================================
+    // USER MANAGEMENT ENDPOINTS
+    // ===============================================
+
+    /**
+     * Get all users (Admin only)
+     */
+    @GetMapping("/users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<UserDto>>> getAllUsers() {
+        try {
+            List<User> users = userDatabase.getAllUsers();
+            List<UserDto> userDtos = users.stream()
+                .map(UserDto::new)
+                .collect(Collectors.toList());
+
+            return ResponseEntity.ok(ApiResponse.success(userDtos));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Failed to retrieve users", "SYS_004"));
+        }
+    }
+
+    /**
+     * Get user by ID
+     */
+    @GetMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #id == authentication.principal.id)")
+    public ResponseEntity<ApiResponse<UserDto>> getUserById(@PathVariable Long id) {
+        try {
+            User user = userDatabase.findUserById(id);
+            if (user == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(ApiResponse.success(new UserDto(user)));
+        } catch (Exception e) {
+            return ResponseEntity.status
