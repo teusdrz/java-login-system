@@ -19,13 +19,13 @@ import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 
 // Professional Animation Components
-const BusinessAnimatedText: React.FC<{ text: string; className?: string; delay?: number }> = ({ 
-    text, 
-    className = "", 
-    delay = 0 
+const BusinessAnimatedText: React.FC<{ text: string; className?: string; delay?: number }> = ({
+    text,
+    className = "",
+    delay = 0
 }) => {
     const textRef = useRef<HTMLDivElement>(null);
-    
+
     useGSAP(() => {
         if (textRef.current) {
             gsap.fromTo(textRef.current, {
@@ -42,18 +42,18 @@ const BusinessAnimatedText: React.FC<{ text: string; className?: string; delay?:
             });
         }
     }, [text, delay]);
-    
+
     return <div ref={textRef} className={className}>{text}</div>;
 };
 
-const BusinessCard: React.FC<{ 
-    children: React.ReactNode; 
-    className?: string; 
+const BusinessCard: React.FC<{
+    children: React.ReactNode;
+    className?: string;
     delay?: number;
     hoverEffect?: boolean;
 }> = ({ children, className = "", delay = 0, hoverEffect = true }) => {
     const cardRef = useRef<HTMLDivElement>(null);
-    
+
     useGSAP(() => {
         if (cardRef.current) {
             gsap.fromTo(cardRef.current, {
@@ -73,7 +73,7 @@ const BusinessCard: React.FC<{
 
             if (hoverEffect) {
                 const card = cardRef.current;
-                
+
                 const handleMouseEnter = () => {
                     gsap.to(card, {
                         scale: 1.02,
@@ -82,7 +82,7 @@ const BusinessCard: React.FC<{
                         ease: "power2.out"
                     });
                 };
-                
+
                 const handleMouseLeave = () => {
                     gsap.to(card, {
                         scale: 1,
@@ -91,10 +91,10 @@ const BusinessCard: React.FC<{
                         ease: "power2.out"
                     });
                 };
-                
+
                 card.addEventListener('mouseenter', handleMouseEnter);
                 card.addEventListener('mouseleave', handleMouseLeave);
-                
+
                 return () => {
                     card.removeEventListener('mouseenter', handleMouseEnter);
                     card.removeEventListener('mouseleave', handleMouseLeave);
@@ -102,7 +102,7 @@ const BusinessCard: React.FC<{
             }
         }
     }, [delay, hoverEffect]);
-    
+
     return <div ref={cardRef} className={className}>{children}</div>;
 };
 
@@ -117,7 +117,7 @@ interface SettingSection {
 
 const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const pageRef = useRef<HTMLDivElement>(null);
-    
+
     const [activeSection, setActiveSection] = useState<string>('general');
     const [settings, setSettings] = useState({
         notifications: {
@@ -211,7 +211,7 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const handleSaveSettings = async () => {
         setIsSaving(true);
-        
+
         // Simulate API call
         setTimeout(() => {
             setIsSaving(false);
@@ -274,7 +274,7 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                         </label>
                     </div>
-                    
+
                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                         <div>
                             <h4 className="font-medium text-gray-900">Maintenance Mode</h4>
@@ -300,9 +300,9 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
-                            <input 
-                                type="checkbox" 
-                                className="sr-only peer" 
+                            <input
+                                type="checkbox"
+                                className="sr-only peer"
                                 checked={settings.security.twoFactorAuth}
                                 onChange={(e) => updateSetting('security', 'twoFactorAuth', e.target.checked)}
                             />
@@ -315,7 +315,7 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Session Timeout (minutes)
                             </label>
-                            <select 
+                            <select
                                 value={settings.security.sessionTimeout}
                                 onChange={(e) => updateSetting('security', 'sessionTimeout', e.target.value)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -326,12 +326,12 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 <option value="120">2 hours</option>
                             </select>
                         </div>
-                        
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Password Expiry (days)
                             </label>
-                            <select 
+                            <select
                                 value={settings.security.passwordExpiry}
                                 onChange={(e) => updateSetting('security', 'passwordExpiry', e.target.value)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -359,7 +359,7 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="bg-gray-50 rounded-lg p-4">
                             <h4 className="font-medium text-gray-900 mb-2">Active Sessions</h4>
@@ -380,7 +380,7 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="bg-gray-50 rounded-lg p-4">
                             <h4 className="font-medium text-gray-900 mb-2">API Keys</h4>
                             <div className="space-y-2">
@@ -418,7 +418,7 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             securityAlerts: 'Security Alerts',
                             maintenanceAlerts: 'Maintenance Alerts'
                         };
-                        
+
                         const descriptions = {
                             emailNotifications: 'Receive notifications via email',
                             pushNotifications: 'Receive browser push notifications',
@@ -433,9 +433,9 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <p className="text-sm text-gray-600">{descriptions[key as keyof typeof descriptions]}</p>
                                 </div>
                                 <label className="relative inline-flex items-center cursor-pointer">
-                                    <input 
-                                        type="checkbox" 
-                                        className="sr-only peer" 
+                                    <input
+                                        type="checkbox"
+                                        className="sr-only peer"
                                         checked={value}
                                         onChange={(e) => updateSetting('notifications', key, e.target.checked)}
                                     />
@@ -460,7 +460,7 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </div>
-                    
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Port
@@ -471,7 +471,7 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </div>
-                    
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Username
@@ -482,7 +482,7 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </div>
-                    
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Password
@@ -507,7 +507,7 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="mt-4">
                     <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
                         Test Connection
@@ -551,7 +551,7 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Theme
                                     </label>
-                                    <select 
+                                    <select
                                         value={settings.appearance.theme}
                                         onChange={(e) => updateSetting('appearance', 'theme', e.target.value)}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -561,12 +561,12 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         <option value="auto">Auto</option>
                                     </select>
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Language
                                     </label>
-                                    <select 
+                                    <select
                                         value={settings.appearance.language}
                                         onChange={(e) => updateSetting('appearance', 'language', e.target.value)}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -576,12 +576,12 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         <option value="es">Español</option>
                                     </select>
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Timezone
                                     </label>
-                                    <select 
+                                    <select
                                         value={settings.appearance.timezone}
                                         onChange={(e) => updateSetting('appearance', 'timezone', e.target.value)}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -591,12 +591,12 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         <option value="UTC-05:00">UTC-05:00 (New York)</option>
                                     </select>
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Date Format
                                     </label>
-                                    <select 
+                                    <select
                                         value={settings.appearance.dateFormat}
                                         onChange={(e) => updateSetting('appearance', 'dateFormat', e.target.value)}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -616,7 +616,7 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     return (
-        <div 
+        <div
             ref={pageRef}
             className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6"
         >
@@ -633,12 +633,12 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <ArrowLeft className="w-5 h-5 text-gray-600" />
                                 </button>
                                 <div>
-                                    <BusinessAnimatedText 
+                                    <BusinessAnimatedText
                                         text="System Settings"
                                         className="text-3xl font-bold text-gray-900"
                                         delay={0.2}
                                     />
-                                    <BusinessAnimatedText 
+                                    <BusinessAnimatedText
                                         text="Configure system preferences and administrative settings"
                                         className="text-lg text-gray-600 mt-2"
                                         delay={0.4}
@@ -656,29 +656,28 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     {/* Settings Menu */}
                     <BusinessCard delay={0.3}>
                         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                            <BusinessAnimatedText 
+                            <BusinessAnimatedText
                                 text="Settings Categories"
                                 className="text-lg font-bold text-gray-900 mb-6"
                                 delay={0.4}
                             />
-                            
+
                             <div className="space-y-2">
                                 {settingSections.map((section, index) => (
                                     <button
                                         key={section.id}
                                         onClick={() => setActiveSection(section.id)}
-                                        className={`w-full text-left p-3 rounded-lg transition-all duration-300 ${
-                                            activeSection === section.id
+                                        className={`w-full text-left p-3 rounded-lg transition-all duration-300 ${activeSection === section.id
                                                 ? 'bg-blue-100 border-2 border-blue-500 text-blue-900'
                                                 : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent text-gray-700'
-                                        }`}
+                                            }`}
                                     >
                                         <div className="flex items-start space-x-3">
-                                            <div 
+                                            <div
                                                 className="p-1 rounded"
-                                                style={{ 
+                                                style={{
                                                     backgroundColor: activeSection === section.id ? `${section.color}20` : 'transparent',
-                                                    color: section.color 
+                                                    color: section.color
                                                 }}
                                             >
                                                 {section.icon}
@@ -699,7 +698,7 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <BusinessCard delay={0.5}>
                             <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
                                 <div className="flex items-center justify-between mb-6">
-                                    <BusinessAnimatedText 
+                                    <BusinessAnimatedText
                                         text={settingSections.find(s => s.id === activeSection)?.title || 'Settings'}
                                         className="text-xl font-bold text-gray-900"
                                         delay={0.6}
@@ -707,11 +706,10 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <button
                                         onClick={handleSaveSettings}
                                         disabled={isSaving}
-                                        className={`px-6 py-2 rounded-lg font-semibold transition-all duration-300 ${
-                                            isSaving
+                                        className={`px-6 py-2 rounded-lg font-semibold transition-all duration-300 ${isSaving
                                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                                 : 'bg-blue-600 hover:bg-blue-700 text-white'
-                                        }`}
+                                            }`}
                                     >
                                         {isSaving ? (
                                             <div className="flex items-center">
@@ -726,7 +724,7 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                         )}
                                     </button>
                                 </div>
-                                
+
                                 {renderContent()}
                             </div>
                         </BusinessCard>

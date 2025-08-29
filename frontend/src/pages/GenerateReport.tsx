@@ -20,13 +20,13 @@ import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 
 // Professional Animation Components
-const BusinessAnimatedText: React.FC<{ text: string; className?: string; delay?: number }> = ({ 
-    text, 
-    className = "", 
-    delay = 0 
+const BusinessAnimatedText: React.FC<{ text: string; className?: string; delay?: number }> = ({
+    text,
+    className = "",
+    delay = 0
 }) => {
     const textRef = useRef<HTMLDivElement>(null);
-    
+
     useGSAP(() => {
         if (textRef.current) {
             gsap.fromTo(textRef.current, {
@@ -43,18 +43,18 @@ const BusinessAnimatedText: React.FC<{ text: string; className?: string; delay?:
             });
         }
     }, [text, delay]);
-    
+
     return <div ref={textRef} className={className}>{text}</div>;
 };
 
-const BusinessCard: React.FC<{ 
-    children: React.ReactNode; 
-    className?: string; 
+const BusinessCard: React.FC<{
+    children: React.ReactNode;
+    className?: string;
     delay?: number;
     hoverEffect?: boolean;
 }> = ({ children, className = "", delay = 0, hoverEffect = true }) => {
     const cardRef = useRef<HTMLDivElement>(null);
-    
+
     useGSAP(() => {
         if (cardRef.current) {
             gsap.fromTo(cardRef.current, {
@@ -74,7 +74,7 @@ const BusinessCard: React.FC<{
 
             if (hoverEffect) {
                 const card = cardRef.current;
-                
+
                 const handleMouseEnter = () => {
                     gsap.to(card, {
                         scale: 1.02,
@@ -83,7 +83,7 @@ const BusinessCard: React.FC<{
                         ease: "power2.out"
                     });
                 };
-                
+
                 const handleMouseLeave = () => {
                     gsap.to(card, {
                         scale: 1,
@@ -92,10 +92,10 @@ const BusinessCard: React.FC<{
                         ease: "power2.out"
                     });
                 };
-                
+
                 card.addEventListener('mouseenter', handleMouseEnter);
                 card.addEventListener('mouseleave', handleMouseLeave);
-                
+
                 return () => {
                     card.removeEventListener('mouseenter', handleMouseEnter);
                     card.removeEventListener('mouseleave', handleMouseLeave);
@@ -103,7 +103,7 @@ const BusinessCard: React.FC<{
             }
         }
     }, [delay, hoverEffect]);
-    
+
     return <div ref={cardRef} className={className}>{children}</div>;
 };
 
@@ -132,7 +132,7 @@ const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const { state } = useAuth();
     const { user } = state;
     const pageRef = useRef<HTMLDivElement>(null);
-    
+
     const [selectedTemplate, setSelectedTemplate] = useState<string>('');
     const [dateRange, setDateRange] = useState({ start: '', end: '' });
     const [isGenerating, setIsGenerating] = useState(false);
@@ -253,9 +253,9 @@ const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const handleGenerateReport = async () => {
         if (!selectedTemplate) return;
-        
+
         setIsGenerating(true);
-        
+
         // Simulate report generation
         setTimeout(() => {
             setIsGenerating(false);
@@ -290,7 +290,7 @@ const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     return (
-        <div 
+        <div
             ref={pageRef}
             className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6"
         >
@@ -307,12 +307,12 @@ const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <ArrowLeft className="w-5 h-5 text-gray-600" />
                                 </button>
                                 <div>
-                                    <BusinessAnimatedText 
+                                    <BusinessAnimatedText
                                         text="Report Generation Center"
                                         className="text-3xl font-bold text-gray-900"
                                         delay={0.2}
                                     />
-                                    <BusinessAnimatedText 
+                                    <BusinessAnimatedText
                                         text="Generate comprehensive business reports and analytics"
                                         className="text-lg text-gray-600 mt-2"
                                         delay={0.4}
@@ -329,19 +329,18 @@ const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 {/* Report Templates */}
                 <BusinessCard delay={0.3}>
                     <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                        <BusinessAnimatedText 
+                        <BusinessAnimatedText
                             text="Available Report Templates"
                             className="text-xl font-bold text-gray-900 mb-6"
                             delay={0.4}
                         />
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {reportTemplates.map((template, index) => (
                                 <div
                                     key={template.id}
-                                    className={`${template.bgColor} border rounded-xl p-4 cursor-pointer transition-all duration-300 hover:shadow-md ${
-                                        selectedTemplate === template.id ? 'ring-2 ring-blue-500' : ''
-                                    }`}
+                                    className={`${template.bgColor} border rounded-xl p-4 cursor-pointer transition-all duration-300 hover:shadow-md ${selectedTemplate === template.id ? 'ring-2 ring-blue-500' : ''
+                                        }`}
                                     onClick={() => setSelectedTemplate(template.id)}
                                 >
                                     <div className="flex items-start justify-between mb-3">
@@ -352,10 +351,10 @@ const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                             {template.category}
                                         </span>
                                     </div>
-                                    
+
                                     <h3 className="font-semibold text-gray-900 mb-2">{template.name}</h3>
                                     <p className="text-sm text-gray-600 mb-3">{template.description}</p>
-                                    
+
                                     <div className="space-y-1 text-xs text-gray-500">
                                         <div className="flex justify-between">
                                             <span>Est. Time:</span>
@@ -376,12 +375,12 @@ const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <BusinessCard delay={0.5}>
                         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                            <BusinessAnimatedText 
+                            <BusinessAnimatedText
                                 text="Report Configuration"
                                 className="text-xl font-bold text-gray-900 mb-6"
                                 delay={0.6}
                             />
-                            
+
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -392,7 +391,7 @@ const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                             <input
                                                 type="date"
                                                 value={dateRange.start}
-                                                onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+                                                onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                             />
                                             <span className="text-xs text-gray-500">Start Date</span>
@@ -401,7 +400,7 @@ const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                             <input
                                                 type="date"
                                                 value={dateRange.end}
-                                                onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+                                                onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                             />
                                             <span className="text-xs text-gray-500">End Date</span>
@@ -440,11 +439,10 @@ const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 <button
                                     onClick={handleGenerateReport}
                                     disabled={!selectedTemplate || isGenerating}
-                                    className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 ${
-                                        selectedTemplate && !isGenerating
+                                    className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 ${selectedTemplate && !isGenerating
                                             ? 'bg-blue-600 hover:bg-blue-700 text-white'
                                             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    }`}
+                                        }`}
                                 >
                                     {isGenerating ? (
                                         <div className="flex items-center justify-center">
@@ -466,7 +464,7 @@ const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <BusinessCard delay={0.7}>
                         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
                             <div className="flex items-center justify-between mb-6">
-                                <BusinessAnimatedText 
+                                <BusinessAnimatedText
                                     text="Recent Reports"
                                     className="text-xl font-bold text-gray-900"
                                     delay={0.8}
@@ -475,7 +473,7 @@ const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <RefreshCw className="w-4 h-4 text-gray-600" />
                                 </button>
                             </div>
-                            
+
                             <div className="space-y-3">
                                 {reportHistory.map((report, index) => (
                                     <div

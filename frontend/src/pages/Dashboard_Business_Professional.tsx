@@ -48,13 +48,13 @@ import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 
 // Professional Business Text Animation Component
-const BusinessAnimatedText: React.FC<{ text: string; className?: string; delay?: number }> = ({ 
-    text, 
-    className = "", 
-    delay = 0 
+const BusinessAnimatedText: React.FC<{ text: string; className?: string; delay?: number }> = ({
+    text,
+    className = "",
+    delay = 0
 }) => {
     const textRef = useRef<HTMLDivElement>(null);
-    
+
     useGSAP(() => {
         if (textRef.current) {
             gsap.fromTo(textRef.current, {
@@ -71,19 +71,19 @@ const BusinessAnimatedText: React.FC<{ text: string; className?: string; delay?:
             });
         }
     }, [text, delay]);
-    
+
     return <div ref={textRef} className={className}>{text}</div>;
 };
 
 // Professional Card Animation Component
-const BusinessCard: React.FC<{ 
-    children: React.ReactNode; 
-    className?: string; 
+const BusinessCard: React.FC<{
+    children: React.ReactNode;
+    className?: string;
     delay?: number;
     hoverEffect?: boolean;
 }> = ({ children, className = "", delay = 0, hoverEffect = true }) => {
     const cardRef = useRef<HTMLDivElement>(null);
-    
+
     useGSAP(() => {
         if (cardRef.current) {
             gsap.fromTo(cardRef.current, {
@@ -103,7 +103,7 @@ const BusinessCard: React.FC<{
 
             if (hoverEffect) {
                 const card = cardRef.current;
-                
+
                 const handleMouseEnter = () => {
                     gsap.to(card, {
                         scale: 1.02,
@@ -112,7 +112,7 @@ const BusinessCard: React.FC<{
                         ease: "power2.out"
                     });
                 };
-                
+
                 const handleMouseLeave = () => {
                     gsap.to(card, {
                         scale: 1,
@@ -121,10 +121,10 @@ const BusinessCard: React.FC<{
                         ease: "power2.out"
                     });
                 };
-                
+
                 card.addEventListener('mouseenter', handleMouseEnter);
                 card.addEventListener('mouseleave', handleMouseLeave);
-                
+
                 return () => {
                     card.removeEventListener('mouseenter', handleMouseEnter);
                     card.removeEventListener('mouseleave', handleMouseLeave);
@@ -132,7 +132,7 @@ const BusinessCard: React.FC<{
             }
         }
     }, [delay, hoverEffect]);
-    
+
     return <div ref={cardRef} className={className}>{children}</div>;
 };
 
@@ -178,10 +178,10 @@ const Dashboard: React.FC = () => {
     const { state } = useAuth();
     const { user } = state;
     const dashboardRef = useRef<HTMLDivElement>(null);
-    
+
     // Navigation state
     const [currentPage, setCurrentPage] = useState<'dashboard' | 'reports' | 'settings' | 'users'>('dashboard');
-    
+
     const [stats, setStats] = useState<DashboardStats>({
         totalUsers: 0,
         activeUsers: 0,
@@ -329,17 +329,17 @@ const Dashboard: React.FC = () => {
     if (currentPage === 'reports') {
         return <GenerateReport onBack={() => setCurrentPage('dashboard')} />;
     }
-    
+
     if (currentPage === 'settings') {
         return <SystemSettings onBack={() => setCurrentPage('dashboard')} />;
     }
-    
+
     if (currentPage === 'users') {
         return <UserManagement onBack={() => setCurrentPage('dashboard')} />;
     }
 
     return (
-        <div 
+        <div
             ref={dashboardRef}
             className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6"
         >
@@ -349,12 +349,12 @@ const Dashboard: React.FC = () => {
                     <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <BusinessAnimatedText 
+                                <BusinessAnimatedText
                                     text={`Welcome back, ${user?.username || 'Executive'}`}
                                     className="text-3xl font-bold text-gray-900"
                                     delay={0.2}
                                 />
-                                <BusinessAnimatedText 
+                                <BusinessAnimatedText
                                     text="Enterprise Business Intelligence Dashboard"
                                     className="text-lg text-gray-600 mt-2"
                                     delay={0.4}
@@ -362,20 +362,20 @@ const Dashboard: React.FC = () => {
                             </div>
                             <div className="flex items-center space-x-4">
                                 <div className="text-right">
-                                    <BusinessAnimatedText 
-                                        text={new Date().toLocaleDateString('en-US', { 
-                                            weekday: 'long', 
-                                            year: 'numeric', 
-                                            month: 'long', 
-                                            day: 'numeric' 
+                                    <BusinessAnimatedText
+                                        text={new Date().toLocaleDateString('en-US', {
+                                            weekday: 'long',
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
                                         })}
                                         className="text-sm text-gray-500"
                                         delay={0.6}
                                     />
-                                    <BusinessAnimatedText 
-                                        text={new Date().toLocaleTimeString('en-US', { 
-                                            hour: '2-digit', 
-                                            minute: '2-digit' 
+                                    <BusinessAnimatedText
+                                        text={new Date().toLocaleTimeString('en-US', {
+                                            hour: '2-digit',
+                                            minute: '2-digit'
                                         })}
                                         className="text-lg font-semibold text-gray-700"
                                         delay={0.8}
@@ -398,19 +398,19 @@ const Dashboard: React.FC = () => {
                                     </div>
                                     <div className={`flex items-center ${card.trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                         {card.trend >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                                        <BusinessAnimatedText 
+                                        <BusinessAnimatedText
                                             text={`${Math.abs(card.trend)}%`}
                                             className="text-sm font-medium ml-1"
                                             delay={0.4 + index * 0.1}
                                         />
                                     </div>
                                 </div>
-                                <BusinessAnimatedText 
+                                <BusinessAnimatedText
                                     text={card.title}
                                     className={`text-sm font-medium ${card.textColor} mb-2`}
                                     delay={0.6 + index * 0.1}
                                 />
-                                <BusinessAnimatedText 
+                                <BusinessAnimatedText
                                     text={card.value.toString()}
                                     className={`text-3xl font-bold ${card.textColor}`}
                                     delay={0.8 + index * 0.1}
@@ -425,7 +425,7 @@ const Dashboard: React.FC = () => {
                     {/* Performance Trends */}
                     <BusinessCard delay={0.8}>
                         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                            <BusinessAnimatedText 
+                            <BusinessAnimatedText
                                 text="Performance Trends"
                                 className="text-xl font-bold text-gray-900 mb-6"
                                 delay={0.9}
@@ -435,12 +435,12 @@ const Dashboard: React.FC = () => {
                                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                                     <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
                                     <YAxis stroke="#64748b" fontSize={12} />
-                                    <Tooltip 
-                                        contentStyle={{ 
-                                            backgroundColor: 'white', 
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: 'white',
                                             border: '1px solid #e2e8f0',
                                             borderRadius: '8px'
-                                        }} 
+                                        }}
                                     />
                                     <Area
                                         type="monotone"
@@ -471,7 +471,7 @@ const Dashboard: React.FC = () => {
                     {/* System Health Radar */}
                     <BusinessCard delay={1.0}>
                         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                            <BusinessAnimatedText 
+                            <BusinessAnimatedText
                                 text="System Health Monitor"
                                 className="text-xl font-bold text-gray-900 mb-6"
                                 delay={1.1}
@@ -500,7 +500,7 @@ const Dashboard: React.FC = () => {
                     {/* Platform Distribution */}
                     <BusinessCard delay={1.2}>
                         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                            <BusinessAnimatedText 
+                            <BusinessAnimatedText
                                 text="Platform Distribution"
                                 className="text-xl font-bold text-gray-900 mb-6"
                                 delay={1.3}
@@ -529,7 +529,7 @@ const Dashboard: React.FC = () => {
                     {/* System Status */}
                     <BusinessCard delay={1.4}>
                         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                            <BusinessAnimatedText 
+                            <BusinessAnimatedText
                                 text="System Status"
                                 className="text-xl font-bold text-gray-900 mb-6"
                                 delay={1.5}
@@ -540,7 +540,7 @@ const Dashboard: React.FC = () => {
                                         <Cpu className="w-5 h-5 text-blue-600 mr-2" />
                                         <span className="text-gray-700">CPU Usage</span>
                                     </div>
-                                    <BusinessAnimatedText 
+                                    <BusinessAnimatedText
                                         text={`${systemMetrics.cpu}%`}
                                         className="font-semibold text-gray-900"
                                         delay={1.6}
@@ -551,7 +551,7 @@ const Dashboard: React.FC = () => {
                                         <Database className="w-5 h-5 text-green-600 mr-2" />
                                         <span className="text-gray-700">Memory</span>
                                     </div>
-                                    <BusinessAnimatedText 
+                                    <BusinessAnimatedText
                                         text={`${systemMetrics.memory}%`}
                                         className="font-semibold text-gray-900"
                                         delay={1.7}
@@ -562,7 +562,7 @@ const Dashboard: React.FC = () => {
                                         <Monitor className="w-5 h-5 text-purple-600 mr-2" />
                                         <span className="text-gray-700">Uptime</span>
                                     </div>
-                                    <BusinessAnimatedText 
+                                    <BusinessAnimatedText
                                         text={systemMetrics.uptime}
                                         className="font-semibold text-gray-900"
                                         delay={1.8}
@@ -573,7 +573,7 @@ const Dashboard: React.FC = () => {
                                         <Shield className="w-5 h-5 text-amber-600 mr-2" />
                                         <span className="text-gray-700">Security</span>
                                     </div>
-                                    <BusinessAnimatedText 
+                                    <BusinessAnimatedText
                                         text="Active"
                                         className="font-semibold text-green-600"
                                         delay={1.9}
@@ -586,13 +586,13 @@ const Dashboard: React.FC = () => {
                     {/* Quick Actions */}
                     <BusinessCard delay={1.6}>
                         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                            <BusinessAnimatedText 
+                            <BusinessAnimatedText
                                 text="Quick Actions"
                                 className="text-xl font-bold text-gray-900 mb-6"
                                 delay={1.7}
                             />
                             <div className="space-y-3">
-                                <button 
+                                <button
                                     onClick={() => setCurrentPage('reports')}
                                     className="w-full flex items-center justify-between p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200"
                                 >
@@ -602,7 +602,7 @@ const Dashboard: React.FC = () => {
                                     </div>
                                     <ArrowUpRight className="w-4 h-4 text-gray-400" />
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setCurrentPage('settings')}
                                     className="w-full flex items-center justify-between p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors duration-200"
                                 >
@@ -612,7 +612,7 @@ const Dashboard: React.FC = () => {
                                     </div>
                                     <ArrowUpRight className="w-4 h-4 text-gray-400" />
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setCurrentPage('users')}
                                     className="w-full flex items-center justify-between p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors duration-200"
                                 >

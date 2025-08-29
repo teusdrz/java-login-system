@@ -15,19 +15,21 @@ import {
     Clock,
     Crown,
     User,
-    Eye
+    Eye,
+    Save,
+    X
 } from 'lucide-react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 
 // Professional Animation Components
-const BusinessAnimatedText: React.FC<{ text: string; className?: string; delay?: number }> = ({ 
-    text, 
-    className = "", 
-    delay = 0 
+const BusinessAnimatedText: React.FC<{ text: string; className?: string; delay?: number }> = ({
+    text,
+    className = "",
+    delay = 0
 }) => {
     const textRef = useRef<HTMLDivElement>(null);
-    
+
     useGSAP(() => {
         if (textRef.current) {
             gsap.fromTo(textRef.current, {
@@ -44,18 +46,18 @@ const BusinessAnimatedText: React.FC<{ text: string; className?: string; delay?:
             });
         }
     }, [text, delay]);
-    
+
     return <div ref={textRef} className={className}>{text}</div>;
 };
 
-const BusinessCard: React.FC<{ 
-    children: React.ReactNode; 
-    className?: string; 
+const BusinessCard: React.FC<{
+    children: React.ReactNode;
+    className?: string;
     delay?: number;
     hoverEffect?: boolean;
 }> = ({ children, className = "", delay = 0, hoverEffect = true }) => {
     const cardRef = useRef<HTMLDivElement>(null);
-    
+
     useGSAP(() => {
         if (cardRef.current) {
             gsap.fromTo(cardRef.current, {
@@ -75,7 +77,7 @@ const BusinessCard: React.FC<{
 
             if (hoverEffect) {
                 const card = cardRef.current;
-                
+
                 const handleMouseEnter = () => {
                     gsap.to(card, {
                         scale: 1.02,
@@ -84,7 +86,7 @@ const BusinessCard: React.FC<{
                         ease: "power2.out"
                     });
                 };
-                
+
                 const handleMouseLeave = () => {
                     gsap.to(card, {
                         scale: 1,
@@ -93,10 +95,10 @@ const BusinessCard: React.FC<{
                         ease: "power2.out"
                     });
                 };
-                
+
                 card.addEventListener('mouseenter', handleMouseEnter);
                 card.addEventListener('mouseleave', handleMouseLeave);
-                
+
                 return () => {
                     card.removeEventListener('mouseenter', handleMouseEnter);
                     card.removeEventListener('mouseleave', handleMouseLeave);
@@ -104,7 +106,7 @@ const BusinessCard: React.FC<{
             }
         }
     }, [delay, hoverEffect]);
-    
+
     return <div ref={cardRef} className={className}>{children}</div>;
 };
 
@@ -131,77 +133,182 @@ interface UserStats {
     viewers: number;
 }
 
+// Função para gerar dados fictícios realistas
+const generateMockUsers = (): UserData[] => {
+    const departments = [
+        'IT Department', 'Sales Department', 'Marketing Department', 
+        'HR Department', 'Finance Department', 'Operations Department',
+        'Customer Service', 'Engineering', 'Product Management', 'Legal Department'
+    ];
+    
+    const firstNames = [
+        'João', 'Maria', 'Pedro', 'Ana', 'Carlos', 'Luisa', 'Fernando', 'Juliana',
+        'Roberto', 'Carla', 'Marcos', 'Patricia', 'André', 'Beatriz', 'Paulo',
+        'Fernanda', 'Ricardo', 'Mônica', 'Rodrigo', 'Cristina', 'Lucas', 'Amanda',
+        'Gabriel', 'Renata', 'Diego', 'Camila', 'Bruno', 'Vanessa', 'Thiago', 'Sandra'
+    ];
+    
+    const lastNames = [
+        'Silva', 'Santos', 'Oliveira', 'Costa', 'Lima', 'Pereira', 'Souza',
+        'Rodrigues', 'Ferreira', 'Alves', 'Gomes', 'Martins', 'Araújo', 'Melo',
+        'Barbosa', 'Ribeiro', 'Cardoso', 'Dias', 'Morais', 'Reis', 'Dantas',
+        'Moreira', 'Teixeira', 'Mendes', 'Cavalcanti', 'Andrade', 'Nascimento'
+    ];
+    
+    
+    const users: UserData[] = [];
+    
+    for (let i = 1; i <= 50; i++) {
+        const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+        const name = `${firstName} ${lastName}`;
+        const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@company.com`;
+        
+        // Distribui roles de forma realista
+        let role: 'admin' | 'manager' | 'user' | 'viewer';
+        if (i <= 2) role = 'admin';
+        else if (i <= 8) role = 'manager';
+        else if (i <= 42) role = 'user';
+        else role = 'viewer';
+        
+        // Distribui status de forma realista
+        let status: 'active' | 'inactive' | 'pending';
+        if (i <= 40) status = 'active';
+        else if (i <= 47) status = 'inactive';
+        else status = 'pending';
+        
+        const department = departments[Math.floor(Math.random() * departments.length)];
+        
+        // Gera datas realistas
+        const createdDate = new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1);
+        const lastLoginDate = status === 'active' 
+            ? new Date(2025, 7, Math.floor(Math.random() * 28) + 1, Math.floor(Math.random() * 24), Math.floor(Math.random() * 60))
+            : status === 'inactive' 
+                ? new Date(2025, 6, Math.floor(Math.random() * 30) + 1, Math.floor(Math.random() * 24), Math.floor(Math.random() * 60))
+                : new Date(0); // Pending users never logged in
+        
+        users.push({
+            id: i.toString(),
+            name,
+            email,
+            role,
+            status,
+            lastLogin: status === 'pending' ? 'Never' : lastLoginDate.toISOString().slice(0, 16).replace('T', ' '),
+            createdAt: createdDate.toISOString().slice(0, 10),
+            department
+        });
+    }
+    
+    return users;
+};
+
 const UserManagement: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const pageRef = useRef<HTMLDivElement>(null);
-    
+
+    const [users, setUsers] = useState<UserData[]>(() => generateMockUsers());
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRole, setFilterRole] = useState<string>('all');
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+    const [editingUser, setEditingUser] = useState<UserData | null>(null);
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [newUser, setNewUser] = useState<Partial<UserData>>({
+        name: '',
+        email: '',
+        role: 'user',
+        status: 'pending',
+        department: ''
+    });
 
+    // Calcula estatísticas dinamicamente baseado nos usuários atuais
     const userStats: UserStats = {
-        total: 2847,
-        active: 2683,
-        inactive: 164,
-        pending: 23,
-        admins: 12,
-        managers: 89,
-        users: 2598,
-        viewers: 148
+        total: users.length,
+        active: users.filter(u => u.status === 'active').length,
+        inactive: users.filter(u => u.status === 'inactive').length,
+        pending: users.filter(u => u.status === 'pending').length,
+        admins: users.filter(u => u.role === 'admin').length,
+        managers: users.filter(u => u.role === 'manager').length,
+        users: users.filter(u => u.role === 'user').length,
+        viewers: users.filter(u => u.role === 'viewer').length
     };
 
-    const userData: UserData[] = [
-        {
-            id: '1',
-            name: 'João Silva',
-            email: 'joao.silva@company.com',
-            role: 'admin',
-            status: 'active',
-            lastLogin: '2025-08-28 15:30',
-            createdAt: '2024-01-15',
-            department: 'IT Department'
-        },
-        {
-            id: '2',
-            name: 'Maria Santos',
-            email: 'maria.santos@company.com',
-            role: 'manager',
-            status: 'active',
-            lastLogin: '2025-08-28 14:22',
-            createdAt: '2024-02-20',
-            department: 'Sales Department'
-        },
-        {
-            id: '3',
-            name: 'Pedro Oliveira',
-            email: 'pedro.oliveira@company.com',
-            role: 'user',
-            status: 'inactive',
-            lastLogin: '2025-08-25 09:15',
-            createdAt: '2024-03-10',
-            department: 'Marketing Department'
-        },
-        {
-            id: '4',
-            name: 'Ana Costa',
-            email: 'ana.costa@company.com',
-            role: 'user',
-            status: 'active',
-            lastLogin: '2025-08-28 16:45',
-            createdAt: '2024-04-05',
-            department: 'HR Department'
-        },
-        {
-            id: '5',
-            name: 'Carlos Lima',
-            email: 'carlos.lima@company.com',
-            role: 'viewer',
-            status: 'pending',
-            lastLogin: 'Never',
-            createdAt: '2025-08-28',
-            department: 'Finance Department'
+    // Filtra usuários baseado na pesquisa e filtros
+    const filteredUsers = users.filter(user => {
+        const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            user.department.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesRole = filterRole === 'all' || user.role === filterRole;
+        const matchesStatus = filterStatus === 'all' || user.status === filterStatus;
+        
+        return matchesSearch && matchesRole && matchesStatus;
+    });
+
+    // Função para adicionar usuário
+    const handleAddUser = () => {
+        if (newUser.name && newUser.email && newUser.department) {
+            const user: UserData = {
+                id: (users.length + 1).toString(),
+                name: newUser.name,
+                email: newUser.email,
+                role: newUser.role as 'admin' | 'manager' | 'user' | 'viewer',
+                status: newUser.status as 'active' | 'inactive' | 'pending',
+                department: newUser.department,
+                lastLogin: 'Never',
+                createdAt: new Date().toISOString().slice(0, 10)
+            };
+            
+            setUsers([...users, user]);
+            setNewUser({ name: '', email: '', role: 'user', status: 'pending', department: '' });
+            setShowAddForm(false);
         }
-    ];
+    };
+
+    // Função para editar usuário
+    const handleEditUser = (user: UserData) => {
+        setEditingUser({ ...user });
+    };
+
+    // Função para salvar edição
+    const handleSaveEdit = () => {
+        if (editingUser) {
+            setUsers(users.map(u => u.id === editingUser.id ? editingUser : u));
+            setEditingUser(null);
+        }
+    };
+
+    // Função para deletar usuário
+    const handleDeleteUser = (userId: string) => {
+        if (window.confirm('Tem certeza que deseja deletar este usuário?')) {
+            setUsers(users.filter(u => u.id !== userId));
+            setSelectedUsers(selectedUsers.filter(id => id !== userId));
+        }
+    };
+
+    // Função para deletar múltiplos usuários
+    const handleDeleteSelected = () => {
+        if (selectedUsers.length > 0 && window.confirm(`Tem certeza que deseja deletar ${selectedUsers.length} usuários selecionados?`)) {
+            setUsers(users.filter(u => !selectedUsers.includes(u.id)));
+            setSelectedUsers([]);
+        }
+    };
+
+    // Função para alternar seleção de usuário
+    const toggleUserSelection = (userId: string) => {
+        setSelectedUsers(prev => 
+            prev.includes(userId) 
+                ? prev.filter(id => id !== userId)
+                : [...prev, userId]
+        );
+    };
+
+    // Função para selecionar todos
+    const toggleSelectAll = () => {
+        setSelectedUsers(
+            selectedUsers.length === filteredUsers.length 
+                ? [] 
+                : filteredUsers.map(u => u.id)
+        );
+    };
 
     const getRoleIcon = (role: string) => {
         switch (role) {
@@ -259,65 +366,8 @@ const UserManagement: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
     };
 
-    const filteredUsers = userData.filter(user => {
-        const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             user.department.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesRole = filterRole === 'all' || user.role === filterRole;
-        const matchesStatus = filterStatus === 'all' || user.status === filterStatus;
-        
-        return matchesSearch && matchesRole && matchesStatus;
-    });
-
-    const handleSelectUser = (userId: string) => {
-        setSelectedUsers(prev => 
-            prev.includes(userId) 
-                ? prev.filter(id => id !== userId)
-                : [...prev, userId]
-        );
-    };
-
-    const handleSelectAll = () => {
-        if (selectedUsers.length === filteredUsers.length) {
-            setSelectedUsers([]);
-        } else {
-            setSelectedUsers(filteredUsers.map(user => user.id));
-        }
-    };
-
-    const handleEditUser = (user: UserData) => {
-        console.log('Editing user:', user);
-        // setEditingUser(user);
-        // setShowEditUserModal(true);
-    };
-
-    const handleDeleteUser = (userId: string) => {
-        if (window.confirm('Are you sure you want to delete this user?')) {
-            console.log('Deleting user:', userId);
-        }
-    };
-
-    const handleBulkAction = (action: string) => {
-        if (selectedUsers.length === 0) return;
-        
-        switch (action) {
-            case 'activate':
-                console.log('Activating users:', selectedUsers);
-                break;
-            case 'deactivate':
-                console.log('Deactivating users:', selectedUsers);
-                break;
-            case 'delete':
-                if (window.confirm(`Are you sure you want to delete ${selectedUsers.length} users?`)) {
-                    console.log('Deleting users:', selectedUsers);
-                }
-                break;
-        }
-        setSelectedUsers([]);
-    };
-
     return (
-        <div 
+        <div
             ref={pageRef}
             className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6"
         >
@@ -334,13 +384,13 @@ const UserManagement: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <ArrowLeft className="w-5 h-5 text-gray-600" />
                                 </button>
                                 <div>
-                                    <BusinessAnimatedText 
-                                        text="User Management"
+                                    <BusinessAnimatedText
+                                        text="Gerenciamento de Usuários"
                                         className="text-3xl font-bold text-gray-900"
                                         delay={0.2}
                                     />
-                                    <BusinessAnimatedText 
-                                        text="Manage user accounts, roles, and permissions"
+                                    <BusinessAnimatedText
+                                        text="Gerencie contas de usuários, funções e permissões"
                                         className="text-lg text-gray-600 mt-2"
                                         delay={0.4}
                                     />
@@ -356,14 +406,14 @@ const UserManagement: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 {/* User Statistics */}
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                     {[
-                        { label: 'Total Users', value: userStats.total, color: 'blue', icon: Users },
-                        { label: 'Active', value: userStats.active, color: 'green', icon: CheckCircle },
-                        { label: 'Inactive', value: userStats.inactive, color: 'red', icon: XCircle },
-                        { label: 'Pending', value: userStats.pending, color: 'yellow', icon: Clock },
+                        { label: 'Total de Usuários', value: userStats.total, color: 'blue', icon: Users },
+                        { label: 'Ativos', value: userStats.active, color: 'green', icon: CheckCircle },
+                        { label: 'Inativos', value: userStats.inactive, color: 'red', icon: XCircle },
+                        { label: 'Pendentes', value: userStats.pending, color: 'yellow', icon: Clock },
                         { label: 'Admins', value: userStats.admins, color: 'yellow', icon: Crown },
-                        { label: 'Managers', value: userStats.managers, color: 'blue', icon: Shield },
-                        { label: 'Users', value: userStats.users, color: 'green', icon: User },
-                        { label: 'Viewers', value: userStats.viewers, color: 'gray', icon: Eye }
+                        { label: 'Gerentes', value: userStats.managers, color: 'blue', icon: Shield },
+                        { label: 'Usuários', value: userStats.users, color: 'green', icon: User },
+                        { label: 'Visualizadores', value: userStats.viewers, color: 'gray', icon: Eye }
                     ].map((stat, index) => (
                         <BusinessCard key={stat.label} delay={0.3 + index * 0.05}>
                             <div className={`bg-${stat.color}-50 border border-${stat.color}-200 rounded-xl p-4`}>
@@ -389,7 +439,7 @@ const UserManagement: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
                                     <input
                                         type="text"
-                                        placeholder="Search users..."
+                                        placeholder="Buscar usuários..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64"
@@ -402,11 +452,11 @@ const UserManagement: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     onChange={(e) => setFilterRole(e.target.value)}
                                     className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 >
-                                    <option value="all">All Roles</option>
+                                    <option value="all">Todas as Funções</option>
                                     <option value="admin">Admin</option>
-                                    <option value="manager">Manager</option>
-                                    <option value="user">User</option>
-                                    <option value="viewer">Viewer</option>
+                                    <option value="manager">Gerente</option>
+                                    <option value="user">Usuário</option>
+                                    <option value="viewer">Visualizador</option>
                                 </select>
 
                                 <select
@@ -414,61 +464,51 @@ const UserManagement: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     onChange={(e) => setFilterStatus(e.target.value)}
                                     className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 >
-                                    <option value="all">All Status</option>
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                    <option value="pending">Pending</option>
+                                    <option value="all">Todos os Status</option>
+                                    <option value="active">Ativo</option>
+                                    <option value="inactive">Inativo</option>
+                                    <option value="pending">Pendente</option>
                                 </select>
                             </div>
 
                             <div className="flex space-x-2">
                                 <button
-                                    onClick={() => console.log('Add user modal')}
+                                    onClick={() => setShowAddForm(true)}
                                     className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
                                 >
                                     <UserPlus className="w-4 h-4 mr-2" />
-                                    Add User
+                                    Adicionar Usuário
                                 </button>
-                                
-                                <button className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
+
+                                <button 
+                                    onClick={() => alert('Exportando usuários...')}
+                                    className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
                                     <Download className="w-4 h-4 mr-2" />
-                                    Export
+                                    Exportar
                                 </button>
-                                
-                                <button className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200">
+
+                                <button 
+                                    onClick={() => alert('Importando usuários...')}
+                                    className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200">
                                     <Upload className="w-4 h-4 mr-2" />
-                                    Import
+                                    Importar
                                 </button>
                             </div>
                         </div>
 
                         {/* Bulk Actions */}
                         {selectedUsers.length > 0 && (
-                            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium text-blue-900">
-                                        {selectedUsers.length} user(s) selected
-                                    </span>
-                                    <div className="flex space-x-2">
-                                        <button
-                                            onClick={() => handleBulkAction('activate')}
-                                            className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors duration-200"
-                                        >
-                                            Activate
-                                        </button>
-                                        <button
-                                            onClick={() => handleBulkAction('deactivate')}
-                                            className="px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700 transition-colors duration-200"
-                                        >
-                                            Deactivate
-                                        </button>
-                                        <button
-                                            onClick={() => handleBulkAction('delete')}
-                                            className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors duration-200"
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
+                            <div className="mt-4 flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <span className="text-blue-700 font-medium">
+                                    {selectedUsers.length} usuário(s) selecionado(s)
+                                </span>
+                                <div className="flex space-x-2">
+                                    <button
+                                        onClick={handleDeleteSelected}
+                                        className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors"
+                                    >
+                                        Deletar Selecionados
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -486,45 +526,47 @@ const UserManagement: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                             <input
                                                 type="checkbox"
                                                 checked={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0}
-                                                onChange={handleSelectAll}
+                                                onChange={toggleSelectAll}
                                                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                             />
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            User
+                                            Usuário
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Role
+                                            Função
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Status
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Department
+                                            Departamento
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Last Login
+                                            Último Login
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Actions
+                                            Ações
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                    {filteredUsers.map((user, index) => (
-                                        <tr key={user.id} className="hover:bg-gray-50 transition-colors duration-200">
-                                            <td className="px-6 py-4">
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {filteredUsers.map((user) => (
+                                        <tr key={user.id} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap">
                                                 <input
                                                     type="checkbox"
                                                     checked={selectedUsers.includes(user.id)}
-                                                    onChange={() => handleSelectUser(user.id)}
+                                                    onChange={() => toggleUserSelection(user.id)}
                                                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                                 />
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
-                                                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                                                        {user.name.charAt(0).toUpperCase()}
+                                                    <div className="flex-shrink-0 h-10 w-10">
+                                                        <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                                                            {user.name.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                                                        </div>
                                                     </div>
                                                     <div className="ml-4">
                                                         <div className="text-sm font-medium text-gray-900">{user.name}</div>
@@ -532,39 +574,39 @@ const UserManagement: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
                                                     {getRoleIcon(user.role)}
                                                     <span className="ml-1 capitalize">{user.role}</span>
-                                                </span>
+                                                </div>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
                                                     {getStatusIcon(user.status)}
                                                     <span className="ml-1 capitalize">{user.status}</span>
-                                                </span>
+                                                </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-900">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {user.department}
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-500">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {user.lastLogin}
                                             </td>
-                                            <td className="px-6 py-4 text-right text-sm font-medium">
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <div className="flex items-center space-x-2">
                                                     <button
                                                         onClick={() => handleEditUser(user)}
-                                                        className="p-1 rounded text-blue-600 hover:bg-blue-100 transition-colors duration-200"
+                                                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
                                                     >
                                                         <Edit className="w-4 h-4" />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDeleteUser(user.id)}
-                                                        className="p-1 rounded text-red-600 hover:bg-red-100 transition-colors duration-200"
+                                                        className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
-                                                    <button className="p-1 rounded text-gray-600 hover:bg-gray-100 transition-colors duration-200">
+                                                    <button className="text-gray-600 hover:text-gray-900 p-1 rounded hover:bg-gray-50">
                                                         <MoreVertical className="w-4 h-4" />
                                                     </button>
                                                 </div>
@@ -574,31 +616,190 @@ const UserManagement: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                </BusinessCard>
 
-                        {filteredUsers.length === 0 && (
-                            <div className="text-center py-12">
-                                <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                                <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
-                                <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+                {/* Add User Modal */}
+                {showAddForm && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <BusinessCard className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-gray-900">Adicionar Novo Usuário</h3>
+                                <button
+                                    onClick={() => setShowAddForm(false)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
                             </div>
-                        )}
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                                    <input
+                                        type="text"
+                                        value={newUser.name || ''}
+                                        onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <input
+                                        type="email"
+                                        value={newUser.email || ''}
+                                        onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                                    <input
+                                        type="text"
+                                        value={newUser.department || ''}
+                                        onChange={(e) => setNewUser({ ...newUser, department: e.target.value })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Função</label>
+                                    <select
+                                        value={newUser.role || 'user'}
+                                        onChange={(e) => setNewUser({ ...newUser, role: e.target.value as any })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                        <option value="user">Usuário</option>
+                                        <option value="manager">Gerente</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="viewer">Visualizador</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                    <select
+                                        value={newUser.status || 'pending'}
+                                        onChange={(e) => setNewUser({ ...newUser, status: e.target.value as any })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                        <option value="pending">Pendente</option>
+                                        <option value="active">Ativo</option>
+                                        <option value="inactive">Inativo</option>
+                                    </select>
+                                </div>
+                                <div className="flex space-x-3 pt-4">
+                                    <button
+                                        onClick={handleAddUser}
+                                        className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                    >
+                                        <Save className="w-4 h-4 mr-2" />
+                                        Salvar
+                                    </button>
+                                    <button
+                                        onClick={() => setShowAddForm(false)}
+                                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                                    >
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </BusinessCard>
+                    </div>
+                )}
 
-                        {/* Pagination */}
-                        <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
-                            <div className="flex items-center justify-between">
-                                <div className="text-sm text-gray-700">
-                                    Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredUsers.length}</span> of{' '}
-                                    <span className="font-medium">{filteredUsers.length}</span> results
+                {/* Edit User Modal */}
+                {editingUser && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <BusinessCard className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-gray-900">Editar Usuário</h3>
+                                <button
+                                    onClick={() => setEditingUser(null)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                                    <input
+                                        type="text"
+                                        value={editingUser.name}
+                                        onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
                                 </div>
-                                <div className="flex space-x-2">
-                                    <button className="px-3 py-1 border border-gray-300 text-sm rounded hover:bg-gray-100 transition-colors duration-200">
-                                        Previous
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <input
+                                        type="email"
+                                        value={editingUser.email}
+                                        onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                                    <input
+                                        type="text"
+                                        value={editingUser.department}
+                                        onChange={(e) => setEditingUser({ ...editingUser, department: e.target.value })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Função</label>
+                                    <select
+                                        value={editingUser.role}
+                                        onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value as any })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                        <option value="user">Usuário</option>
+                                        <option value="manager">Gerente</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="viewer">Visualizador</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                    <select
+                                        value={editingUser.status}
+                                        onChange={(e) => setEditingUser({ ...editingUser, status: e.target.value as any })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                        <option value="pending">Pendente</option>
+                                        <option value="active">Ativo</option>
+                                        <option value="inactive">Inativo</option>
+                                    </select>
+                                </div>
+                                <div className="flex space-x-3 pt-4">
+                                    <button
+                                        onClick={handleSaveEdit}
+                                        className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                    >
+                                        <Save className="w-4 h-4 mr-2" />
+                                        Salvar
                                     </button>
-                                    <button className="px-3 py-1 border border-gray-300 text-sm rounded hover:bg-gray-100 transition-colors duration-200">
-                                        Next
+                                    <button
+                                        onClick={() => setEditingUser(null)}
+                                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                                    >
+                                        Cancelar
                                     </button>
                                 </div>
                             </div>
+                        </BusinessCard>
+                    </div>
+                )}
+
+                {/* Summary */}
+                <BusinessCard delay={0.9}>
+                    <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                        <div className="text-center">
+                            <BusinessAnimatedText
+                                text={`Mostrando ${filteredUsers.length} de ${users.length} usuários`}
+                                className="text-sm text-gray-600"
+                                delay={1.0}
+                            />
                         </div>
                     </div>
                 </BusinessCard>
