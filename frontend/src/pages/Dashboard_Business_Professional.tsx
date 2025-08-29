@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import GenerateReport from './GenerateReport';
+import SystemSettings from './SystemSettings';
+import UserManagement from './UserManagement';
 import {
     Activity,
     Users,
@@ -176,6 +179,9 @@ const Dashboard: React.FC = () => {
     const { user } = state;
     const dashboardRef = useRef<HTMLDivElement>(null);
     
+    // Navigation state
+    const [currentPage, setCurrentPage] = useState<'dashboard' | 'reports' | 'settings' | 'users'>('dashboard');
+    
     const [stats, setStats] = useState<DashboardStats>({
         totalUsers: 0,
         activeUsers: 0,
@@ -318,6 +324,19 @@ const Dashboard: React.FC = () => {
         { name: 'Mobile', value: 28, color: businessColors.secondary },
         { name: 'Tablet', value: 7, color: businessColors.accent }
     ];
+
+    // Render different pages based on current selection
+    if (currentPage === 'reports') {
+        return <GenerateReport onBack={() => setCurrentPage('dashboard')} />;
+    }
+    
+    if (currentPage === 'settings') {
+        return <SystemSettings onBack={() => setCurrentPage('dashboard')} />;
+    }
+    
+    if (currentPage === 'users') {
+        return <UserManagement onBack={() => setCurrentPage('dashboard')} />;
+    }
 
     return (
         <div 
@@ -573,21 +592,30 @@ const Dashboard: React.FC = () => {
                                 delay={1.7}
                             />
                             <div className="space-y-3">
-                                <button className="w-full flex items-center justify-between p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200">
+                                <button 
+                                    onClick={() => setCurrentPage('reports')}
+                                    className="w-full flex items-center justify-between p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200"
+                                >
                                     <div className="flex items-center">
                                         <FileText className="w-5 h-5 text-blue-600 mr-3" />
                                         <span className="text-gray-700">Generate Report</span>
                                     </div>
                                     <ArrowUpRight className="w-4 h-4 text-gray-400" />
                                 </button>
-                                <button className="w-full flex items-center justify-between p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors duration-200">
+                                <button 
+                                    onClick={() => setCurrentPage('settings')}
+                                    className="w-full flex items-center justify-between p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors duration-200"
+                                >
                                     <div className="flex items-center">
                                         <Settings className="w-5 h-5 text-green-600 mr-3" />
                                         <span className="text-gray-700">System Settings</span>
                                     </div>
                                     <ArrowUpRight className="w-4 h-4 text-gray-400" />
                                 </button>
-                                <button className="w-full flex items-center justify-between p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors duration-200">
+                                <button 
+                                    onClick={() => setCurrentPage('users')}
+                                    className="w-full flex items-center justify-between p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors duration-200"
+                                >
                                     <div className="flex items-center">
                                         <Users className="w-5 h-5 text-purple-600 mr-3" />
                                         <span className="text-gray-700">User Management</span>
