@@ -1,166 +1,410 @@
-/* Advanced Intro Animation Styles */
+/* Enterprise Professional Intro Animation - Enhanced Corporate Design */
 .intro-container {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-    position: relative;
+    background: linear-gradient(135deg,
+            #0F172A 0%,
+            #1E293B 25%,
+            #334155 50%,
+            #475569 75%,
+            #64748B 100%) !important;
+    background-size: 400% 400% !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
     overflow: hidden;
+    font-family: 'Inter', 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    z-index: 9999 !important;
+    animation: gradientShift 8s ease-in-out infinite !important;
 }
 
+/* Enhanced gradient animation */
+@keyframes gradientShift {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    25% {
+        background-position: 100% 50%;
+    }
+
+    50% {
+        background-position: 100% 100%;
+    }
+
+    75% {
+        background-position: 0% 100%;
+    }
+}
+
+/* Advanced GPU Acceleration */
+.intro-container *,
+.corporate-line,
+.data-node,
+.connection-line,
+.logo-segment,
+.enterprise-particle,
+.progress-indicator,
+.status-light {
+    will-change: transform, opacity, filter;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+}
+
+/* Corporate Background Pattern */
 .intro-container::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-    background-size: 50px 50px;
-    animation: drift 20s linear infinite;
-}
-
-.intro-container::after {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(45deg,
-            rgba(255, 255, 255, 0.1) 25%,
-            transparent 25%,
-            transparent 50%,
-            rgba(255, 255, 255, 0.1) 50%,
-            rgba(255, 255, 255, 0.1) 75%,
-            transparent 75%);
-    background-size: 60px 60px;
-    animation: shimmer 8s ease-in-out infinite;
-    opacity: 0.3;
+    background-image:
+        radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 60%),
+        radial-gradient(circle at 80% 70%, rgba(16, 185, 129, 0.15) 0%, transparent 60%),
+        radial-gradient(circle at 50% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+        linear-gradient(45deg, transparent 24%, rgba(148, 163, 184, 0.05) 25%, rgba(148, 163, 184, 0.05) 26%, transparent 27%, transparent 74%, rgba(148, 163, 184, 0.05) 75%, rgba(148, 163, 184, 0.05) 76%, transparent 77%);
+    background-size: 600px 600px, 400px 400px, 500px 500px, 80px 80px;
+    animation: patternMove 15s linear infinite;
+    z-index: 1;
 }
 
-@keyframes drift {
+@keyframes patternMove {
     0% {
-        transform: translate(-50px, -50px) rotate(0deg);
+        transform: translate(0, 0) rotate(0deg);
     }
 
     100% {
-        transform: translate(-50px, -50px) rotate(360deg);
+        transform: translate(80px, 80px) rotate(360deg);
     }
 }
 
-@keyframes shimmer {
-
-    0%,
-    100% {
-        opacity: 0.1;
-    }
-
-    50% {
-        opacity: 0.3;
-    }
+/* Enhanced Enterprise Particles */
+.enterprise-particle {
+    position: absolute;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 3;
+    animation: particleFloat 4s ease-in-out infinite alternate;
 }
 
-.particle {
-    filter: blur(0.5px);
-    transition: all 0.3s ease;
-}
-
-.particle:hover {
-    filter: blur(0px);
-    transform: scale(1.5);
-}
-
-.circle-element {
-    backdrop-filter: blur(10px);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-.logo-glow {
-    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8)) drop-shadow(0 0 40px rgba(102, 126, 234, 0.6)) drop-shadow(0 0 60px rgba(118, 75, 162, 0.4));
-}
-
-.text-glow {
-    text-shadow:
-        0 0 10px rgba(255, 255, 255, 0.8),
-        0 0 20px rgba(102, 126, 234, 0.6),
-        0 0 30px rgba(118, 75, 162, 0.4),
-        0 0 40px rgba(240, 147, 251, 0.3);
-}
-
-.progress-glow {
-    box-shadow:
-        0 0 20px rgba(255, 255, 255, 0.5),
-        0 0 40px rgba(102, 126, 234, 0.4),
-        0 0 60px rgba(118, 75, 162, 0.3);
-}
-
-/* Floating animation for additional elements */
-@keyframes float {
-
-    0%,
-    100% {
+@keyframes particleFloat {
+    0% {
         transform: translateY(0px) rotate(0deg);
-        opacity: 0.6;
     }
 
-    50% {
+    100% {
         transform: translateY(-20px) rotate(180deg);
-        opacity: 1;
     }
 }
 
-.floating-element {
-    animation: float 3s ease-in-out infinite;
+/* Corporate Grid Lines - More Visible */
+.corporate-line {
+    stroke: rgba(59, 130, 246, 0.4) !important;
+    stroke-width: 1 !important;
+    opacity: 0;
+    transition: opacity 0.5s ease;
 }
 
-/* Pulse effect for interactive elements */
-@keyframes pulse-glow {
+.corporate-line.major {
+    stroke: rgba(59, 130, 246, 0.7) !important;
+    stroke-width: 2 !important;
+}
+
+/* Enhanced Data Nodes - More Visible */
+.data-node {
+    width: 16px !important;
+    height: 16px !important;
+    background: radial-gradient(circle, #60A5FA 0%, #3B82F6 100%) !important;
+    border: 3px solid rgba(59, 130, 246, 1) !important;
+    border-radius: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.8) !important;
+    opacity: 0;
+    animation: nodeGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes nodeGlow {
+    0% {
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    100% {
+        box-shadow: 0 0 25px rgba(59, 130, 246, 0.8);
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+
+/* Enhanced Connection Lines */
+.connection-line {
+    height: 2px;
+    background: linear-gradient(90deg,
+            rgba(59, 130, 246, 0.8) 0%,
+            rgba(6, 182, 212, 0.8) 50%,
+            rgba(16, 185, 129, 0.8) 100%);
+    position: absolute;
+    transform-origin: left center;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    opacity: 0;
+    animation: connectionPulse 3s ease-in-out infinite;
+}
+
+@keyframes connectionPulse {
 
     0%,
     100% {
-        box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-        transform: scale(1);
+        opacity: 0.3;
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
     }
 
     50% {
-        box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
-        transform: scale(1.05);
+        opacity: 0.8;
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
     }
 }
 
-.pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite;
+/* Corporate Logo Enhancements */
+.corporate-logo-svg {
+    filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.3));
 }
 
-/* Advanced gradient text effect */
-.gradient-text {
-    background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #667eea);
-    background-size: 300% 300%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: gradient-shift 3s ease infinite;
+.logo-segment.primary {
+    fill: url(#primaryGradient);
+    stroke: url(#primaryGradient);
 }
 
-@keyframes gradient-shift {
+.logo-segment.secondary {
+    fill: url(#primaryGradient);
+    opacity: 0.8;
+}
+
+.logo-segment.accent {
+    fill: url(#accentGradient);
+    animation: logoAccentPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes logoAccentPulse {
     0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
+        filter: brightness(1) drop-shadow(0 0 10px rgba(245, 158, 11, 0.5));
     }
 
     100% {
-        background-position: 0% 50%;
+        filter: brightness(1.2) drop-shadow(0 0 20px rgba(245, 158, 11, 0.8));
     }
 }
 
-/* Loading bar enhancement */
-.loading-container {
-    position: relative;
-    overflow: hidden;
+/* Loading Stage Enhancements */
+.loading-stage {
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.loading-container::before {
+/* Responsive Design */
+@media (max-width: 768px) {
+    .intro-container {
+        padding: 20px;
+    }
+
+    .corporate-logo-svg {
+        width: 200px;
+        height: 120px;
+    }
+}
+
+.enterprise-particle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, currentColor 0%, transparent 60%);
+    transform: translate(-50%, -50%);
+    opacity: 0.2;
+    animation: particleGlow 4s ease-in-out infinite;
+}
+
+/* Corporate Data Nodes */
+.data-node {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border-radius: 50%;
+    box-shadow:
+        0 0 20px rgba(59, 130, 246, 0.6),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 4;
+}
+
+.data-node.active {
+    transform: scale(1.5);
+    box-shadow:
+        0 0 30px rgba(59, 130, 246, 0.8),
+        0 0 60px rgba(59, 130, 246, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.5);
+}
+
+.data-node::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 50%;
+    animation: nodeRipple 2s ease-out infinite;
+}
+
+/* Connection Lines - Corporate style */
+.connection-line {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(59, 130, 246, 0.8) 20%,
+            rgba(16, 185, 129, 0.8) 80%,
+            transparent 100%);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+}
+
+.connection-line::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            transparent 100%);
+    filter: blur(1px);
+}
+
+.connection-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 1px;
+    background: linear-gradient(90deg,
+            rgba(59, 130, 246, 1) 0%,
+            rgba(16, 185, 129, 1) 100%);
+    animation: dataFlow 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* Corporate Grid Lines */
+.corporate-line {
+    opacity: 0.08;
+    stroke: #64748b;
+    stroke-width: 0.5;
+    stroke-dasharray: 3, 6;
+    animation: corporateGrid 6s ease-in-out infinite;
+    filter: drop-shadow(0 0 1px rgba(100, 116, 139, 0.3));
+}
+
+.corporate-line.major {
+    opacity: 0.15;
+    stroke-width: 1;
+    stroke-dasharray: 6, 12;
+}
+
+/* Logo Segments - More professional */
+.logo-segment {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+.logo-segment.primary {
+    fill: url(#corporateGradient);
+    stroke: #3b82f6;
+    stroke-width: 2;
+}
+
+.logo-segment.secondary {
+    fill: url(#accentGradient);
+    stroke: #10b981;
+    stroke-width: 1.5;
+}
+
+/* Advanced Text Effects */
+.corporate-text {
+    background: linear-gradient(135deg,
+            #1e40af 0%,
+            #3b82f6 25%,
+            #06b6d4 50%,
+            #10b981 75%,
+            #059669 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: corporateTextShine 4s ease-in-out infinite;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Status Indicators */
+.status-indicator {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow:
+        0 0 10px rgba(16, 185, 129, 0.5),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.status-indicator::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 50%;
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+.status-indicator.warning {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    box-shadow:
+        0 0 10px rgba(59, 130, 246, 0.5),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.status-indicator.warning::before {
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Progress Enhancement */
+.progress-container {
+    position: relative;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(100, 116, 139, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.progress-container::before {
     content: '';
     position: absolute;
     top: 0;
@@ -168,49 +412,642 @@
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg,
-            transparent,
-            rgba(255, 255, 255, 0.4),
-            transparent);
-    animation: loading-shimmer 2s infinite;
+            transparent 0%,
+            rgba(59, 130, 246, 0.3) 30%,
+            rgba(16, 185, 129, 0.3) 70%,
+            transparent 100%);
+    animation: progressSweep 3s ease-in-out infinite;
 }
 
-@keyframes loading-shimmer {
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg,
+            #1e40af 0%,
+            #3b82f6 25%,
+            #06b6d4 50%,
+            #10b981 75%,
+            #059669 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.2) 50%,
+            transparent 100%);
+    transform: translateX(-100%);
+    animation: progressShine 2s ease-in-out infinite;
+}
+
+/* Advanced Animations */
+@keyframes enterprisePulse {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(1) rotate(0deg);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.2) rotate(180deg);
+    }
+}
+
+@keyframes particleGlow {
+
+    0%,
+    100% {
+        opacity: 0.2;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+}
+
+@keyframes nodeRipple {
     0% {
-        left: -100%;
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+@keyframes dataFlow {
+    0% {
+        left: -20px;
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    80% {
+        opacity: 1;
     }
 
     100% {
         left: 100%;
+        opacity: 0;
     }
 }
 
-/* Responsive adjustments */
+@keyframes corporateGrid {
+
+    0%,
+    100% {
+        opacity: 0.08;
+        stroke-dashoffset: 0;
+    }
+
+    50% {
+        opacity: 0.2;
+        stroke-dashoffset: 9;
+    }
+}
+
+@keyframes corporateTextShine {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+        filter: brightness(1);
+    }
+
+    50% {
+        background-position: 100% 50%;
+        filter: brightness(1.2);
+    }
+}
+
+@keyframes statusPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: scale(1.5);
+        opacity: 0.4;
+    }
+}
+
+@keyframes progressSweep {
+    0% {
+        left: -100%;
+    }
+
+    50% {
+        left: 100%;
+    }
+
+    100% {
+        left: -100%;
+    }
+}
+
+@keyframes progressShine {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Enterprise Loading States */
+.loading-stage {
+    position: relative;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(100, 116, 139, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(15px);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.loading-stage::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(135deg,
+            rgba(59, 130, 246, 0.3) 0%,
+            transparent 30%,
+            transparent 70%,
+            rgba(16, 185, 129, 0.3) 100%);
+    border-radius: 12px;
+    z-index: -1;
+    animation: borderGlow 3s ease-in-out infinite;
+}
+
+@keyframes borderGlow {
+
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* Responsive Corporate Design */
 @media (max-width: 768px) {
-    .intro-container::before {
-        background-size: 30px 30px;
+    .enterprise-particle {
+        width: 1.5px !important;
+        height: 1.5px !important;
     }
 
-    .intro-container::after {
-        background-size: 40px 40px;
+    .data-node {
+        width: 6px !important;
+        height: 6px !important;
     }
 
-    .circle-element {
-        opacity: 0.6;
+    .connection-line {
+        height: 0.5px !important;
+    }
+
+    .corporate-line {
+        stroke-width: 0.3 !important;
     }
 }
 
-/* High performance animations */
-.gpu-accelerated {
-    transform: translateZ(0);
-    will-change: transform, opacity;
+/* Performance & Accessibility */
+@media (prefers-reduced-motion: reduce) {
+
+    .enterprise-particle,
+    .data-node,
+    .connection-line,
+    .corporate-line,
+    .logo-segment,
+    .progress-bar {
+        animation: none !important;
+    }
+
+    .intro-container {
+        background: #0f172a !important;
+    }
 }
 
-/* Focus and accessibility */
-.intro-container:focus {
-    outline: none;
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .corporate-line {
+        opacity: 0.3 !important;
+        stroke: #ffffff !important;
+    }
+
+    .data-node {
+        background: #ffffff !important;
+        box-shadow: 0 0 10px #ffffff !important;
+    }
 }
 
-.intro-container * {
-    pointer-events: none;
-    user-select: none;
+/* Enterprise Hover Effects */
+.interactive-element {
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.interactive-element:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2) drop-shadow(0 4px 16px rgba(59, 130, 246, 0.4));
+}
+
+/* Corporate Typography */
+.enterprise-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    background: linear-gradient(135deg,
+            #1e40af 0%,
+            #3b82f6 30%,
+            #06b6d4 60%,
+            #10b981 100%);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: titleGradient 6s ease-in-out infinite;
+}
+
+@keyframes titleGradient {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    33% {
+        background-position: 100% 50%;
+    }
+
+    66% {
+        background-position: 100% 100%;
+    }
+}
+
+/* ==========================================
+   TYPING/TYPEWRITER ANIMATION EFFECTS
+   ========================================== */
+
+/* Corporate Typewriter Effect */
+.typewriter-text {
+    font-family: 'Inter', 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 3px solid;
+    border-color: #3b82f6;
+    animation:
+        typewriter var(--typing-duration, 4s) steps(var(--text-length, 40), end),
+        blinking-cursor 1s infinite step-end;
+    animation-fill-mode: forwards;
+    background: linear-gradient(135deg,
+            #1e40af 0%,
+            #3b82f6 25%,
+            #06b6d4 50%,
+            #10b981 75%,
+            #059669 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+}
+
+/* Typing animation keyframes */
+@keyframes typewriter {
+    0% {
+        width: 0;
+    }
+
+    100% {
+        width: 100%;
+    }
+}
+
+/* Blinking cursor animation */
+@keyframes blinking-cursor {
+
+    0%,
+    50% {
+        border-color: #3b82f6;
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+    }
+
+    51%,
+    100% {
+        border-color: transparent;
+        box-shadow: none;
+    }
+}
+
+/* Advanced Corporate Typewriter with multiple lines */
+.typewriter-multiline {
+    font-family: 'Inter', 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+    position: relative;
+}
+
+.typewriter-multiline .line {
+    overflow: hidden;
+    white-space: nowrap;
+    opacity: 0;
+    animation-fill-mode: forwards;
+    background: linear-gradient(135deg,
+            #1e40af 0%,
+            #3b82f6 25%,
+            #06b6d4 50%,
+            #10b981 75%,
+            #059669 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.typewriter-multiline .line.active {
+    animation:
+        fadeInLine 0.3s ease-in forwards,
+        typewriterLine var(--line-duration, 3s) steps(var(--line-length, 30), end) 0.3s forwards;
+    border-right: 2px solid #3b82f6;
+}
+
+.typewriter-multiline .line.completed {
+    opacity: 1;
+    width: 100%;
+    border-right: none;
+    animation: none;
+}
+
+.typewriter-multiline .line:last-child.active {
+    animation:
+        fadeInLine 0.3s ease-in forwards,
+        typewriterLine var(--line-duration, 3s) steps(var(--line-length, 30), end) 0.3s forwards,
+        blinkingCursorFinal 1s infinite step-end calc(var(--line-duration, 3s) + 0.3s);
+}
+
+@keyframes fadeInLine {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes typewriterLine {
+    0% {
+        width: 0;
+    }
+
+    100% {
+        width: 100%;
+    }
+}
+
+@keyframes blinkingCursorFinal {
+
+    0%,
+    50% {
+        border-color: #3b82f6;
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+    }
+
+    51%,
+    100% {
+        border-color: transparent;
+        box-shadow: none;
+    }
+}
+
+/* Corporate Character-by-Character Animation */
+.typewriter-chars {
+    display: inline-block;
+    font-family: 'Inter', 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.typewriter-chars .char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+    animation: charAppear 0.1s ease-out forwards;
+    background: linear-gradient(135deg,
+            #1e40af 0%,
+            #3b82f6 25%,
+            #06b6d4 50%,
+            #10b981 75%,
+            #059669 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes charAppear {
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.8);
+        filter: blur(2px);
+    }
+
+    50% {
+        transform: translateY(-2px) scale(1.05);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+/* Professional Typing Sound Effect Visual */
+.typewriter-with-pulse {
+    position: relative;
+}
+
+.typewriter-with-pulse::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -10px;
+    width: 2px;
+    height: 1.2em;
+    background: linear-gradient(135deg, #3b82f6, #10b981);
+    transform: translateY(-50%);
+    animation: typingPulse 0.1s ease-in-out;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+}
+
+@keyframes typingPulse {
+    0% {
+        opacity: 0;
+        transform: translateY(-50%) scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateY(-50%) scale(1.2);
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+    }
+
+    100% {
+        opacity: 0.7;
+        transform: translateY(-50%) scale(1);
+    }
+}
+
+/* Corporate Typing Loading Effect */
+.corporate-typing-loader {
+    display: inline-block;
+    font-family: 'Inter', 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    color: #3b82f6;
+    font-size: 1.2em;
+}
+
+.corporate-typing-loader::after {
+    content: '';
+    animation: loadingDots 1.5s infinite;
+}
+
+@keyframes loadingDots {
+
+    0%,
+    20% {
+        content: '';
+    }
+
+    25% {
+        content: '.';
+    }
+
+    50% {
+        content: '..';
+    }
+
+    75%,
+    100% {
+        content: '...';
+    }
+}
+
+/* Enterprise Console Typing Effect */
+.console-typewriter {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9em;
+    background: #0f172a;
+    color: #10b981;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.console-typewriter::before {
+    content: '$ ';
+    color: #3b82f6;
+    text-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+}
+
+.console-typewriter .command {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 2px solid #10b981;
+    animation:
+        consoleType var(--cmd-duration, 3s) steps(var(--cmd-length, 25), end),
+        consoleCursor 1s infinite step-end;
+    animation-fill-mode: forwards;
+    text-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+@keyframes consoleType {
+    0% {
+        width: 0;
+    }
+
+    100% {
+        width: 100%;
+    }
+}
+
+@keyframes consoleCursor {
+
+    0%,
+    50% {
+        border-color: #10b981;
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    }
+
+    51%,
+    100% {
+        border-color: transparent;
+        box-shadow: none;
+    }
+}
+
+/* Responsive Typewriter Effects */
+@media (max-width: 768px) {
+
+    .typewriter-text,
+    .typewriter-multiline .line {
+        font-size: 0.9em;
+        letter-spacing: 0.01em;
+    }
+
+    .console-typewriter {
+        font-size: 0.8em;
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .typewriter-text,
+    .typewriter-multiline .line {
+        font-size: 0.8em;
+    }
+
+    .console-typewriter {
+        font-size: 0.7em;
+        padding: 0.5rem;
+    }
 }
