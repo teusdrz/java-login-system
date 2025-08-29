@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
+import IntroAnimation from './components/IntroAnimation';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard_Business_Professional';
@@ -36,6 +37,16 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 function App() {
+  const [showIntro, setShowIntro] = useState(true);
+
+  const handleIntroComplete = () => {
+    setShowIntro(false);
+  };
+
+  if (showIntro) {
+    return <IntroAnimation onComplete={handleIntroComplete} />;
+  }
+
   return (
     <AuthProvider>
       <ToastProvider>
