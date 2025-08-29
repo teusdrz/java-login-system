@@ -7,14 +7,31 @@ import {
     Database,
     Globe,
     Palette,
+    Eye,
+    EyeOff,
     Save,
     RefreshCw,
     AlertTriangle,
+    Monitor,
+    Smartphone,
+    Lock,
+    Mail,
+    Users,
+    Server,
+    Wifi,
+    HardDrive,
+    Cpu,
+    MemoryStick,
+    Clock,
+    Key,
+    FileText,
     Download,
     Upload,
     Trash2,
     Plus,
-    Check
+    Edit,
+    Check,
+    X
 } from 'lucide-react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -178,6 +195,7 @@ const SystemSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [activeCategory, setActiveCategory] = useState<SettingsCategory>('general');
     const [hasChanges, setHasChanges] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [showPasswordField, setShowPasswordField] = useState(false);
     const [newIpAddress, setNewIpAddress] = useState('');
 
     const [settings, setSettings] = useState<SystemSettingsConfig>({
