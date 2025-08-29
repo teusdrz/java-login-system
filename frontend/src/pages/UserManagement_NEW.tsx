@@ -155,6 +155,8 @@ const generateMockUsers = (): UserData[] => {
         'Moreira', 'Teixeira', 'Mendes', 'Cavalcanti', 'Andrade', 'Nascimento'
     ];
 
+    const roles: ('admin' | 'manager' | 'user' | 'viewer')[] = ['admin', 'manager', 'user', 'viewer'];
+    const statuses: ('active' | 'inactive' | 'pending')[] = ['active', 'inactive', 'pending'];
 
     const users: UserData[] = [];
 

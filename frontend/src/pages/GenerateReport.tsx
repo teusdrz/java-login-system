@@ -14,7 +14,15 @@ import {
     Send,
     CheckCircle,
     Clock,
-    AlertTriangle
+    AlertTriangle,
+    Calendar,
+    Filter,
+    Mail,
+    Save,
+    Eye,
+    Trash2,
+    Plus,
+    Settings
 } from 'lucide-react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -117,6 +125,7 @@ interface ReportTemplate {
     lastGenerated: string;
     color: string;
     bgColor: string;
+    fields: string[];
 }
 
 interface ReportHistory {
@@ -126,6 +135,19 @@ interface ReportHistory {
     status: 'completed' | 'processing' | 'failed';
     size: string;
     downloadUrl: string;
+    template: string;
+}
+
+interface ReportConfig {
+    template: string;
+    dateRange: { start: string; end: string };
+    format: 'PDF' | 'Excel' | 'CSV' | 'Word';
+    includeCharts: boolean;
+    includeRawData: boolean;
+    emailDelivery: boolean;
+    emailRecipients: string[];
+    scheduledGeneration: boolean;
+    frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly';
 }
 
 const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
@@ -134,133 +156,207 @@ const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const pageRef = useRef<HTMLDivElement>(null);
 
     const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-    const [dateRange, setDateRange] = useState({ start: '', end: '' });
+    const [reportConfig, setReportConfig] = useState<ReportConfig>({
+        template: '',
+        dateRange: { start: '', end: '' },
+        format: 'PDF',
+        includeCharts: true,
+        includeRawData: false,
+        emailDelivery: false,
+        emailRecipients: [],
+        scheduledGeneration: false,
+        frequency: 'monthly'
+    });
     const [isGenerating, setIsGenerating] = useState(false);
+    const [showPreview, setShowPreview] = useState(false);
+    const [newEmailRecipient, setNewEmailRecipient] = useState('');
 
-    // Professional color palette
-    const businessColors = {
-        primary: '#1e40af',
-        secondary: '#059669',
-        accent: '#7c3aed',
-        warning: '#d97706',
-        danger: '#dc2626',
-        neutral: '#374151'
-    };
-
+    // Mock data para templates de relatório
     const reportTemplates: ReportTemplate[] = [
         {
             id: 'user-analytics',
-            name: 'User Analytics Report',
-            description: 'Comprehensive analysis of user behavior, engagement metrics, and growth trends',
+            name: 'Relatório de Análise de Usuários',
+            description: 'Análise detalhada de atividade e engajamento dos usuários',
             icon: <Users className="w-6 h-6" />,
-            category: 'Analytics',
-            estimatedTime: '3-5 minutes',
-            lastGenerated: '2 hours ago',
-            color: businessColors.primary,
-            bgColor: 'bg-blue-50'
+            category: 'Usuários',
+            estimatedTime: '2-3 min',
+            lastGenerated: '2025-08-28 14:30',
+            color: 'text-blue-700',
+            bgColor: 'bg-blue-50',
+            fields: ['Total de usuários', 'Usuários ativos', 'Taxa de retenção', 'Demografia', 'Atividade por hora']
         },
         {
             id: 'financial-summary',
-            name: 'Financial Summary',
-            description: 'Revenue analysis, cost breakdown, and financial performance indicators',
-            icon: <BarChart3 className="w-6 h-6" />,
-            category: 'Finance',
-            estimatedTime: '2-4 minutes',
-            lastGenerated: '1 day ago',
-            color: businessColors.secondary,
-            bgColor: 'bg-green-50'
+            name: 'Resumo Financeiro',
+            description: 'Relatório abrangente de performance financeira e métricas',
+            icon: <TrendingUp className="w-6 h-6" />,
+            category: 'Financeiro',
+            estimatedTime: '3-5 min',
+            lastGenerated: '2025-08-28 09:15',
+            color: 'text-green-700',
+            bgColor: 'bg-green-50',
+            fields: ['Receita total', 'Lucro líquido', 'Despesas', 'ROI', 'Projeções']
         },
         {
             id: 'system-performance',
-            name: 'System Performance',
-            description: 'Technical metrics, uptime analysis, and infrastructure health status',
+            name: 'Performance do Sistema',
+            description: 'Métricas de desempenho, tempo de resposta e disponibilidade',
             icon: <Activity className="w-6 h-6" />,
-            category: 'Technical',
-            estimatedTime: '1-2 minutes',
-            lastGenerated: '6 hours ago',
-            color: businessColors.accent,
-            bgColor: 'bg-purple-50'
+            category: 'Sistema',
+            estimatedTime: '1-2 min',
+            lastGenerated: '2025-08-28 16:45',
+            color: 'text-purple-700',
+            bgColor: 'bg-purple-50',
+            fields: ['Tempo de resposta', 'Uptime', 'Uso de CPU', 'Memória', 'Throughput']
         },
         {
-            id: 'security-audit',
-            name: 'Security Audit Report',
-            description: 'Security analysis, threat assessment, and compliance verification',
+            id: 'sales-analytics',
+            name: 'Análise de Vendas',
+            description: 'Insights detalhados sobre vendas, conversões e pipeline',
+            icon: <BarChart3 className="w-6 h-6" />,
+            category: 'Vendas',
+            estimatedTime: '4-6 min',
+            lastGenerated: '2025-08-27 11:20',
+            color: 'text-orange-700',
+            bgColor: 'bg-orange-50',
+            fields: ['Volume de vendas', 'Taxa de conversão', 'Pipeline', 'Previsões', 'Performance por vendedor']
+        },
+        {
+            id: 'data-insights',
+            name: 'Insights de Dados',
+            description: 'Análise profunda de padrões e tendências nos dados',
             icon: <Database className="w-6 h-6" />,
-            category: 'Security',
-            estimatedTime: '5-7 minutes',
-            lastGenerated: '3 days ago',
-            color: businessColors.warning,
-            bgColor: 'bg-amber-50'
+            category: 'Dados',
+            estimatedTime: '5-8 min',
+            lastGenerated: '2025-08-26 15:10',
+            color: 'text-indigo-700',
+            bgColor: 'bg-indigo-50',
+            fields: ['Qualidade dos dados', 'Padrões', 'Anomalias', 'Correlações', 'Tendências']
         },
         {
-            id: 'business-intelligence',
-            name: 'Business Intelligence',
-            description: 'Market insights, competitive analysis, and strategic recommendations',
-            icon: <TrendingUp className="w-6 h-6" />,
-            category: 'Business',
-            estimatedTime: '4-6 minutes',
-            lastGenerated: '1 week ago',
-            color: businessColors.danger,
-            bgColor: 'bg-red-50'
-        },
-        {
-            id: 'operational-efficiency',
-            name: 'Operational Efficiency',
-            description: 'Process optimization, resource utilization, and productivity metrics',
+            id: 'custom-dashboard',
+            name: 'Dashboard Personalizado',
+            description: 'Relatório customizável com métricas específicas do negócio',
             icon: <PieChartIcon className="w-6 h-6" />,
-            category: 'Operations',
-            estimatedTime: '3-4 minutes',
-            lastGenerated: '12 hours ago',
-            color: businessColors.neutral,
-            bgColor: 'bg-gray-50'
+            category: 'Personalizado',
+            estimatedTime: '3-4 min',
+            lastGenerated: '2025-08-28 10:30',
+            color: 'text-red-700',
+            bgColor: 'bg-red-50',
+            fields: ['KPIs selecionados', 'Métricas customizadas', 'Gráficos personalizados', 'Comparações']
         }
     ];
 
-    const reportHistory: ReportHistory[] = [
+    // Mock data para histórico de relatórios
+    const [reportHistory, setReportHistory] = useState<ReportHistory[]>([
         {
             id: '1',
-            name: 'Monthly User Analytics - August 2025',
+            name: 'Relatório de Análise de Usuários',
             generatedDate: '2025-08-28 14:30',
             status: 'completed',
-            size: '2.4 MB',
-            downloadUrl: '#'
+            size: '2.3 MB',
+            downloadUrl: '#',
+            template: 'user-analytics'
         },
         {
             id: '2',
-            name: 'Financial Summary Q3 2025',
-            generatedDate: '2025-08-27 09:15',
+            name: 'Performance do Sistema',
+            generatedDate: '2025-08-28 16:45',
             status: 'completed',
             size: '1.8 MB',
-            downloadUrl: '#'
+            downloadUrl: '#',
+            template: 'system-performance'
         },
         {
             id: '3',
-            name: 'System Performance Weekly',
-            generatedDate: '2025-08-28 16:45',
+            name: 'Resumo Financeiro',
+            generatedDate: '2025-08-28 09:15',
             status: 'processing',
-            size: '0 MB',
-            downloadUrl: '#'
+            size: '---',
+            downloadUrl: '#',
+            template: 'financial-summary'
         },
         {
             id: '4',
-            name: 'Security Audit Report',
-            generatedDate: '2025-08-25 11:20',
+            name: 'Análise de Vendas',
+            generatedDate: '2025-08-27 11:20',
             status: 'completed',
-            size: '3.1 MB',
-            downloadUrl: '#'
+            size: '4.1 MB',
+            downloadUrl: '#',
+            template: 'sales-analytics'
+        },
+        {
+            id: '5',
+            name: 'Insights de Dados',
+            generatedDate: '2025-08-26 15:10',
+            status: 'failed',
+            size: '---',
+            downloadUrl: '#',
+            template: 'data-insights'
         }
-    ];
+    ]);
+
+    // Funções de manipulação
+    const handleTemplateSelect = (templateId: string) => {
+        setSelectedTemplate(templateId);
+        setReportConfig(prev => ({ ...prev, template: templateId }));
+    };
 
     const handleGenerateReport = async () => {
-        if (!selectedTemplate) return;
+        if (!reportConfig.template) {
+            alert('Por favor, selecione um template de relatório');
+            return;
+        }
 
         setIsGenerating(true);
-
-        // Simulate report generation
+        
+        // Simula geração de relatório
         setTimeout(() => {
+            const template = reportTemplates.find(t => t.id === reportConfig.template);
+            const newReport: ReportHistory = {
+                id: Date.now().toString(),
+                name: template?.name || 'Relatório',
+                generatedDate: new Date().toISOString().slice(0, 16).replace('T', ' '),
+                status: 'completed',
+                size: `${(Math.random() * 5 + 1).toFixed(1)} MB`,
+                downloadUrl: '#',
+                template: reportConfig.template
+            };
+            
+            setReportHistory(prev => [newReport, ...prev]);
             setIsGenerating(false);
-            alert('Report generated successfully! Check your email for the download link.');
+            alert('Relatório gerado com sucesso!');
         }, 3000);
+    };
+
+    const handleDownloadReport = (reportId: string) => {
+        const report = reportHistory.find(r => r.id === reportId);
+        if (report) {
+            alert(`Baixando: ${report.name}`);
+        }
+    };
+
+    const handleDeleteReport = (reportId: string) => {
+        if (window.confirm('Tem certeza que deseja deletar este relatório?')) {
+            setReportHistory(prev => prev.filter(r => r.id !== reportId));
+        }
+    };
+
+    const addEmailRecipient = () => {
+        if (newEmailRecipient && !reportConfig.emailRecipients.includes(newEmailRecipient)) {
+            setReportConfig(prev => ({
+                ...prev,
+                emailRecipients: [...prev.emailRecipients, newEmailRecipient]
+            }));
+            setNewEmailRecipient('');
+        }
+    };
+
+    const removeEmailRecipient = (email: string) => {
+        setReportConfig(prev => ({
+            ...prev,
+            emailRecipients: prev.emailRecipients.filter(e => e !== email)
+        }));
     };
 
     const getStatusIcon = (status: string) => {
@@ -308,12 +404,12 @@ const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 </button>
                                 <div>
                                     <BusinessAnimatedText
-                                        text="Report Generation Center"
+                                        text="Geração de Relatórios"
                                         className="text-3xl font-bold text-gray-900"
                                         delay={0.2}
                                     />
                                     <BusinessAnimatedText
-                                        text="Generate comprehensive business reports and analytics"
+                                        text="Crie relatórios detalhados com análises profissionais"
                                         className="text-lg text-gray-600 mt-2"
                                         delay={0.4}
                                     />
@@ -326,186 +422,431 @@ const GenerateReport: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     </div>
                 </BusinessCard>
 
-                {/* Report Templates */}
+                {/* Templates de Relatório */}
                 <BusinessCard delay={0.3}>
                     <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                        <BusinessAnimatedText
-                            text="Available Report Templates"
-                            className="text-xl font-bold text-gray-900 mb-6"
-                            delay={0.4}
-                        />
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="flex items-center justify-between mb-6">
+                            <BusinessAnimatedText
+                                text="Templates de Relatório"
+                                className="text-xl font-semibold text-gray-900"
+                                delay={0.4}
+                            />
+                            <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <Plus className="w-4 h-4 mr-2" />
+                                Novo Template
+                            </button>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {reportTemplates.map((template, index) => (
-                                <div
-                                    key={template.id}
-                                    className={`${template.bgColor} border rounded-xl p-4 cursor-pointer transition-all duration-300 hover:shadow-md ${selectedTemplate === template.id ? 'ring-2 ring-blue-500' : ''
+                                <BusinessCard key={template.id} delay={0.5 + index * 0.1}>
+                                    <div
+                                        className={`border-2 rounded-xl p-6 cursor-pointer transition-all duration-200 ${
+                                            selectedTemplate === template.id
+                                                ? 'border-blue-500 bg-blue-50'
+                                                : 'border-gray-200 hover:border-gray-300'
                                         }`}
-                                    onClick={() => setSelectedTemplate(template.id)}
-                                >
-                                    <div className="flex items-start justify-between mb-3">
-                                        <div className="p-2 rounded-lg" style={{ backgroundColor: `${template.color}20`, color: template.color }}>
-                                            {template.icon}
+                                        onClick={() => handleTemplateSelect(template.id)}
+                                    >
+                                        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${template.bgColor} mb-4`}>
+                                            <div className={template.color}>
+                                                {template.icon}
+                                            </div>
                                         </div>
-                                        <span className="text-xs font-medium px-2 py-1 bg-white rounded-full text-gray-600">
-                                            {template.category}
-                                        </span>
-                                    </div>
-
-                                    <h3 className="font-semibold text-gray-900 mb-2">{template.name}</h3>
-                                    <p className="text-sm text-gray-600 mb-3">{template.description}</p>
-
-                                    <div className="space-y-1 text-xs text-gray-500">
-                                        <div className="flex justify-between">
-                                            <span>Est. Time:</span>
+                                        
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                            {template.name}
+                                        </h3>
+                                        
+                                        <p className="text-gray-600 text-sm mb-4">
+                                            {template.description}
+                                        </p>
+                                        
+                                        <div className="flex items-center justify-between text-sm text-gray-500">
+                                            <span>{template.category}</span>
                                             <span>{template.estimatedTime}</span>
                                         </div>
-                                        <div className="flex justify-between">
-                                            <span>Last Generated:</span>
-                                            <span>{template.lastGenerated}</span>
+                                        
+                                        <div className="mt-3 text-xs text-gray-400">
+                                            Último: {template.lastGenerated}
                                         </div>
+
+                                        {/* Preview dos campos */}
+                                        {selectedTemplate === template.id && (
+                                            <div className="mt-4 pt-4 border-t border-gray-200">
+                                                <p className="text-sm font-medium text-gray-700 mb-2">Campos incluídos:</p>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {template.fields.map((field, idx) => (
+                                                        <span key={idx} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                                                            {field}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
+                                </BusinessCard>
                             ))}
                         </div>
                     </div>
                 </BusinessCard>
 
-                {/* Report Configuration */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <BusinessCard delay={0.5}>
-                        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                            <BusinessAnimatedText
-                                text="Report Configuration"
-                                className="text-xl font-bold text-gray-900 mb-6"
-                                delay={0.6}
-                            />
-
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Date Range
-                                    </label>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <input
-                                                type="date"
-                                                value={dateRange.start}
-                                                onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            />
-                                            <span className="text-xs text-gray-500">Start Date</span>
-                                        </div>
-                                        <div>
-                                            <input
-                                                type="date"
-                                                value={dateRange.end}
-                                                onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            />
-                                            <span className="text-xs text-gray-500">End Date</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Output Format
-                                    </label>
-                                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        <option>PDF Document</option>
-                                        <option>Excel Spreadsheet</option>
-                                        <option>CSV Data</option>
-                                        <option>PowerPoint Presentation</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Delivery Method
-                                    </label>
-                                    <div className="space-y-2">
-                                        <label className="flex items-center">
-                                            <input type="radio" name="delivery" value="email" className="mr-2" defaultChecked />
-                                            <span className="text-sm">Email to {user?.email}</span>
-                                        </label>
-                                        <label className="flex items-center">
-                                            <input type="radio" name="delivery" value="download" className="mr-2" />
-                                            <span className="text-sm">Direct Download</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <button
-                                    onClick={handleGenerateReport}
-                                    disabled={!selectedTemplate || isGenerating}
-                                    className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 ${selectedTemplate && !isGenerating
-                                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                        }`}
-                                >
-                                    {isGenerating ? (
-                                        <div className="flex items-center justify-center">
-                                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                                            Generating Report...
-                                        </div>
-                                    ) : (
-                                        <div className="flex items-center justify-center">
-                                            <Send className="w-4 h-4 mr-2" />
-                                            Generate Report
-                                        </div>
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-                    </BusinessCard>
-
-                    {/* Recent Reports */}
+                {/* Configurações do Relatório */}
+                {selectedTemplate && (
                     <BusinessCard delay={0.7}>
                         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <BusinessAnimatedText
-                                    text="Recent Reports"
-                                    className="text-xl font-bold text-gray-900"
-                                    delay={0.8}
-                                />
-                                <button className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
-                                    <RefreshCw className="w-4 h-4 text-gray-600" />
-                                </button>
-                            </div>
+                            <BusinessAnimatedText
+                                text="Configurações do Relatório"
+                                className="text-xl font-semibold text-gray-900 mb-6"
+                                delay={0.8}
+                            />
 
-                            <div className="space-y-3">
-                                {reportHistory.map((report, index) => (
-                                    <div
-                                        key={report.id}
-                                        className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors duration-200"
-                                    >
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <h4 className="font-medium text-gray-900 mb-1">{report.name}</h4>
-                                                <div className="flex items-center space-x-4 text-sm text-gray-500">
-                                                    <span>{report.generatedDate}</span>
-                                                    <span>{report.size}</span>
-                                                </div>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Configurações Básicas */}
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-medium text-gray-900">Configurações Básicas</h3>
+                                    
+                                    {/* Período */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Período do Relatório
+                                        </label>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs text-gray-500 mb-1">Data Inicial</label>
+                                                <input
+                                                    type="date"
+                                                    value={reportConfig.dateRange.start}
+                                                    onChange={(e) => setReportConfig(prev => ({
+                                                        ...prev,
+                                                        dateRange: { ...prev.dateRange, start: e.target.value }
+                                                    }))}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
                                             </div>
-                                            <div className="flex items-center space-x-2">
-                                                <span className={`flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
-                                                    {getStatusIcon(report.status)}
-                                                    <span className="ml-1 capitalize">{report.status}</span>
-                                                </span>
-                                                {report.status === 'completed' && (
-                                                    <button className="p-1 rounded bg-blue-100 hover:bg-blue-200 transition-colors duration-200">
-                                                        <Download className="w-4 h-4 text-blue-600" />
-                                                    </button>
-                                                )}
+                                            <div>
+                                                <label className="block text-xs text-gray-500 mb-1">Data Final</label>
+                                                <input
+                                                    type="date"
+                                                    value={reportConfig.dateRange.end}
+                                                    onChange={(e) => setReportConfig(prev => ({
+                                                        ...prev,
+                                                        dateRange: { ...prev.dateRange, end: e.target.value }
+                                                    }))}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
                                             </div>
                                         </div>
                                     </div>
-                                ))}
+
+                                    {/* Formato */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Formato de Saída
+                                        </label>
+                                        <select
+                                            value={reportConfig.format}
+                                            onChange={(e) => setReportConfig(prev => ({
+                                                ...prev,
+                                                format: e.target.value as any
+                                            }))}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        >
+                                            <option value="PDF">PDF</option>
+                                            <option value="Excel">Excel</option>
+                                            <option value="CSV">CSV</option>
+                                            <option value="Word">Word</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Opções de Conteúdo */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-3">
+                                            Opções de Conteúdo
+                                        </label>
+                                        <div className="space-y-2">
+                                            <label className="flex items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={reportConfig.includeCharts}
+                                                    onChange={(e) => setReportConfig(prev => ({
+                                                        ...prev,
+                                                        includeCharts: e.target.checked
+                                                    }))}
+                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                />
+                                                <span className="ml-2 text-sm text-gray-700">Incluir gráficos</span>
+                                            </label>
+                                            <label className="flex items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={reportConfig.includeRawData}
+                                                    onChange={(e) => setReportConfig(prev => ({
+                                                        ...prev,
+                                                        includeRawData: e.target.checked
+                                                    }))}
+                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                />
+                                                <span className="ml-2 text-sm text-gray-700">Incluir dados brutos</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Configurações Avançadas */}
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-medium text-gray-900">Configurações Avançadas</h3>
+                                    
+                                    {/* Entrega por Email */}
+                                    <div>
+                                        <label className="flex items-center mb-3">
+                                            <input
+                                                type="checkbox"
+                                                checked={reportConfig.emailDelivery}
+                                                onChange={(e) => setReportConfig(prev => ({
+                                                    ...prev,
+                                                    emailDelivery: e.target.checked
+                                                }))}
+                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <span className="ml-2 text-sm font-medium text-gray-700">Enviar por email</span>
+                                        </label>
+                                        
+                                        {reportConfig.emailDelivery && (
+                                            <div className="space-y-3">
+                                                <div className="flex space-x-2">
+                                                    <input
+                                                        type="email"
+                                                        placeholder="email@exemplo.com"
+                                                        value={newEmailRecipient}
+                                                        onChange={(e) => setNewEmailRecipient(e.target.value)}
+                                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    />
+                                                    <button
+                                                        onClick={addEmailRecipient}
+                                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                                    >
+                                                        <Plus className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                
+                                                {reportConfig.emailRecipients.length > 0 && (
+                                                    <div className="space-y-1">
+                                                        {reportConfig.emailRecipients.map((email, index) => (
+                                                            <div key={index} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded">
+                                                                <span className="text-sm text-gray-700">{email}</span>
+                                                                <button
+                                                                    onClick={() => removeEmailRecipient(email)}
+                                                                    className="text-red-500 hover:text-red-700"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Geração Programada */}
+                                    <div>
+                                        <label className="flex items-center mb-3">
+                                            <input
+                                                type="checkbox"
+                                                checked={reportConfig.scheduledGeneration}
+                                                onChange={(e) => setReportConfig(prev => ({
+                                                    ...prev,
+                                                    scheduledGeneration: e.target.checked
+                                                }))}
+                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <span className="ml-2 text-sm font-medium text-gray-700">Geração programada</span>
+                                        </label>
+                                        
+                                        {reportConfig.scheduledGeneration && (
+                                            <select
+                                                value={reportConfig.frequency}
+                                                onChange={(e) => setReportConfig(prev => ({
+                                                    ...prev,
+                                                    frequency: e.target.value as any
+                                                }))}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            >
+                                                <option value="daily">Diário</option>
+                                                <option value="weekly">Semanal</option>
+                                                <option value="monthly">Mensal</option>
+                                                <option value="quarterly">Trimestral</option>
+                                            </select>
+                                        )}
+                                    </div>
+
+                                    {/* Botões de Ação */}
+                                    <div className="space-y-3 pt-4">
+                                        <button
+                                            onClick={() => setShowPreview(true)}
+                                            className="w-full flex items-center justify-center px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                                        >
+                                            <Eye className="w-4 h-4 mr-2" />
+                                            Visualizar Prévia
+                                        </button>
+                                        
+                                        <button
+                                            onClick={handleGenerateReport}
+                                            disabled={isGenerating}
+                                            className="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
+                                        >
+                                            {isGenerating ? (
+                                                <>
+                                                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                                                    Gerando...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Download className="w-4 h-4 mr-2" />
+                                                    Gerar Relatório
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </BusinessCard>
-                </div>
+                )}
+
+                {/* Histórico de Relatórios */}
+                <BusinessCard delay={0.9}>
+                    <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <BusinessAnimatedText
+                                text="Histórico de Relatórios"
+                                className="text-xl font-semibold text-gray-900"
+                                delay={1.0}
+                            />
+                            <button className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                <Download className="w-4 h-4 mr-2" />
+                                Baixar Todos
+                            </button>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-gray-50 border-b border-gray-200">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Relatório
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Data de Geração
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Tamanho
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Ações
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {reportHistory.map((report) => (
+                                        <tr key={report.id} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-medium text-gray-900">{report.name}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-500">{report.generatedDate}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
+                                                    {getStatusIcon(report.status)}
+                                                    <span className="ml-1 capitalize">{report.status}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {report.size}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <div className="flex items-center space-x-2">
+                                                    {report.status === 'completed' && (
+                                                        <button
+                                                            onClick={() => handleDownloadReport(report.id)}
+                                                            className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
+                                                        >
+                                                            <Download className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => handleDeleteReport(report.id)}
+                                                        className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </BusinessCard>
+
+                {/* Modal de Prévia */}
+                {showPreview && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <BusinessCard className="bg-white rounded-xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-semibold text-gray-900">Prévia do Relatório</h3>
+                                <button
+                                    onClick={() => setShowPreview(false)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
+                            </div>
+                            
+                            <div className="space-y-6">
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                                    <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                                    <h4 className="text-lg font-medium text-gray-900 mb-2">
+                                        Prévia do Relatório: {reportTemplates.find(t => t.id === selectedTemplate)?.name}
+                                    </h4>
+                                    <p className="text-gray-600">
+                                        Período: {reportConfig.dateRange.start || 'Não definido'} até {reportConfig.dateRange.end || 'Não definido'}
+                                    </p>
+                                    <p className="text-gray-600">
+                                        Formato: {reportConfig.format}
+                                    </p>
+                                    <div className="mt-4 text-sm text-gray-500">
+                                        Esta é uma prévia mockup. O relatório real será gerado com dados reais.
+                                    </div>
+                                </div>
+                                
+                                <div className="flex space-x-3">
+                                    <button
+                                        onClick={() => setShowPreview(false)}
+                                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                                    >
+                                        Fechar
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowPreview(false);
+                                            handleGenerateReport();
+                                        }}
+                                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                    >
+                                        Gerar Relatório
+                                    </button>
+                                </div>
+                            </div>
+                        </BusinessCard>
+                    </div>
+                )}
             </div>
         </div>
     );
