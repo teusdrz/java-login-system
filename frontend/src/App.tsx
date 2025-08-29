@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/Dashboard_Business_Professional';
 import ProfilePage from './pages/ProfilePage';
 import './App.css';
 

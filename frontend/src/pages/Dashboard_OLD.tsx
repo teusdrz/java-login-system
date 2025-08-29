@@ -43,21 +43,21 @@ import {
     ChevronDown,
     ChevronUp
 } from 'lucide-react';
-import { 
-    PieChart, 
-    Pie, 
-    Cell, 
-    BarChart, 
-    Bar, 
-    XAxis, 
-    YAxis, 
-    CartesianGrid, 
-    Tooltip, 
-    ResponsiveContainer, 
-    LineChart, 
-    Line, 
-    Area, 
-    AreaChart 
+import {
+    PieChart,
+    Pie,
+    Cell,
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    LineChart,
+    Line,
+    Area,
+    AreaChart
 } from 'recharts';
 
 interface DashboardStats {
@@ -163,8 +163,6 @@ const Dashboard: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRole, setFilterRole] = useState<Role | 'all'>('all');
     const [realTimeData, setRealTimeData] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterRole, setFilterRole] = useState<Role | 'all'>('all');
 
     const isModerator = user?.role === Role.ADMIN || user?.role === Role.MODERATOR;
 
@@ -193,7 +191,11 @@ const Dashboard: React.FC = () => {
             totalUsers: 1247,
             activeUsers: 892,
             newUsersToday: 23,
-            onlineUsers: 156
+            onlineUsers: 156,
+            totalSessions: 3452,
+            avgSessionTime: '24min',
+            systemUptime: '99.9%',
+            errorRate: 0.1
         });
     };
 

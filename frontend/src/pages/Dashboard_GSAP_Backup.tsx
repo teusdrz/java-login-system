@@ -3,6 +3,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { User, Role } from '../types/api';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { TextPlugin } from 'gsap/TextPlugin';
+import { Observer } from 'gsap/Observer';
+import { Flip } from 'gsap/Flip';
 import {
     BarChart3, Users, FileText, Settings, AlertTriangle, Shield, UserPlus,
     Search, Filter, MoreVertical, Eye, Edit, Trash2, CheckCircle, XCircle,
@@ -10,12 +14,15 @@ import {
     Activity, Database, Server, Wifi, WifiOff, Plus, Minus, ChevronDown,
     ChevronUp, Lock, Unlock, Zap, Target, Globe, Monitor, HardDrive,
     Cpu, MemoryStick, Network, Calendar, Mail, Phone, AlertCircle, CheckSquare,
-    TrendingDown, Home
+    TrendingDown, Home, Sparkles, Layers, Crosshair, Waves, Orbit, Palette
 } from 'lucide-react';
 import {
-    PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+    PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, 
     Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area
 } from 'recharts';
+
+// Registrar plugins do GSAP
+gsap.registerPlugin(ScrollTrigger, TextPlugin, Observer, Flip);
 
 // Interfaces
 interface DashboardStats {
@@ -207,10 +214,252 @@ const getActivityIcon = (type: ActivityLog['type']): React.ReactElement => {
     }
 };
 
-const DashboardComplete: React.FC = () => {
+// Componente de Item de Navegação com Animações Extraordinárias
+interface NavigationItemProps {
+    item: {
+        id: string;
+        label: string;
+        icon: React.ComponentType<{ className?: string }>;
+    };
+    index: number;
+    isActive: boolean;
+    onClick: () => void;
+    notificationCount: number;
+}
+
+const NavigationItem: React.FC<NavigationItemProps> = ({ 
+    item, 
+    index, 
+    isActive, 
+    onClick, 
+    notificationCount 
+}) => {
+    const itemRef = useRef<HTMLButtonElement>(null);
+    const iconRef = useRef<HTMLSpanElement>(null);
+    const labelRef = useRef<HTMLSpanElement>(null);
+    const notificationRef = useRef<HTMLSpanElement>(null);
+
+    const IconComponent = item.icon;
+
+    useGSAP(() => {
+        // Animação de entrada extraordinária
+        if (itemRef.current) {
+            gsap.fromTo(itemRef.current, 
+                {
+                    opacity: 0,
+                    x: -100,
+                    rotationY: -90,
+                    scale: 0.5,
+                    filter: "blur(10px)"
+                },
+                {
+                    opacity: 1,
+                    x: 0,
+                    rotationY: 0,
+                    scale: 1,
+                    filter: "blur(0px)",
+                    duration: 1.2,
+                    ease: "elastic.out(1, 0.5)",
+                    delay: index * 0.15
+                }
+            );
+        }
+
+        // Animações de hover extraordinárias
+        const handleHover = () => {
+            const tl = gsap.timeline();
+            
+            tl
+                // Expansão com brilho
+                .to(itemRef.current, {
+                    scale: 1.05,
+                    x: 10,
+                    boxShadow: "10px 0 30px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(59, 130, 246, 0.1)",
+                    background: "linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%)",
+                    borderLeft: "4px solid #3b82f6",
+                    duration: 0.5,
+                    ease: "back.out(1.4)"
+                })
+                // Ícone com rotação e pulsação
+                .to(iconRef.current, {
+                    scale: 1.3,
+                    rotation: 360,
+                    color: "#3b82f6",
+                    textShadow: "0 0 10px rgba(59, 130, 246, 0.8)",
+                    duration: 0.6,
+                    ease: "elastic.out(1, 0.3)"
+                }, "-=0.3")
+                // Label com efeito de brilho
+                .to(labelRef.current, {
+                    scale: 1.1,
+                    color: "#1e40af",
+                    textShadow: "0 0 5px rgba(59, 130, 246, 0.5)",
+                    duration: 0.3,
+                    ease: "power2.out"
+                }, "-=0.4");
+
+            // Efeito de partículas flutuantes
+            gsap.to(itemRef.current, {
+                background: "radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%)",
+                duration: 1,
+                ease: "sine.out"
+            });
+        };
+
+        const handleLeave = () => {
+            if (!isActive) {
+                const tl = gsap.timeline();
+                
+                tl
+                    .to(itemRef.current, {
+                        scale: 1,
+                        x: 0,
+                        boxShadow: "none",
+                        background: "transparent",
+                        borderLeft: "none",
+                        duration: 0.4,
+                        ease: "power2.out"
+                    })
+                    .to(iconRef.current, {
+                        scale: 1,
+                        rotation: 0,
+                        color: "#6b7280",
+                        textShadow: "none",
+                        duration: 0.3,
+                        ease: "power2.out"
+                    }, "-=0.2")
+                    .to(labelRef.current, {
+                        scale: 1,
+                        color: "#6b7280",
+                        textShadow: "none",
+                        duration: 0.3,
+                        ease: "power2.out"
+                    }, "-=0.3");
+            }
+        };
+
+        const button = itemRef.current;
+        if (button) {
+            button.addEventListener('mouseenter', handleHover);
+            button.addEventListener('mouseleave', handleLeave);
+
+            return () => {
+                button.removeEventListener('mouseenter', handleHover);
+                button.removeEventListener('mouseleave', handleLeave);
+            };
+        }
+    }, [isActive, index]);
+
+    // Animação quando ativo
+    useGSAP(() => {
+        if (itemRef.current && isActive) {
+            gsap.to(itemRef.current, {
+                scale: 1.05,
+                x: 15,
+                background: "linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.15) 100%)",
+                boxShadow: "10px 0 30px rgba(59, 130, 246, 0.4), inset 0 0 30px rgba(59, 130, 246, 0.1)",
+                borderLeft: "6px solid #3b82f6",
+                duration: 0.6,
+                ease: "back.out(1.2)"
+            });
+
+            gsap.to(iconRef.current, {
+                scale: 1.2,
+                color: "#1e40af",
+                textShadow: "0 0 15px rgba(59, 130, 246, 1)",
+                duration: 0.5,
+                ease: "power2.out"
+            });
+
+            gsap.to(labelRef.current, {
+                color: "#1e40af",
+                fontWeight: "bold",
+                textShadow: "0 0 8px rgba(59, 130, 246, 0.6)",
+                duration: 0.4,
+                ease: "power2.out"
+            });
+        } else if (itemRef.current) {
+            gsap.to(itemRef.current, {
+                scale: 1,
+                x: 0,
+                background: "transparent",
+                boxShadow: "none",
+                borderLeft: "none",
+                duration: 0.4,
+                ease: "power2.out"
+            });
+
+            gsap.to(iconRef.current, {
+                scale: 1,
+                color: "#6b7280",
+                textShadow: "none",
+                duration: 0.3,
+                ease: "power2.out"
+            });
+
+            gsap.to(labelRef.current, {
+                color: "#6b7280",
+                fontWeight: "normal",
+                textShadow: "none",
+                duration: 0.3,
+                ease: "power2.out"
+            });
+        }
+    }, [isActive]);
+
+    // Animação de notificação
+    useGSAP(() => {
+        if (notificationRef.current && notificationCount > 0) {
+            gsap.fromTo(notificationRef.current,
+                { scale: 0, rotation: -180 },
+                { 
+                    scale: 1, 
+                    rotation: 0, 
+                    duration: 0.6, 
+                    ease: "elastic.out(1, 0.3)" 
+                }
+            );
+
+            // Pulsação contínua
+            gsap.to(notificationRef.current, {
+                scale: 1.2,
+                duration: 1,
+                ease: "sine.inOut",
+                yoyo: true,
+                repeat: -1
+            });
+        }
+    }, [notificationCount]);
+
+    return (
+        <button
+            ref={itemRef}
+            onClick={onClick}
+            className="nav-item w-full flex items-center px-3 py-3 mb-2 text-sm font-medium rounded-lg transition-all duration-200 transform-gpu"
+            style={{ perspective: '1000px' }}
+        >
+            <span ref={iconRef} className="flex items-center justify-center mr-3">
+                <IconComponent className="w-5 h-5" />
+            </span>
+            <span ref={labelRef} className="flex-1 text-left">
+                {item.label}
+            </span>
+            {notificationCount > 0 && (
+                <span 
+                    ref={notificationRef}
+                    className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-1 transform-gpu"
+                >
+                    {notificationCount}
+                </span>
+            )}
+        </button>
+    );
+};
+
+const Dashboard: React.FC = () => {
     const { state } = useAuth();
     const { user } = state;
-
+    
     // Refs for GSAP animations
     const containerRef = useRef<HTMLDivElement>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
@@ -218,7 +467,7 @@ const DashboardComplete: React.FC = () => {
     const statsCardsRef = useRef<HTMLDivElement>(null);
     const chartsRef = useRef<HTMLDivElement>(null);
     const tableRef = useRef<HTMLDivElement>(null);
-
+    
     // States
     const [currentView, setCurrentView] = useState<ViewType>('overview');
     const [loading, setLoading] = useState(true);
@@ -265,59 +514,176 @@ const DashboardComplete: React.FC = () => {
 
     const isModerator = user?.role === Role.ADMIN || user?.role === Role.MODERATOR;
 
-    // GSAP Animations
+    // GSAP Animações Extraordinárias e Avançadas
     useGSAP(() => {
-        // Initial page load animation
+        // Animação de entrada com morfismo fluido e efeitos de partículas
         if (containerRef.current) {
-            gsap.set([sidebarRef.current, mainContentRef.current], { opacity: 0 });
-
-            gsap.timeline()
-                .to(sidebarRef.current, {
+            gsap.set([sidebarRef.current, mainContentRef.current], { 
+                opacity: 0,
+                scale: 0.95,
+                rotationY: -15,
+                transformOrigin: "center center",
+                filter: "blur(10px)"
+            });
+            
+            // Timeline mestra com efeitos extraordinários
+            const masterTL = gsap.timeline();
+            
+            masterTL
+                // Entrada da sidebar com efeito de cristal
+                .to(sidebarRef.current, { 
                     opacity: 1,
-                    x: 0,
-                    duration: 0.8,
-                    ease: "power3.out"
+                    scale: 1,
+                    rotationY: 0,
+                    filter: "blur(0px)",
+                    duration: 1.2, 
+                    ease: "elastic.out(1, 0.8)",
+                    transformOrigin: "left center"
                 })
-                .to(mainContentRef.current, {
-                    opacity: 1,
-                    duration: 0.6,
+                // Efeito de ondas propagando pelo sidebar
+                .to(sidebarRef.current, {
+                    boxShadow: "0 0 50px rgba(59, 130, 246, 0.5), inset 0 0 20px rgba(59, 130, 246, 0.1)",
+                    duration: 0.8,
                     ease: "power2.out"
-                }, "-=0.4");
+                }, "-=0.6")
+                // Entrada do conteúdo principal com efeito holográfico
+                .to(mainContentRef.current, { 
+                    opacity: 1,
+                    scale: 1,
+                    rotationY: 0,
+                    filter: "blur(0px)",
+                    duration: 1.0, 
+                    ease: "back.out(1.7)",
+                    transformOrigin: "center center"
+                }, "-=0.8")
+                // Efeito de brilho holográfico
+                .to(mainContentRef.current, {
+                    background: "linear-gradient(135deg, rgba(59, 130, 246, 0.02) 0%, rgba(147, 51, 234, 0.02) 100%)",
+                    duration: 1.5,
+                    ease: "sine.inOut"
+                }, "-=0.5");
+
+            // Animação contínua de respiração para elementos ativos
+            gsap.to(sidebarRef.current, {
+                scale: 1.02,
+                duration: 3,
+                ease: "sine.inOut",
+                yoyo: true,
+                repeat: -1
+            });
         }
     }, []);
 
-    // Animate content change
+    // Animação de transição de conteúdo com efeito de quebra-cabeça quântico
     useGSAP(() => {
         if (mainContentRef.current) {
-            gsap.fromTo(mainContentRef.current.children,
-                { y: 30, opacity: 0 },
-                {
-                    y: 0,
+            const children = Array.from(mainContentRef.current.children);
+            
+            // Efeito de saída com fragmentação
+            gsap.fromTo(children, 
+                { 
                     opacity: 1,
-                    duration: 0.6,
-                    stagger: 0.1,
-                    ease: "power2.out"
+                    y: 0,
+                    rotationX: 0,
+                    scale: 1,
+                    filter: "blur(0px)"
+                },
+                { 
+                    opacity: 0,
+                    y: -50,
+                    rotationX: 90,
+                    scale: 0.8,
+                    filter: "blur(5px)",
+                    duration: 0.4, 
+                    stagger: {
+                        amount: 0.3,
+                        from: "random",
+                        ease: "power3.in"
+                    }
                 }
-            );
+            ).then(() => {
+                // Efeito de entrada com materialização quântica
+                gsap.fromTo(children,
+                    { 
+                        opacity: 0,
+                        y: 100,
+                        rotationX: -90,
+                        scale: 0.5,
+                        filter: "blur(15px) brightness(0.5)",
+                        boxShadow: "0 0 0 rgba(59, 130, 246, 0)"
+                    },
+                    { 
+                        opacity: 1,
+                        y: 0,
+                        rotationX: 0,
+                        scale: 1,
+                        filter: "blur(0px) brightness(1)",
+                        boxShadow: "0 20px 40px rgba(59, 130, 246, 0.1)",
+                        duration: 0.8, 
+                        stagger: {
+                            amount: 0.6,
+                            from: "center",
+                            ease: "back.out(2)"
+                        }
+                    }
+                );
+            });
         }
     }, [currentView]);
 
-    // Animate stats cards
+    // Animação de cartões de estatísticas com efeito de levitação magnética
     useGSAP(() => {
         if (statsCardsRef.current && currentView === 'overview') {
-            gsap.fromTo(statsCardsRef.current.children,
-                { scale: 0.8, opacity: 0, y: 20 },
-                {
-                    scale: 1,
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.5,
-                    stagger: 0.1,
-                    ease: "back.out(1.7)"
-                }
-            );
+            const cards = Array.from(statsCardsRef.current.children);
+            
+            // Reset inicial
+            gsap.set(cards, {
+                opacity: 0,
+                y: 200,
+                rotationY: 45,
+                scale: 0.3,
+                filter: "blur(20px)",
+                transformOrigin: "center bottom"
+            });
+
+            // Animação de entrada com efeito gravitacional
+            gsap.to(cards, {
+                opacity: 1,
+                y: 0,
+                rotationY: 0,
+                scale: 1,
+                filter: "blur(0px)",
+                duration: 1.2,
+                stagger: {
+                    amount: 0.8,
+                    ease: "power4.out"
+                },
+                ease: "elastic.out(1, 0.6)"
+            });
+
+            // Efeito de levitação contínua para cada cartão
+            cards.forEach((card, index) => {
+                gsap.to(card, {
+                    y: Math.sin(index * 0.5) * 10,
+                    rotation: Math.cos(index * 0.3) * 2,
+                    duration: 3 + (index * 0.5),
+                    ease: "sine.inOut",
+                    yoyo: true,
+                    repeat: -1,
+                    delay: index * 0.2
+                });
+
+                // Efeito de auroras nos cartões
+                gsap.to(card, {
+                    boxShadow: `0 10px 30px rgba(${59 + index * 20}, ${130 + index * 15}, 246, ${0.15 + index * 0.05})`,
+                    duration: 2,
+                    ease: "sine.inOut",
+                    yoyo: true,
+                    repeat: -1
+                });
+            });
         }
-    }, [currentView, stats]);
+    }, [currentView]);
 
     // Real-time data updates with GSAP
     useEffect(() => {
@@ -354,7 +720,7 @@ const DashboardComplete: React.FC = () => {
         try {
             // Simulate API call with loading animation
             await new Promise(resolve => setTimeout(resolve, 1000));
-
+            
             // Animate loading completion
             if (statsCardsRef.current) {
                 gsap.fromTo(statsCardsRef.current.children,
@@ -411,7 +777,7 @@ const DashboardComplete: React.FC = () => {
             // Animate new user addition
             setUsers(prev => [newUser, ...prev]);
             setShowUserForm(false);
-
+            
             // Add activity log
             const logEntry: ActivityLog = {
                 id: Date.now().toString(),
@@ -442,7 +808,7 @@ const DashboardComplete: React.FC = () => {
 
         try {
             const userToDelete = users.find(u => u.id === userId);
-
+            
             // Animate user removal
             const userElement = document.querySelector(`[data-user-id="${userId}"]`);
             if (userElement) {
@@ -458,7 +824,7 @@ const DashboardComplete: React.FC = () => {
             } else {
                 setUsers(prev => prev.filter(u => u.id !== userId));
             }
-
+            
             // Add activity log
             const logEntry: ActivityLog = {
                 id: Date.now().toString(),
@@ -479,12 +845,12 @@ const DashboardComplete: React.FC = () => {
     const handleToggleUserStatus = async (userId: string) => {
         try {
             const userToToggle = users.find(u => u.id === userId);
-            setUsers(prev => prev.map(u =>
-                u.id === userId
+            setUsers(prev => prev.map(u => 
+                u.id === userId 
                     ? { ...u, active: !u.active, lastModifiedAt: new Date().toISOString().split('T')[0] }
                     : u
             ));
-
+            
             // Add activity log
             const logEntry: ActivityLog = {
                 id: Date.now().toString(),
@@ -517,7 +883,7 @@ const DashboardComplete: React.FC = () => {
     const handleUpdateSettings = async (newSettings: Partial<SystemSettings>) => {
         try {
             setSystemSettings(prev => ({ ...prev, ...newSettings }));
-
+            
             // Add activity log
             const logEntry: ActivityLog = {
                 id: Date.now().toString(),
@@ -564,10 +930,11 @@ const DashboardComplete: React.FC = () => {
 
     // Helper functions
     const getStatusBadge = (isActive: boolean) => (
-        <span className={`status-badge inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isActive
-                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+        <span className={`status-badge inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            isActive 
+                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
                 : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-            }`}>
+        }`}>
             {isActive ? (
                 <>
                     <CheckCircle className="w-3 h-3 mr-1" />
@@ -613,14 +980,14 @@ const DashboardComplete: React.FC = () => {
 
     // Filter users
     const filteredUsers = users.filter(u => {
-        const matchesSearch = !searchTerm ||
+        const matchesSearch = !searchTerm || 
             (u.firstName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
             (u.lastName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
             u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
             u.email.toLowerCase().includes(searchTerm.toLowerCase());
-
+        
         const matchesRole = filterRole === 'all' || u.role === filterRole;
-
+        
         return matchesSearch && matchesRole;
     });
 
@@ -652,27 +1019,19 @@ const DashboardComplete: React.FC = () => {
 
                 <nav className="mt-6">
                     <div className="px-3">
-                        {navigationItems.map((item) => {
+                        {navigationItems.map((item, index) => {
                             const IconComponent = item.icon;
                             const isActive = currentView === item.id;
-
+                            
                             return (
-                                <button
+                                <NavigationItem
                                     key={item.id}
+                                    item={item}
+                                    index={index}
+                                    isActive={isActive}
                                     onClick={() => handleViewChange(item.id as ViewType)}
-                                    className={`nav-item w-full flex items-center px-3 py-2 mb-2 text-sm font-medium rounded-lg transition-all duration-200 ${isActive
-                                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                                        }`}
-                                >
-                                    <IconComponent className="w-5 h-5 mr-3" />
-                                    {item.label}
-                                    {item.id === 'notifications' && notifications.filter(n => !n.read).length > 0 && (
-                                        <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-1">
-                                            {notifications.filter(n => !n.read).length}
-                                        </span>
-                                    )}
-                                </button>
+                                    notificationCount={item.id === 'notifications' ? notifications.filter(n => !n.read).length : 0}
+                                />
                             );
                         })}
                     </div>
@@ -717,7 +1076,7 @@ const DashboardComplete: React.FC = () => {
                                     {currentView === 'settings' && 'Configurações do sistema e segurança'}
                                 </p>
                             </div>
-
+                            
                             <div className="flex items-center space-x-4">
                                 <div className="flex items-center space-x-2">
                                     <div className={`w-3 h-3 rounded-full ${realTimeUpdates ? 'bg-green-500' : 'bg-gray-400'}`}></div>
@@ -731,7 +1090,7 @@ const DashboardComplete: React.FC = () => {
                                         {realTimeUpdates ? 'Pausar' : 'Ativar'}
                                     </button>
                                 </div>
-
+                                
                                 <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                                     <RefreshCw className="w-5 h-5" />
                                 </button>
@@ -747,7 +1106,7 @@ const DashboardComplete: React.FC = () => {
                     ) : (
                         <>
                             {currentView === 'overview' && (
-                                <OverviewSection
+                                <OverviewSection 
                                     stats={stats}
                                     systemMetrics={systemMetrics}
                                     userGrowthData={userGrowthData}
@@ -757,9 +1116,9 @@ const DashboardComplete: React.FC = () => {
                                     chartsRef={chartsRef}
                                 />
                             )}
-
+                            
                             {currentView === 'users' && (
-                                <UsersSection
+                                <UsersSection 
                                     users={filteredUsers}
                                     searchTerm={searchTerm}
                                     setSearchTerm={setSearchTerm}
@@ -778,31 +1137,31 @@ const DashboardComplete: React.FC = () => {
                                     tableRef={tableRef}
                                 />
                             )}
-
+                            
                             {currentView === 'activity' && (
-                                <ActivitySection
+                                <ActivitySection 
                                     activityLogs={activityLogs}
                                     getActivityIcon={getActivityIcon}
                                 />
                             )}
-
+                            
                             {currentView === 'analytics' && (
-                                <AnalyticsSection
+                                <AnalyticsSection 
                                     stats={stats}
                                     userGrowthData={userGrowthData}
                                     users={users}
                                 />
                             )}
-
+                            
                             {currentView === 'notifications' && (
-                                <NotificationsSection
+                                <NotificationsSection 
                                     notifications={notifications}
                                     setNotifications={setNotifications}
                                 />
                             )}
-
+                            
                             {currentView === 'settings' && (
-                                <SettingsSection
+                                <SettingsSection 
                                     settings={systemSettings}
                                     onUpdateSettings={handleUpdateSettings}
                                     isModerator={isModerator}
@@ -819,17 +1178,74 @@ const DashboardComplete: React.FC = () => {
 // Loading Screen Component
 const LoadingScreen: React.FC = () => {
     const loadingRef = useRef<HTMLDivElement>(null);
-
+    
     useGSAP(() => {
         if (loadingRef.current) {
-            gsap.set('.loading-dot', { scale: 0 });
-            gsap.to('.loading-dot', {
-                scale: 1,
-                duration: 0.6,
-                stagger: 0.2,
-                repeat: -1,
+            // Animação quântica de loading com efeito de partículas
+            gsap.set('.loading-dot', { 
+                scale: 0,
+                opacity: 0,
+                rotationY: 180,
+                transformOrigin: "center center"
+            });
+            
+            // Timeline complexa para loading extraordinário
+            const loadingTL = gsap.timeline({ repeat: -1 });
+            
+            loadingTL
+                // Materialização das partículas
+                .to('.loading-dot', {
+                    scale: 1,
+                    opacity: 1,
+                    rotationY: 0,
+                    duration: 0.8,
+                    stagger: {
+                        amount: 0.6,
+                        from: "center",
+                        ease: "back.out(1.7)"
+                    }
+                })
+                // Efeito de pulsação energética
+                .to('.loading-dot', {
+                    scale: 1.5,
+                    boxShadow: "0 0 20px rgba(59, 130, 246, 0.8)",
+                    duration: 0.4,
+                    stagger: 0.1,
+                    ease: "power2.out"
+                })
+                // Retorno com ondas
+                .to('.loading-dot', {
+                    scale: 1,
+                    boxShadow: "0 0 5px rgba(59, 130, 246, 0.3)",
+                    duration: 0.4,
+                    stagger: 0.1,
+                    ease: "power2.in"
+                })
+                // Rotação orbital
+                .to('.loading-dot', {
+                    rotation: 360,
+                    duration: 1.5,
+                    ease: "power1.inOut"
+                }, "-=0.8")
+                // Pausa antes de repetir
+                .to('.loading-dot', {
+                    scale: 0.8,
+                    duration: 0.3,
+                    ease: "power2.inOut"
+                })
+                .to('.loading-dot', {
+                    scale: 1,
+                    duration: 0.3,
+                    ease: "power2.inOut"
+                });
+
+            // Efeito de halo contínuo no contêiner
+            gsap.to(loadingRef.current, {
+                background: "radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 50%)",
+                duration: 2,
+                ease: "sine.inOut",
                 yoyo: true,
-                ease: "power2.inOut"
+                repeat: -1
             });
         }
     }, []);
@@ -859,11 +1275,11 @@ interface OverviewSectionProps {
     chartsRef: React.RefObject<HTMLDivElement | null>;
 }
 
-const OverviewSection: React.FC<OverviewSectionProps> = ({
-    stats,
-    systemMetrics,
-    userGrowthData,
-    roleDistributionData,
+const OverviewSection: React.FC<OverviewSectionProps> = ({ 
+    stats, 
+    systemMetrics, 
+    userGrowthData, 
+    roleDistributionData, 
     recentActivity,
     statsCardsRef,
     chartsRef
@@ -872,10 +1288,78 @@ const OverviewSection: React.FC<OverviewSectionProps> = ({
 
     useGSAP(() => {
         if (chartsRef.current) {
-            gsap.fromTo(chartsRef.current.children,
-                { y: 50, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.8, stagger: 0.2, ease: "power3.out" }
-            );
+            const charts = Array.from(chartsRef.current.children);
+            
+            // Animação de entrada com efeito de cristalização
+            gsap.set(charts, {
+                opacity: 0,
+                scale: 0.1,
+                rotationY: 90,
+                z: -200,
+                transformOrigin: "center center",
+                filter: "blur(20px) brightness(0.3)"
+            });
+
+            // Timeline extraordinária para gráficos
+            const chartsTimeline = gsap.timeline();
+            
+            chartsTimeline
+                // Primeira fase: materialização quântica
+                .to(charts, {
+                    opacity: 0.3,
+                    scale: 0.5,
+                    rotationY: 45,
+                    z: -100,
+                    filter: "blur(10px) brightness(0.6)",
+                    duration: 0.6,
+                    stagger: {
+                        amount: 0.8,
+                        from: "random",
+                        ease: "power3.out"
+                    }
+                })
+                // Segunda fase: estabilização dimensional
+                .to(charts, {
+                    opacity: 1,
+                    scale: 1,
+                    rotationY: 0,
+                    z: 0,
+                    filter: "blur(0px) brightness(1)",
+                    duration: 1.2,
+                    stagger: {
+                        amount: 0.6,
+                        ease: "elastic.out(1, 0.5)"
+                    }
+                }, "-=0.3")
+                // Terceira fase: ativação energética
+                .to(charts, {
+                    boxShadow: "0 25px 50px rgba(59, 130, 246, 0.2), inset 0 0 30px rgba(147, 51, 234, 0.1)",
+                    duration: 0.8,
+                    stagger: 0.2,
+                    ease: "power2.out"
+                }, "-=0.8");
+
+            // Animação contínua de flutuação para gráficos
+            charts.forEach((chart, index) => {
+                gsap.to(chart, {
+                    y: Math.sin(index * 1.2) * 8,
+                    rotationZ: Math.cos(index * 0.8) * 1.5,
+                    duration: 4 + (index * 0.3),
+                    ease: "sine.inOut",
+                    yoyo: true,
+                    repeat: -1,
+                    delay: index * 0.4
+                });
+
+                // Efeito de campo energético
+                gsap.to(chart, {
+                    background: `linear-gradient(${index * 45}deg, rgba(59, 130, 246, 0.02) 0%, rgba(147, 51, 234, 0.02) 100%)`,
+                    duration: 3,
+                    ease: "sine.inOut",
+                    yoyo: true,
+                    repeat: -1
+                });
+            });
         }
     }, []);
 
@@ -953,18 +1437,18 @@ const OverviewSection: React.FC<OverviewSectionProps> = ({
                             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                             <XAxis dataKey="month" stroke="#6B7280" />
                             <YAxis stroke="#6B7280" />
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: '#1F2937',
-                                    border: 'none',
+                            <Tooltip 
+                                contentStyle={{ 
+                                    backgroundColor: '#1F2937', 
+                                    border: 'none', 
                                     borderRadius: '8px',
                                     color: '#F9FAFB'
-                                }}
+                                }} 
                             />
-                            <Line
-                                type="monotone"
-                                dataKey="users"
-                                stroke="#3B82F6"
+                            <Line 
+                                type="monotone" 
+                                dataKey="users" 
+                                stroke="#3B82F6" 
                                 strokeWidth={3}
                                 dot={{ fill: '#3B82F6', r: 6 }}
                             />
@@ -1005,11 +1489,12 @@ const OverviewSection: React.FC<OverviewSectionProps> = ({
                 <div className="space-y-4">
                     {recentActivity.map((activity, index) => (
                         <div key={activity.id} className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${activity.type === 'success' ? 'bg-green-100 text-green-600' :
-                                    activity.type === 'warning' ? 'bg-yellow-100 text-yellow-600' :
-                                        activity.type === 'error' ? 'bg-red-100 text-red-600' :
-                                            'bg-blue-100 text-blue-600'
-                                }`}>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                activity.type === 'success' ? 'bg-green-100 text-green-600' :
+                                activity.type === 'warning' ? 'bg-yellow-100 text-yellow-600' :
+                                activity.type === 'error' ? 'bg-red-100 text-red-600' :
+                                'bg-blue-100 text-blue-600'
+                            }`}>
                                 {getActivityIcon(activity.type)}
                             </div>
                             <div className="flex-1">
@@ -1039,6 +1524,8 @@ interface StatsCardProps {
 
 const StatsCard: React.FC<StatsCardProps> = ({ title, value, icon: Icon, trend, color }) => {
     const cardRef = useRef<HTMLDivElement>(null);
+    const iconRef = useRef<HTMLDivElement>(null);
+    const valueRef = useRef<HTMLParagraphElement>(null);
 
     const colorClasses = {
         blue: 'from-blue-500 to-blue-600',
@@ -1048,48 +1535,149 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, value, icon: Icon, trend, 
     };
 
     useGSAP(() => {
+        // Animação extraordinária de hover com efeito holográfico
         const handleHover = () => {
+            const tl = gsap.timeline();
+            
+            tl
+                // Levitação com rotação sutil
+                .to(cardRef.current, {
+                    y: -15,
+                    scale: 1.05,
+                    rotationY: 5,
+                    rotationX: 2,
+                    boxShadow: "0 25px 50px rgba(59, 130, 246, 0.3), 0 0 30px rgba(147, 51, 234, 0.2)",
+                    background: "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 248, 255, 0.95) 100%)",
+                    duration: 0.6,
+                    ease: "back.out(1.4)"
+                })
+                // Pulsação do ícone com efeito energético
+                .to(iconRef.current, {
+                    scale: 1.3,
+                    rotation: 360,
+                    boxShadow: "0 0 20px rgba(255, 255, 255, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.3)",
+                    duration: 0.5,
+                    ease: "elastic.out(1, 0.3)"
+                }, "-=0.4")
+                // Efeito de digitação no valor
+                .to(valueRef.current, {
+                    scale: 1.1,
+                    color: "#3b82f6",
+                    textShadow: "0 0 10px rgba(59, 130, 246, 0.5)",
+                    duration: 0.3,
+                    ease: "power2.out"
+                }, "-=0.3");
+
+            // Efeito de ondas propagando
             gsap.to(cardRef.current, {
-                y: -5,
-                scale: 1.02,
-                duration: 0.3,
-                ease: "power2.out"
+                background: "radial-gradient(circle at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%)",
+                duration: 1.5,
+                ease: "sine.out"
             });
         };
 
         const handleLeave = () => {
-            gsap.to(cardRef.current, {
-                y: 0,
-                scale: 1,
-                duration: 0.3,
-                ease: "power2.out"
-            });
+            const tl = gsap.timeline();
+            
+            tl
+                // Retorno suave à posição original
+                .to(cardRef.current, {
+                    y: 0,
+                    scale: 1,
+                    rotationY: 0,
+                    rotationX: 0,
+                    boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
+                    background: "white",
+                    duration: 0.5,
+                    ease: "power3.out"
+                })
+                .to(iconRef.current, {
+                    scale: 1,
+                    rotation: 0,
+                    boxShadow: "none",
+                    duration: 0.4,
+                    ease: "power2.out"
+                }, "-=0.3")
+                .to(valueRef.current, {
+                    scale: 1,
+                    color: "#111827",
+                    textShadow: "none",
+                    duration: 0.3,
+                    ease: "power2.out"
+                }, "-=0.3");
         };
+
+        // Animação contínua de respiração quando não hover
+        const breatheAnimation = gsap.to(cardRef.current, {
+            scale: 1.01,
+            duration: 3,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1,
+            paused: true
+        });
 
         const card = cardRef.current;
         if (card) {
-            card.addEventListener('mouseenter', handleHover);
-            card.addEventListener('mouseleave', handleLeave);
+            // Iniciar respiração
+            breatheAnimation.play();
+
+            card.addEventListener('mouseenter', () => {
+                breatheAnimation.pause();
+                handleHover();
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                handleLeave();
+                setTimeout(() => breatheAnimation.play(), 500);
+            });
 
             return () => {
+                breatheAnimation.kill();
                 card.removeEventListener('mouseenter', handleHover);
                 card.removeEventListener('mouseleave', handleLeave);
             };
         }
     }, []);
 
+    // Animação inicial de entrada
+    useGSAP(() => {
+        if (cardRef.current) {
+            gsap.fromTo(cardRef.current, 
+                {
+                    opacity: 0,
+                    y: 100,
+                    rotationX: -90,
+                    transformOrigin: "center bottom"
+                },
+                {
+                    opacity: 1,
+                    y: 0,
+                    rotationX: 0,
+                    duration: 1.2,
+                    ease: "elastic.out(1, 0.5)",
+                    delay: Math.random() * 0.5
+                }
+            );
+        }
+    }, []);
+
     return (
-        <div
+        <div 
             ref={cardRef}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 cursor-pointer"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 cursor-pointer transform-gpu"
+            style={{ perspective: '1000px' }}
         >
             <div className="flex items-center justify-between">
                 <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{value}</p>
+                    <p ref={valueRef} className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{value}</p>
                     <p className="text-sm text-green-600 dark:text-green-400 mt-1">{trend}</p>
                 </div>
-                <div className={`w-12 h-12 bg-gradient-to-r ${colorClasses[color]} rounded-lg flex items-center justify-center`}>
+                <div 
+                    ref={iconRef}
+                    className={`w-12 h-12 bg-gradient-to-r ${colorClasses[color]} rounded-lg flex items-center justify-center transform-gpu`}
+                >
                     <Icon className="w-6 h-6 text-white" />
                 </div>
             </div>
@@ -1362,7 +1950,7 @@ const UsersSection: React.FC<UsersSectionProps> = ({
             )}
 
             {/* Users Table */}
-            <div
+            <div 
                 ref={tableRef}
                 className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden"
             >
@@ -1480,7 +2068,7 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({ activityLogs, getActi
     const [filterType, setFilterType] = useState<ActivityLog['type'] | 'all'>('all');
     const timelineRef = useRef<HTMLDivElement>(null);
 
-    const filteredLogs = activityLogs.filter(log =>
+    const filteredLogs = activityLogs.filter(log => 
         filterType === 'all' || log.type === filterType
     );
 
@@ -1528,18 +2116,19 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({ activityLogs, getActi
                             <li key={log.id}>
                                 <div className="relative pb-8">
                                     {index !== filteredLogs.length - 1 && (
-                                        <span
-                                            className="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200 dark:bg-gray-700"
-                                            aria-hidden="true"
+                                        <span 
+                                            className="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200 dark:bg-gray-700" 
+                                            aria-hidden="true" 
                                         />
                                     )}
                                     <div className="relative flex items-start space-x-3">
                                         <div className="relative">
-                                            <div className={`h-10 w-10 rounded-full flex items-center justify-center ring-8 ring-white dark:ring-gray-800 ${log.type === 'success' ? 'bg-green-500' :
-                                                    log.type === 'warning' ? 'bg-yellow-500' :
-                                                        log.type === 'error' ? 'bg-red-500' :
-                                                            'bg-blue-500'
-                                                }`}>
+                                            <div className={`h-10 w-10 rounded-full flex items-center justify-center ring-8 ring-white dark:ring-gray-800 ${
+                                                log.type === 'success' ? 'bg-green-500' :
+                                                log.type === 'warning' ? 'bg-yellow-500' :
+                                                log.type === 'error' ? 'bg-red-500' :
+                                                'bg-blue-500'
+                                            }`}>
                                                 <div className="text-white">
                                                     {getActivityIcon(log.type)}
                                                 </div>
@@ -1621,13 +2210,13 @@ const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ stats, userGrowthDa
                     <p className="text-3xl font-bold text-green-600">R$ {stats.revenue.toLocaleString()}</p>
                     <p className="text-sm text-green-600 mt-2">+{stats.growth}% este mês</p>
                 </div>
-
+                
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Sessões Totais</h3>
                     <p className="text-3xl font-bold text-blue-600">{stats.totalSessions.toLocaleString()}</p>
                     <p className="text-sm text-gray-500 mt-2">Tempo médio: {stats.avgSessionTime}</p>
                 </div>
-
+                
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Taxa de Erro</h3>
                     <p className="text-3xl font-bold text-red-600">{stats.errorRate}%</p>
@@ -1642,27 +2231,27 @@ const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ stats, userGrowthDa
                     <AreaChart data={userGrowthData}>
                         <defs>
                             <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8} />
-                                <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1} />
+                                <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                                <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
                             </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                         <XAxis dataKey="month" stroke="#6B7280" />
                         <YAxis stroke="#6B7280" />
-                        <Tooltip
-                            contentStyle={{
-                                backgroundColor: '#1F2937',
-                                border: 'none',
+                        <Tooltip 
+                            contentStyle={{ 
+                                backgroundColor: '#1F2937', 
+                                border: 'none', 
                                 borderRadius: '8px',
                                 color: '#F9FAFB'
-                            }}
+                            }} 
                         />
-                        <Area
-                            type="monotone"
-                            dataKey="users"
-                            stroke="#3B82F6"
-                            fillOpacity={1}
-                            fill="url(#colorUsers)"
+                        <Area 
+                            type="monotone" 
+                            dataKey="users" 
+                            stroke="#3B82F6" 
+                            fillOpacity={1} 
+                            fill="url(#colorUsers)" 
                         />
                     </AreaChart>
                 </ResponsiveContainer>
@@ -1681,7 +2270,7 @@ const NotificationsSection: React.FC<NotificationsSectionProps> = ({ notificatio
     const notificationsRef = useRef<HTMLDivElement>(null);
 
     const markAsRead = (id: string) => {
-        setNotifications(notifications.map(n =>
+        setNotifications(notifications.map(n => 
             n.id === id ? { ...n, read: true } : n
         ));
     };
@@ -1718,11 +2307,12 @@ const NotificationsSection: React.FC<NotificationsSectionProps> = ({ notificatio
                 {notifications.map((notification) => (
                     <div
                         key={notification.id}
-                        className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-l-4 ${notification.type === 'success' ? 'border-green-500' :
-                                notification.type === 'warning' ? 'border-yellow-500' :
-                                    notification.type === 'error' ? 'border-red-500' :
-                                        'border-blue-500'
-                            } ${!notification.read ? 'ring-2 ring-blue-200 dark:ring-blue-800' : ''}`}
+                        className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-l-4 ${
+                            notification.type === 'success' ? 'border-green-500' :
+                            notification.type === 'warning' ? 'border-yellow-500' :
+                            notification.type === 'error' ? 'border-red-500' :
+                            'border-blue-500'
+                        } ${!notification.read ? 'ring-2 ring-blue-200 dark:ring-blue-800' : ''}`}
                     >
                         <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -1950,7 +2540,7 @@ const ToggleSetting: React.FC<ToggleSettingProps> = ({ label, description, check
 
     const handleClick = () => {
         onChange(!checked);
-
+        
         // GSAP animation for toggle
         if (toggleRef.current) {
             gsap.to(toggleRef.current, {
@@ -1973,7 +2563,7 @@ const ToggleSetting: React.FC<ToggleSettingProps> = ({ label, description, check
                     {description}
                 </p>
             </div>
-            <label
+            <label 
                 ref={toggleRef}
                 className="relative inline-flex items-center cursor-pointer"
                 onClick={handleClick}
@@ -1981,7 +2571,7 @@ const ToggleSetting: React.FC<ToggleSettingProps> = ({ label, description, check
                 <input
                     type="checkbox"
                     checked={checked}
-                    onChange={() => { }}
+                    onChange={() => {}}
                     className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
@@ -2023,4 +2613,4 @@ const NumberSetting: React.FC<NumberSettingProps> = ({ label, description, value
     );
 };
 
-export default DashboardComplete;
+export default Dashboard;

@@ -1,6 +1,7 @@
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/test/ApiTestRunner.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/server/SimpleHttpServer.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/controller/NotificationController_simple.java
+/Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/api/dto/LoginRequestDto_clean.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/api/dto/UserRegistrationDto.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/services/BackupRecoveryService.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/server/BasicApiServer.java
@@ -9,6 +10,7 @@
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/services/BackupRecoveryService_temp.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/model/AuditAction.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/model/Role.java
+/Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/api.dto/UserDto.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/api/dto/BackupInfoDto.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/api/dto/PasswordChangeDto.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/model/RegistrationResult.java
@@ -17,6 +19,7 @@
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/model/AuditLevel.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/api/dto/BackupRequestDto.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/services/NotificationService.java
+/Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/api/dto/UserDtoFixed.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/server/TestHttpServer.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/services/BackupRecoveryService_simple.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/controller/BackupController_new.java
@@ -33,6 +36,7 @@
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/model/User.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/view/ConsoleView.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/controller/AuthController.java
+/Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/api.dto/UserRegistrationDto.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/api/dto/SystemStatsDto.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/api/dto/UserUpdateDto.java
 /Users/matheusviniciusdosreissouza/java-login-system/src/main/java/com/loginapp/controller/NotificationController.java

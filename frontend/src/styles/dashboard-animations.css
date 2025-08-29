@@ -1,0 +1,575 @@
+/* Animações CSS personalizadas para o Dashboard Extraordinário */
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%) skewX(-15deg);
+    }
+
+    100% {
+        transform: translateX(200%) skewX(-15deg);
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+    }
+}
+
+@keyframes rotate-3d {
+    0% {
+        transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+    }
+
+    25% {
+        transform: perspective(1000px) rotateY(90deg) rotateX(5deg);
+    }
+
+    50% {
+        transform: perspective(1000px) rotateY(180deg) rotateX(0deg);
+    }
+
+    75% {
+        transform: perspective(1000px) rotateY(270deg) rotateX(-5deg);
+    }
+
+    100% {
+        transform: perspective(1000px) rotateY(360deg) rotateX(0deg);
+    }
+}
+
+@keyframes matrix-rain {
+    0% {
+        transform: translateY(-100vh);
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+}
+
+@keyframes holographic-shift {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+@keyframes quantum-flicker {
+
+    0%,
+    100% {
+        opacity: 1;
+        filter: hue-rotate(0deg);
+    }
+
+    25% {
+        opacity: 0.8;
+        filter: hue-rotate(90deg);
+    }
+
+    50% {
+        opacity: 0.9;
+        filter: hue-rotate(180deg);
+    }
+
+    75% {
+        opacity: 0.7;
+        filter: hue-rotate(270deg);
+    }
+}
+
+@keyframes cyber-glitch {
+
+    0%,
+    100% {
+        transform: translateX(0);
+        filter: hue-rotate(0deg);
+    }
+
+    20% {
+        transform: translateX(-2px);
+        filter: hue-rotate(90deg);
+    }
+
+    40% {
+        transform: translateX(2px);
+        filter: hue-rotate(180deg);
+    }
+
+    60% {
+        transform: translateX(-1px);
+        filter: hue-rotate(270deg);
+    }
+
+    80% {
+        transform: translateX(1px);
+        filter: hue-rotate(360deg);
+    }
+}
+
+/* Classes utilitárias para animações */
+.animate-shimmer {
+    animation: shimmer 2s infinite;
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-rotate-3d {
+    animation: rotate-3d 10s linear infinite;
+}
+
+.animate-matrix-rain {
+    animation: matrix-rain 5s linear infinite;
+}
+
+.animate-holographic {
+    background: linear-gradient(-45deg, #3B82F6, #8B5CF6, #10B981, #F59E0B);
+    background-size: 400% 400%;
+    animation: holographic-shift 3s ease infinite;
+}
+
+.animate-quantum {
+    animation: quantum-flicker 4s ease-in-out infinite;
+}
+
+.animate-cyber-glitch {
+    animation: cyber-glitch 0.3s ease-in-out infinite;
+}
+
+/* Efeitos de vidro e blur */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-effect-dark {
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Efeitos de neon */
+.neon-blue {
+    box-shadow:
+        0 0 5px #3B82F6,
+        0 0 10px #3B82F6,
+        0 0 20px #3B82F6,
+        0 0 40px #3B82F6;
+}
+
+.neon-purple {
+    box-shadow:
+        0 0 5px #8B5CF6,
+        0 0 10px #8B5CF6,
+        0 0 20px #8B5CF6,
+        0 0 40px #8B5CF6;
+}
+
+.neon-green {
+    box-shadow:
+        0 0 5px #10B981,
+        0 0 10px #10B981,
+        0 0 20px #10B981,
+        0 0 40px #10B981;
+}
+
+/* Gradientes holográficos */
+.holographic-bg {
+    background: linear-gradient(45deg,
+            rgba(59, 130, 246, 0.1) 0%,
+            rgba(139, 92, 246, 0.1) 25%,
+            rgba(16, 185, 129, 0.1) 50%,
+            rgba(245, 158, 11, 0.1) 75%,
+            rgba(59, 130, 246, 0.1) 100%);
+    background-size: 400% 400%;
+    animation: holographic-shift 8s ease infinite;
+}
+
+/* Efeitos de partículas */
+.particle-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 75% 25%, rgba(139, 92, 246, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 25% 75%, rgba(16, 185, 129, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(245, 158, 11, 0.2) 0%, transparent 50%);
+    animation: holographic-shift 12s ease infinite;
+    pointer-events: none;
+}
+
+/* Transformações 3D */
+.transform-3d {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.rotate-y-6 {
+    transform: rotateY(6deg);
+}
+
+.rotate-x-6 {
+    transform: rotateX(6deg);
+}
+
+/* Efeitos de hover extraordinários */
+.hover-levitate:hover {
+    transform: translateY(-8px) scale(1.02);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-glow:hover {
+    box-shadow:
+        0 0 20px rgba(59, 130, 246, 0.4),
+        0 0 40px rgba(59, 130, 246, 0.2),
+        0 0 60px rgba(59, 130, 246, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* Bordas animadas */
+.animated-border {
+    position: relative;
+    overflow: hidden;
+}
+
+.animated-border::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #3B82F6, transparent);
+    animation: border-flow 2s linear infinite;
+}
+
+@keyframes border-flow {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+/* Texto holográfico */
+.holographic-text {
+    background: linear-gradient(45deg, #3B82F6, #8B5CF6, #10B981, #F59E0B);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: holographic-shift 3s ease infinite;
+}
+
+/* Efeitos de loading */
+.loading-dots {
+    display: inline-block;
+}
+
+.loading-dots::after {
+    content: '';
+    animation: loading-dots 1.5s infinite;
+}
+
+@keyframes loading-dots {
+
+    0%,
+    20% {
+        content: '';
+    }
+
+    40% {
+        content: '.';
+    }
+
+    60% {
+        content: '..';
+    }
+
+    80%,
+    100% {
+        content: '...';
+    }
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 768px) {
+    .animate-rotate-3d {
+        animation: none;
+        /* Reduzir animações em dispositivos móveis */
+    }
+
+    .glass-effect {
+        backdrop-filter: blur(5px);
+        /* Reduzir blur para melhor performance */
+    }
+}
+
+/* Modo escuro aprimorado */
+@media (prefers-color-scheme: dark) {
+    .holographic-bg {
+        background: linear-gradient(45deg,
+                rgba(59, 130, 246, 0.05) 0%,
+                rgba(139, 92, 246, 0.05) 25%,
+                rgba(16, 185, 129, 0.05) 50%,
+                rgba(245, 158, 11, 0.05) 75%,
+                rgba(59, 130, 246, 0.05) 100%);
+    }
+}
+
+/* Custom Slider Styles */
+.slider-cyan::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #06B6D4, #3B82F6);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.8),
+        0 0 20px rgba(59, 130, 246, 0.4);
+    transition: all 0.3s ease;
+}
+
+.slider-cyan::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 15px rgba(6, 182, 212, 1),
+        0 0 30px rgba(59, 130, 246, 0.6);
+}
+
+.slider-cyan::-webkit-slider-track {
+    background: linear-gradient(90deg,
+            rgba(6, 182, 212, 0.3) 0%,
+            rgba(59, 130, 246, 0.5) 50%,
+            rgba(147, 51, 234, 0.3) 100%);
+    border-radius: 4px;
+    height: 8px;
+}
+
+/* Holographic Button */
+.holographic-button {
+    position: relative;
+    background: linear-gradient(135deg,
+            rgba(59, 130, 246, 0.2) 0%,
+            rgba(147, 51, 234, 0.3) 50%,
+            rgba(6, 182, 212, 0.2) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.5);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.holographic-button::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg,
+            transparent 40%,
+            rgba(255, 255, 255, 0.1) 50%,
+            transparent 60%);
+    transform: rotate(45deg);
+    transition: all 0.6s ease;
+    opacity: 0;
+}
+
+.holographic-button:hover::before {
+    opacity: 1;
+    animation: shimmer 1.5s ease-out;
+}
+
+.holographic-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4),
+        0 0 30px rgba(147, 51, 234, 0.3);
+}
+
+/* Neon Glow Effect */
+@keyframes neonGlow {
+    from {
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.8),
+            0 0 20px rgba(59, 130, 246, 0.6),
+            0 0 30px rgba(59, 130, 246, 0.4);
+    }
+
+    to {
+        box-shadow: 0 0 20px rgba(6, 182, 212, 0.8),
+            0 0 30px rgba(6, 182, 212, 0.6),
+            0 0 40px rgba(6, 182, 212, 0.4);
+    }
+}
+
+.neon-glow {
+    animation: neonGlow 2s ease-in-out infinite alternate;
+}
+
+/* Quantum Field Effect */
+@keyframes quantumField {
+
+    0%,
+    100% {
+        background: radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 50%, rgba(147, 51, 234, 0.1) 0%, transparent 50%);
+    }
+
+    25% {
+        background: radial-gradient(ellipse at 50% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 80%, rgba(147, 51, 234, 0.15) 0%, transparent 50%);
+    }
+
+    50% {
+        background: radial-gradient(ellipse at 80% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+            radial-gradient(ellipse at 20% 50%, rgba(147, 51, 234, 0.1) 0%, transparent 50%);
+    }
+
+    75% {
+        background: radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 20%, rgba(147, 51, 234, 0.15) 0%, transparent 50%);
+    }
+}
+
+.quantum-field {
+    animation: quantumField 8s ease-in-out infinite;
+}
+
+/* Sliders Personalizados Extraordinários */
+.slider-cosmic {
+    background: linear-gradient(90deg, #3B82F6, #8B5CF6, #06B6D4);
+    border-radius: 8px;
+    outline: none;
+    -webkit-appearance: none;
+    height: 8px;
+}
+
+.slider-cosmic::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #3B82F6, #8B5CF6);
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+    transition: all 0.3s ease;
+}
+
+.slider-cosmic::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+}
+
+.slider-dimensional {
+    background: linear-gradient(90deg, #8B5CF6, #EC4899, #F59E0B);
+    border-radius: 8px;
+    outline: none;
+    -webkit-appearance: none;
+    height: 8px;
+}
+
+.slider-dimensional::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #8B5CF6, #EC4899);
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(147, 51, 234, 0.6);
+    transition: all 0.3s ease;
+}
+
+.slider-dimensional::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.8);
+}
+
+/* Efeito Portal Dimensional */
+@keyframes portalRotation {
+    0% {
+        transform: rotateY(0deg) rotateX(0deg);
+    }
+
+    25% {
+        transform: rotateY(90deg) rotateX(15deg);
+    }
+
+    50% {
+        transform: rotateY(180deg) rotateX(0deg);
+    }
+
+    75% {
+        transform: rotateY(270deg) rotateX(-15deg);
+    }
+
+    100% {
+        transform: rotateY(360deg) rotateX(0deg);
+    }
+}
+
+.portal-dimensional {
+    animation: portalRotation 20s linear infinite;
+    transform-style: preserve-3d;
+}
+
+/* Efeito Matrix 3D */
+@keyframes matrixChar {
+    0% {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+.matrix-char {
+    animation: matrixChar 2s linear infinite;
+    font-family: 'Courier New', monospace;
+    color: #00ff00;
+    text-shadow: 0 0 10px #00ff00;
+}
