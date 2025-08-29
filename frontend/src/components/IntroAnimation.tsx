@@ -56,89 +56,89 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
             ease: 'power2.out'
         })
 
-        // Particles entrance
-        .to('.particle', {
-            opacity: 1,
-            scale: 1,
-            rotation: 360,
-            duration: 1.2,
-            stagger: {
-                amount: 0.8,
-                from: 'random'
-            },
-            ease: 'back.out(1.7)'
-        }, 0.3)
+            // Particles entrance
+            .to('.particle', {
+                opacity: 1,
+                scale: 1,
+                rotation: 360,
+                duration: 1.2,
+                stagger: {
+                    amount: 0.8,
+                    from: 'random'
+                },
+                ease: 'back.out(1.7)'
+            }, 0.3)
 
-        // Circles formation
-        .to('.circle-element', {
-            scale: 1,
-            rotation: 180,
-            opacity: 0.8,
-            duration: 1.5,
-            stagger: {
-                amount: 1,
-                from: 'center'
-            },
-            ease: 'elastic.out(1, 0.5)'
-        }, 0.8)
+            // Circles formation
+            .to('.circle-element', {
+                scale: 1,
+                rotation: 180,
+                opacity: 0.8,
+                duration: 1.5,
+                stagger: {
+                    amount: 1,
+                    from: 'center'
+                },
+                ease: 'elastic.out(1, 0.5)'
+            }, 0.8)
 
-        // Logo SVG draw animation
-        .to('.logo-element', {
-            pathLength: 1,
-            opacity: 1,
-            duration: 2,
-            stagger: 0.2,
-            ease: 'power2.inOut'
-        }, 1.2)
+            // Logo SVG draw animation
+            .to('.logo-element', {
+                pathLength: 1,
+                opacity: 1,
+                duration: 2,
+                stagger: 0.2,
+                ease: 'power2.inOut'
+            }, 1.2)
 
-        // Logo container appearance
-        .to(logoRef.current, {
-            opacity: 1,
-            scale: 1,
-            duration: 0.8,
-            ease: 'back.out(1.7)'
-        }, 1.5)
+            // Logo container appearance
+            .to(logoRef.current, {
+                opacity: 1,
+                scale: 1,
+                duration: 0.8,
+                ease: 'back.out(1.7)'
+            }, 1.5)
 
-        // Text reveal
-        .to(textRef.current, {
-            opacity: 1,
-            scale: 1,
-            duration: 0.6,
-            ease: 'power2.out'
-        }, 2.2)
+            // Text reveal
+            .to(textRef.current, {
+                opacity: 1,
+                scale: 1,
+                duration: 0.6,
+                ease: 'power2.out'
+            }, 2.2)
 
-        // Loading bar
-        .to(loadingRef.current, {
-            opacity: 1,
-            scale: 1,
-            duration: 0.5,
-            ease: 'power2.out'
-        }, 2.8)
+            // Loading bar
+            .to(loadingRef.current, {
+                opacity: 1,
+                scale: 1,
+                duration: 0.5,
+                ease: 'power2.out'
+            }, 2.8)
 
-        // Progress animation
-        .to(progressRef.current, {
-            width: '100%',
-            duration: 1.5,
-            ease: 'power2.inOut',
-            onUpdate: function() {
-                const progress = Math.round(this.progress() * 100);
-                setLoadingProgress(progress);
-            }
-        }, 3)
+            // Progress animation
+            .to(progressRef.current, {
+                width: '100%',
+                duration: 1.5,
+                ease: 'power2.inOut',
+                onUpdate: function () {
+                    const progress = Math.round(this.progress() * 100);
+                    setLoadingProgress(progress);
+                }
+            }, 3)
 
-        // Final scale and fade
-        .to([logoRef.current, textRef.current, loadingRef.current], {
-            scale: 1.1,
-            duration: 0.3,
-            ease: 'power2.out'
-        }, 4.2)
-        
-        .to(containerRef.current, {
-            opacity: 0,
-            scale: 1.2,
-            duration: 0.8,
-            ease: 'power2.inOut'
-        }, 4.5);
+            // Final scale and fade
+            .to([logoRef.current, textRef.current, loadingRef.current], {
+                scale: 1.1,
+                duration: 0.3,
+                ease: 'power2.out'
+            }, 4.2)
+
+            .to(containerRef.current, {
+                opacity: 0,
+                scale: 1.2,
+                duration: 0.8,
+                ease: 'power2.inOut'
+            }, 4.5);
 
         // Continuous particle animation
         gsap.to('.particle', {
@@ -227,10 +227,10 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
                                 <stop offset="100%" stopColor="#f093fb" />
                             </linearGradient>
                             <filter id="glow">
-                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                                <feMerge> 
-                                    <feMergeNode in="coloredBlur"/>
-                                    <feMergeNode in="SourceGraphic"/>
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur" />
+                                    <feMergeNode in="SourceGraphic" />
                                 </feMerge>
                             </filter>
                         </defs>
@@ -392,7 +392,7 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
                         <div
                             ref={progressRef}
                             className="h-full bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 rounded-full transition-all duration-300 progress-glow"
-                            style={{ 
+                            style={{
                                 width: '0%',
                                 boxShadow: '0 0 20px rgba(255,255,255,0.5)'
                             }}
@@ -415,7 +415,7 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
                         }}
                     />
                 ))}
-                
+
                 {/* Additional geometric shapes */}
                 {Array.from({ length: 5 }, (_, i) => (
                     <div
