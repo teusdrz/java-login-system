@@ -1,0 +1,380 @@
+/* Video Intro Component Styles */
+.video-intro-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    overflow: hidden;
+    transition: all 3.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Loading indicator */
+.video-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 10001;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px auto;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.video-loading p {
+    margin: 0;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+}
+
+.intro-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* Controles do vídeo: só aparecem no hover e somem rapidamente */
+.intro-video::-webkit-media-controls {
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+    visibility: hidden;
+    transform: translateY(10px);
+}
+
+.intro-video:hover::-webkit-media-controls {
+    opacity: 0.9;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.3s ease-in, transform 0.3s ease-in;
+}
+
+/* Para Firefox */
+.intro-video::-moz-media-controls {
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+}
+
+.intro-video:hover::-moz-media-controls {
+    opacity: 0.9;
+    transition: opacity 0.3s ease-in;
+}
+
+/* Força esconder controles por padrão - método adicional */
+.intro-video {
+    outline: none;
+}
+
+.intro-video:not(:hover) {
+    pointer-events: auto;
+}
+
+/* Esconde controles de forma mais agressiva quando não há hover */
+.video-intro-container:not(:hover) .intro-video::-webkit-media-controls-panel {
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+/* Animação suave para aparição dos controles */
+.video-intro-container:hover .intro-video::-webkit-media-controls-panel {
+    opacity: 0.9 !important;
+    visibility: visible !important;
+    transition: opacity 0.3s ease-in !important;
+}
+
+/* Transição Extraordinária para Dashboard */
+.video-to-dashboard-transition {
+    opacity: 0;
+    transform: scale(1.02);
+    filter: blur(1px) brightness(1.1);
+    background: linear-gradient(135deg,
+            rgba(15, 23, 42, 0.95) 0%,
+            rgba(30, 41, 59, 0.9) 50%,
+            rgba(15, 23, 42, 0.95) 100%);
+}
+
+.video-to-dashboard-transition .intro-video {
+    opacity: 0;
+    transform: scale(1.05);
+    filter: brightness(1.2) saturate(1.1);
+}
+
+/* Overlay de Transição Imperceptível */
+.seamless-transition-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    animation: fadeInSeamless 2.5s ease-in-out forwards;
+}
+
+.transition-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg,
+            transparent 0%,
+            rgba(15, 23, 42, 0.03) 25%,
+            rgba(30, 41, 59, 0.08) 50%,
+            rgba(15, 23, 42, 0.12) 75%,
+            rgba(15, 23, 42, 0.2) 100%);
+    animation: gradientShift 3.2s ease-in-out forwards;
+}
+
+.transition-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 20% 30%,
+            rgba(59, 130, 246, 0.02) 0%,
+            transparent 50%),
+        radial-gradient(circle at 80% 70%,
+            rgba(139, 92, 246, 0.02) 0%,
+            transparent 50%),
+        radial-gradient(circle at 40% 80%,
+            rgba(34, 197, 94, 0.01) 0%,
+            transparent 50%);
+    opacity: 0;
+    animation: particlesFloat 3s ease-in-out 0.5s forwards;
+}
+
+.transition-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 200%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle,
+            rgba(59, 130, 246, 0.01) 0%,
+            rgba(139, 92, 246, 0.008) 30%,
+            rgba(15, 23, 42, 0.02) 60%,
+            rgba(15, 23, 42, 0.05) 100%);
+    opacity: 0;
+    animation: glowExpand 3.2s ease-out 1s forwards;
+}
+
+/* Indicador Discreto de Áudio */
+.audio-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    z-index: 5;
+    opacity: 0.7;
+}
+
+.audio-wave {
+    width: 3px;
+    background: linear-gradient(to top, #3b82f6, #60a5fa);
+    border-radius: 2px;
+    animation: audioWave 1.2s ease-in-out infinite;
+}
+
+.audio-wave:nth-child(1) {
+    height: 12px;
+    animation-delay: 0s;
+}
+
+.audio-wave:nth-child(2) {
+    height: 8px;
+    animation-delay: 0.2s;
+}
+
+.audio-wave:nth-child(3) {
+    height: 15px;
+    animation-delay: 0.4s;
+}
+
+/* Garantir que o vídeo cubra toda a tela em diferentes proporções */
+@media (max-aspect-ratio: 16/9) {
+    .intro-video {
+        width: auto;
+        height: 100%;
+    }
+}
+
+@media (min-aspect-ratio: 16/9) {
+    .intro-video {
+        width: 100%;
+        height: auto;
+    }
+}
+
+/* Animações Sutis e Profissionais */
+@keyframes fadeInSeamless {
+    0% {
+        opacity: 0;
+    }
+
+    30% {
+        opacity: 0.1;
+    }
+
+    60% {
+        opacity: 0.3;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes gradientShift {
+    0% {
+        background: linear-gradient(45deg, transparent 0%, transparent 100%);
+        transform: translateX(0) translateY(0);
+    }
+
+    25% {
+        background: linear-gradient(45deg,
+                rgba(15, 23, 42, 0.01) 0%,
+                rgba(30, 41, 59, 0.02) 100%);
+        transform: translateX(-1px) translateY(-1px);
+    }
+
+    50% {
+        background: linear-gradient(45deg,
+                rgba(15, 23, 42, 0.03) 0%,
+                rgba(30, 41, 59, 0.05) 100%);
+        transform: translateX(0) translateY(-2px);
+    }
+
+    75% {
+        background: linear-gradient(45deg,
+                rgba(15, 23, 42, 0.08) 0%,
+                rgba(30, 41, 59, 0.12) 100%);
+        transform: translateX(1px) translateY(-1px);
+    }
+
+    100% {
+        background: linear-gradient(45deg,
+                rgba(15, 23, 42, 0.15) 0%,
+                rgba(30, 41, 59, 0.25) 100%);
+        transform: translateX(0) translateY(0);
+    }
+}
+
+@keyframes particlesFloat {
+    0% {
+        opacity: 0;
+        transform: translateY(0px) scale(1);
+    }
+
+    25% {
+        opacity: 0.3;
+        transform: translateY(-5px) scale(1.01);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: translateY(-10px) scale(1.02);
+    }
+
+    75% {
+        opacity: 0.8;
+        transform: translateY(-8px) scale(1.01);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(-3px) scale(1);
+    }
+}
+
+@keyframes glowExpand {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+
+    30% {
+        opacity: 0.2;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+
+    60% {
+        opacity: 0.4;
+        transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    100% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+}
+
+@keyframes audioWave {
+
+    0%,
+    100% {
+        transform: scaleY(0.5);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: scaleY(1);
+        opacity: 1;
+    }
+}
+
+/* Otimizações para performance */
+.video-intro-container,
+.seamless-transition-overlay,
+.transition-gradient,
+.transition-particles,
+.transition-glow {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Suavização adicional para dispositivos móveis */
+@media (max-width: 768px) {
+    .video-intro-container {
+        transition: all 2.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .seamless-transition-overlay {
+        animation-duration: 2.2s;
+    }
+
+    .transition-glow {
+        animation-duration: 2.8s;
+    }
+}
